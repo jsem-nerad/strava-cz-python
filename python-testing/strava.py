@@ -33,6 +33,7 @@ class Strava:
         self.default_canteen_number = "3753"  # Default canteen number
 
         self.user = self.User()
+        self.orders = []
 
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
@@ -92,9 +93,123 @@ class Strava:
             return self.user
         else:
             return None
+        
+    def get_orders_list(self):
+        if not self.user.is_logged_in:
+            raise Exception("User not logged in")
+        
+        payload = {
+            "cislo": self.user.canteen_number,
+            "sid": self.user.sid,
+            "s5url": self.user.s5url,
+            "lang": "EN",
+            "konto": self.user.balance,
+            "podminka": "",
+            "ignoreCert": False
+        }
+        
+        response = self.api_request('objednavky', payload)
+        orders_unformated = response['response']
+        self.orders = []
 
+        # Group meals by date
+        meals_by_date = {}
+
+        # Iterate through all tables (table0, table1, table2, etc.)
+        for table_key, meals_list in orders_unformated.items():
+            if not table_key.startswith('table'):
+                continue
+            
+            for meal in meals_list:
+                date = meal['datum']
+                
+                if not meal["nazev"]:
+                    continue  # Skip meals without a name
+
+                # Create filtered meal object with only required fields
+                meal_filtered = {
+                    "local_id": meal["id"],
+                    "type": meal["druh_popis"], 
+                    "name": meal["nazev"],
+                    "forbiddenAlergens": meal["zakazaneAlergeny"],
+                    "alergens": meal["alergeny"],
+                    "ordered": True if meal["pocet"] == 1 else False,
+                    "order_id": int(meal["veta"])
+                }
+                
+                # Group by date
+                if date not in meals_by_date:
+                    meals_by_date[date] = []
+                meals_by_date[date].append(meal_filtered)
+
+        # Convert to final format
+        for date, meals in meals_by_date.items():
+            self.orders.append({
+                "date": date,
+                "meals": meals
+            })
+
+        return self.orders
+            
+    # 20, 21
+
+    def is_ordered(self, meal_id):
+        if not self.user.is_logged_in:
+            raise Exception("User not logged in")
+        
+        for day in self.orders:
+            for meal in day['meals']:
+                if meal['order_id'] == meal_id:
+                    return meal['ordered']
+        return False
+
+    def order_meal(self, meal_id):
+        if not self.user.is_logged_in:
+            raise Exception("User not logged in")
+        
+        if not self.orders:
+            self.get_orders_list()
+        
+        if self.is_ordered(meal_id):
+            print(f"Meal with id {meal_id} is already ordered.")
+            return
+        
+        # Order
+
+        payload = {
+            "cislo": self.user.canteen_number,
+            "sid": self.user.sid,
+            "url": self.user.s5url,
+            "veta": str(meal_id),
+            "pocet": 1,
+            "lang": "EN",
+            "ignoreCert": "false"
+        }
+        
+        response = self.api_request('pridejJidloS5', payload)
+        if response['status_code'] != 200:
+            return False
+
+        # Save
+
+        payload = {
+            "cislo": self.user.canteen_number,
+            "sid": self.user.sid,
+            "url": self.user.s5url,
+            "xml": None,
+            "lang": "EN",
+            "ignoreCert": "false"
+        }
+
+        response = self.api_request('saveOrders', payload)
+        
+        if response['status_code'] != 200:
+            return False
+        return True
+        
 
 app = Strava()
 
-print(app.login("vojtech.nerad", os.getenv("TEST_PASSWORD")))
-
+app.login("vojtech.nerad", os.getenv("TEST_PASSWORD"))
+print(app.user)
+app.order_meal(4)

@@ -367,8 +367,8 @@ Sepsane dulezite hodnoty jednotlivych jidel:
 |------------------|-------------------------------------------------------------------------------------------|--------------------------------------|--------------------------------------------|---------|
 | id               | id jidla z daneho dne                                                                     | 0                                    | 1                                          | integer |
 | datum            | datum dne                                                                                 | 15.09.2025                           | 02.10.2025                                 | string  |
-| druh_popis       | popis typu jidla                                                                          | Polévka                              | Obed1                                      | pocet   |
-| nazev            | nazev jidla                                                                               | Vývar s kuskusem                     | Čočka s uzeným masem, kysané zelí, čaj, pv | pocet   |
+| druh_popis       | popis typu jidla                                                                          | Polévka                              | Obed1                                      | string   |
+| nazev            | nazev jidla                                                                               | Vývar s kuskusem                     | Čočka s uzeným masem, kysané zelí, čaj, pv | string   |
 | zakazaneAlergeny | nejspis vypsane alergeny, ktere uzivatel nastavil jako spatne                             | null                                 | ...                                        | ...     |
 | alergeny         | alergeny obsazene v jidle                                                                 | [["04","Ryby"],["06","Sójové boby"]] | []                                         | list    |
 | pocet            | stav objednani: 0 = neobjednano, 1 = objednano                                            | 0                                    | 1                                          | integer |
