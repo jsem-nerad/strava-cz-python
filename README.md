@@ -24,9 +24,20 @@ strava.order_meals(3, 6)
 strava.logout()
 ```
 
+
+## to-do
+
+[ ] Univerzalni datum
+[ ] Moznost detailni filtrace jidelnicku
+[ ] Lepe zorganizovat kod
+[ ] Nahrat jako knihovnu na PyPi
+[ ] Lepe zdokumentovat pouziti
+
 ## Co bude dal?
 
 Planuji udelat aplikaci, ktera bude uzivateli automaticky objednavat obedy podle jeho preferenci.
+
+Prosim, nepouzivejte tuto aplikaci k nekalym ucelum. Pouzivejte ji pouze s dobrymi zamery.
 
 
 ## Pomoz mi pls
