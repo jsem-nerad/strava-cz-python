@@ -27,11 +27,11 @@ strava.logout()
 
 ## to-do
 
-[ ] Univerzalni datum
-[ ] Moznost detailni filtrace jidelnicku
-[ ] Lepe zorganizovat kod
-[ ] Nahrat jako knihovnu na PyPi
-[ ] Lepe zdokumentovat pouziti
+- [ ] Univerzalni datum
+- [ ] Moznost detailni filtrace jidelnicku
+- [ ] Lepe zorganizovat kod
+- [ ] Nahrat jako knihovnu na PyPi
+- [ ] Lepe zdokumentovat pouziti
 
 ## Co bude dal?
 
