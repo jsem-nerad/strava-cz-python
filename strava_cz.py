@@ -1,10 +1,6 @@
 import requests
-import json
-import os
-from dotenv import load_dotenv
-load_dotenv()
 
-class Strava:
+class StravaCZ:
     class User:
         def __init__(self):
             self.username = None
@@ -250,8 +246,12 @@ class Strava:
         return False
 
 if __name__ == "__main__":
+    import os
+    from dotenv import load_dotenv
+    load_dotenv()
+    
     # Example usage
-    strava = Strava("vojtech.nerad", os.getenv("TEST_PASSWORD"), "3753")
+    strava = StravaCZ("vojtech.nerad", os.getenv("TEST_PASSWORD"), "3753")
     print(strava.user)
     print(strava.get_orders_list())
     strava.order_meal(4)

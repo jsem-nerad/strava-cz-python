@@ -1,6 +1,6 @@
-from strava import Strava
+from strava_cz import StravaCZ
 
-strava = Strava(username="your.username", password="YourPassword123", canteen_number="3753")
+strava = StravaCZ(username="your.username", password="YourPassword123", canteen_number="3753")
 print(strava.user)
 print(strava.get_orders_list())
 print(strava.is_ordered(4))
