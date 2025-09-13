@@ -24,6 +24,10 @@ strava.order_meals(3, 6)
 strava.logout()
 ```
 
+## Co bude dal?
+
+Planuji udelat aplikaci, ktera bude uzivateli automaticky objednavat obedy podle jeho preferenci.
+
 
 ## Pomoz mi pls
 
