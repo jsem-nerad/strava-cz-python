@@ -573,3 +573,43 @@ Response value:
 ```
 
 Nejspis pouze aktualni stav objednavek.
+
+
+
+
+## Odhlaseni uzivatele
+
+#### Request payload 
+
+Request URL: https://app.strava.cz/api/logOut
+
+Request type: POST
+
+Payload type: JSON
+
+Payload value: 
+```json
+{
+    "sid":"E9D5B96FE3D14DED8E543B33A4D910F2",
+    "cislo":"3753",
+    "url":"https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc",
+    "lang":"EN",
+    "ignoreCert":"false"
+}
+```
+
+
+| key        | description                                         | example                                             | type   |
+|------------|-----------------------------------------------------|-----------------------------------------------------|--------|
+| sid        | session identifier, slouzi k identifikaci uzivatele | E9D5B96FE3D14DED8E543B33A4D910F2                    | string |
+| cislo      | cislo jidelny                                       | 3753                                                | string |
+| url        | SOAP Web Service Endpoint URL                       | https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc | string |
+| lang       | jazyk                                               | EN                                                  | string |
+| ignoreCert | ...                                                 | false                                               | string |
+
+
+#### Response
+
+Tento request je bez odpovedi.
+
+(bro proste rekl "bez komentare")

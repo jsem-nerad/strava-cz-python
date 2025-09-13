@@ -20,11 +20,12 @@ class Strava:
             self.canteen_name = None
             self.is_logged_in = False
 
+
         def __repr__(self):
             return f"User:\nusername={self.username}, \nfull_name={self.full_name}, \nemail={self.email}, \nbalance={self.balance}, \ncurrency={self.currency}, \ncanteen_name={self.canteen_name}, \nsid={self.sid}, \nis_logged_in={self.is_logged_in}"
 
         
-    def __init__(self):
+    def __init__(self, username=None, password=None, canteen_number=None):
         self.session = requests.Session()
         self.base_url = 'https://app.strava.cz'
         self.api_url = f'{self.base_url}/api'
@@ -51,6 +52,9 @@ class Strava:
         # Initial GET request to establish session
         self.session.get('https://app.strava.cz/en/prihlasit-se?jidelna')
 
+        if username and password:
+            self.login(username=username, password=password, canteen_number=canteen_number)
+
 
     def api_request(self, endpoint, payload=None):
         url = f'{self.api_url}/{endpoint}'
@@ -59,6 +63,9 @@ class Strava:
 
 
     def login(self, username, password, canteen_number=None):
+        if self.user.is_logged_in:
+            raise Exception("User already logged in")
+
         self.user.username = username
         self.user.password = password
         canteen_number = canteen_number or self.default_canteen_number
@@ -92,7 +99,7 @@ class Strava:
             self.user.is_logged_in = True
             return self.user
         else:
-            return None
+            raise Exception(f"Login failed: {response['response'].get('message', 'Unknown error')}")
         
     def get_orders_list(self):
         if not self.user.is_logged_in:
@@ -162,20 +169,18 @@ class Strava:
                 if meal['order_id'] == meal_id:
                     return meal['ordered']
         return False
-
-    def order_meal(self, meal_id):
+    
+    def add_meal_to_order(self, meal_id):
         if not self.user.is_logged_in:
             raise Exception("User not logged in")
         
         if not self.orders:
             self.get_orders_list()
-        
-        if self.is_ordered(meal_id):
-            print(f"Meal with id {meal_id} is already ordered.")
-            return
-        
-        # Order
 
+        if self.is_ordered(meal_id):
+            # Already ordered
+            return True
+        
         payload = {
             "cislo": self.user.canteen_number,
             "sid": self.user.sid,
@@ -185,13 +190,19 @@ class Strava:
             "lang": "EN",
             "ignoreCert": "false"
         }
-        
+
         response = self.api_request('pridejJidloS5', payload)
         if response['status_code'] != 200:
             return False
-
-        # Save
-
+        return True
+    
+    def save_order(self):
+        if not self.user.is_logged_in:
+            raise Exception("User not logged in")
+        
+        if not self.orders:
+            self.get_orders_list()
+        
         payload = {
             "cislo": self.user.canteen_number,
             "sid": self.user.sid,
@@ -206,10 +217,40 @@ class Strava:
         if response['status_code'] != 200:
             return False
         return True
+
+    def order_meal(self, meal_id):
+        self.add_meal_to_order(meal_id)
+        self.save_order()
+        self.get_orders_list()
+
+    def order_meals(self, meal_ids):
+        for meal_id in meal_ids:
+            self.add_meal_to_order(meal_id)
+        self.save_order()
+        self.get_orders_list()
         
+    def logout(self):
+        if not self.user.is_logged_in:
+            return True  # Already logged out
+        
+        payload = {
+            "sid": self.user.sid,
+            "cislo": self.user.canteen_number,
+            "url": self.user.s5url,
+            "lang":"EN",
+            "ignoreCert":"false"
+        }
 
-app = Strava()
+        response = self.api_request('logOut', payload)
+        
+        if response['status_code'] == 200:
+            self.user = self.User()  # Reset user
+            self.orders = []  # Clear orders
+            return True
+        return False
 
-app.login("vojtech.nerad", os.getenv("TEST_PASSWORD"))
+app = Strava("vojtech.nerad", os.getenv("TEST_PASSWORD"), "3753")
 print(app.user)
-app.order_meal(4)
+app.order_meals((4, 6))
+app.logout()
+
