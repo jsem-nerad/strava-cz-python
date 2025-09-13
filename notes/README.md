@@ -4,7 +4,7 @@
 
 #### Request payload 
 
-Login request: https://app.strava.cz/api/login
+Request URL: https://app.strava.cz/api/login
 
 Request type: POST
 
@@ -12,7 +12,14 @@ Payload type: JSON
 
 Payload value: 
 ```json
-{"cislo":"3753","jmeno":"vojtech.nerad","heslo":"XXXXXXXXX","zustatPrihlasen":false,"environment":"W","lang":"EN"}
+{
+    "cislo":"3753",
+    "jmeno":"vojtech.nerad",
+    "heslo":"XXXXXXXXX",
+    "zustatPrihlasen":false,
+    "environment":"W",
+    "lang":"EN"
+}
 ```
 
 
@@ -91,7 +98,7 @@ Dulezite hodnoty:
 
 
 
-## Objednavky
+## Seznam objednavek
 
 #### Request payload
 
@@ -103,7 +110,15 @@ Payload type: JSON
 
 Payload value:
 ```json
-{"cislo":"3753","sid":"01C6FCF02A7146159BC5F245A57AF29F","s5url":"https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc","lang":"EN","konto":0,"podminka":"","ignoreCert":"false"}
+{
+    "cislo":"3753",
+    "sid":"01C6FCF02A7146159BC5F245A57AF29F",
+    "s5url":"https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc",
+    "lang":"EN",
+    "konto":0,
+    "podminka":"",
+    "ignoreCert":"false"
+}
 ```
 
 | key        | description                                         | example                                             | type          |
@@ -114,7 +129,7 @@ Payload value:
 | lang       | jazyk                                               | EN                                                  | string        |
 | konto      | penize na uctu uzivatele                            | 0                                                   | integer/float |
 | podminka   | ...                                                 |                                                     | string        |
-| ignoreCert | ...                                                 | false                                               | boolean       |
+| ignoreCert | ...                                                 | false                                               | string       |
 
 
 
@@ -340,20 +355,221 @@ JSON struktura prvku jednotlivych jidel (dulezite info):
     ],
     ...
     "pocet": 0 / 1 (neobjednano / objednano),
+    ...
+    "veta": "2" / "7" / "56"
 
 }
 ```
 
 Sepsane dulezite hodnoty jednotlivych jidel:
 
-| key              | description                                                   | example 1                            | example 2                                  | type    |
-|------------------|---------------------------------------------------------------|--------------------------------------|--------------------------------------------|---------|
-| id               | id jidla z daneho dne                                         | 0                                    | 1                                          | integer |
-| datum            | datum dne                                                     | 15.09.2025                           | 02.10.2025                                 | string  |
-| druh_popis       | popis typu jidla                                              | Polévka                              | Obed1                                      | pocet   |
-| nazev            | nazev jidla                                                   | Vývar s kuskusem                     | Čočka s uzeným masem, kysané zelí, čaj, pv | pocet   |
-| zakazaneAlergeny | nejspis vypsane alergeny, ktere uzivatel nastavil jako spatne | null                                 | ...                                        | ...     |
-| alergeny         | alergeny obsazene v jidle                                     | [["04","Ryby"],["06","Sójové boby"]] | []                                         | list    |
-| pocet            | stav objednani: 0 = neobjednano, 1 = objednano                | 0                                    | 1                                          | integer |
+| key              | description                                                                               | example 1                            | example 2                                  | type    |
+|------------------|-------------------------------------------------------------------------------------------|--------------------------------------|--------------------------------------------|---------|
+| id               | id jidla z daneho dne                                                                     | 0                                    | 1                                          | integer |
+| datum            | datum dne                                                                                 | 15.09.2025                           | 02.10.2025                                 | string  |
+| druh_popis       | popis typu jidla                                                                          | Polévka                              | Obed1                                      | pocet   |
+| nazev            | nazev jidla                                                                               | Vývar s kuskusem                     | Čočka s uzeným masem, kysané zelí, čaj, pv | pocet   |
+| zakazaneAlergeny | nejspis vypsane alergeny, ktere uzivatel nastavil jako spatne                             | null                                 | ...                                        | ...     |
+| alergeny         | alergeny obsazene v jidle                                                                 | [["04","Ryby"],["06","Sójové boby"]] | []                                         | list    |
+| pocet            | stav objednani: 0 = neobjednano, 1 = objednano                                            | 0                                    | 1                                          | integer |
+| veta             | nejspis to bude identifikacni cislo jidla z celeho jidelnicku, pouziva se pri objednavani | 2                                    | 77                                         | string  |
 
 
+
+## Objednavani
+
+Objednavani obedu se sklada ze dvou hlavnich kroku:
+
+1. **Zaskrtnuti policka konkretniho obedu** - udela API request pridejJidloS5
+2. **Potvrzeni zmen** - udela API request saveOrders
+
+V teto casti mozna bude hrat dulezitejsi roli JavaScript, ktery API cally dela, takze mozna tento typ requestu nepujde jednoduse kopirovat.
+
+Vypada to, ze parametr "veta" bude nejspis identifikacni cislo jidla v celem jidelnicku a pouziva se k objednavani konkretnich jidel.
+
+### pridejJidloS5 request
+
+#### Request payload
+
+Request URL: https://app.strava.cz/api/pridejJidloS5
+
+Request type: POST
+
+Payload type: JSON
+
+Payload value:
+```json
+{
+    "cislo":"3753",
+    "sid":"01C6FCF02A7146159BC5F245A57AF29F",
+    "url":"https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc",
+    "veta":"7",
+    "pocet":1,
+    "lang":"EN",
+    "ignoreCert":"false"
+}
+```
+
+| key        | description                                                   | example                                             | type    |
+|------------|---------------------------------------------------------------|-----------------------------------------------------|---------|
+| cislo      | cislo jidelny                                                 | 3753                                                | string  |
+| sid        | session identifier, slouzi k identifikaci uzivatele           | 01C6FCF02A7146159BC5F245A57AF29F                    | string  |
+| url        | SOAP Web Service Endpoint URL                                 | https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc | string  |
+| veta       | nejspis to bude identifikacni cislo jidla z celeho jidelnicku | 7                                                   | string  |
+| pocet      | stav objednani: 0 = neobjednano, 1 = objednano                | 1                                                   | integer |
+| lang       | jazyk                                                         | EN                                                  | string  |
+| ignoreCert | ...                                                           | false                                               | string  |
+
+
+#### Response
+
+Response type: JSON
+
+Response value:
+```json
+{
+    "produkt": [
+        {
+            "$": {
+                "Veta": "77",
+                "VetaDieta": "8",
+                "Pocet": "0",
+                "Druh": "PO",
+                "CJ": "1",
+                "Produkt": "",
+                "NelzeObj": "I",
+                "NelzeZm": "I",
+                "BurzaZmena": "0",
+                "NelzeBur": "I",
+                "BurzaOstatni": "0",
+                "BurzaNabidka": "0",
+                "BurzaPoptavka": "0",
+                "VydejniMisto": "",
+                "Dieta": ""
+            }
+        },
+        {
+            "$": {
+                "Veta": "6",
+                "VetaDieta": "9",
+                "Pocet": "0",
+                "Druh": "O1",
+                "CJ": "1",
+                "Produkt": "O1",
+                "NelzeObj": "",
+                "NelzeZm": "",
+                "BurzaZmena": "0",
+                "NelzeBur": "C",
+                "BurzaOstatni": "0",
+                "BurzaNabidka": "0",
+                "BurzaPoptavka": "0",
+                "VydejniMisto": "",
+                "Dieta": ""
+            }
+        },
+        {
+            "$": {
+                "Veta": "7",
+                "VetaDieta": "10",
+                "Pocet": "1",
+                "Druh": "O2",
+                "CJ": "1",
+                "Produkt": "O2",
+                "NelzeObj": "",
+                "NelzeZm": "",
+                "BurzaZmena": "0",
+                "NelzeBur": "C",
+                "BurzaOstatni": "0",
+                "BurzaNabidka": "0",
+                "BurzaPoptavka": "0",
+                "VydejniMisto": "",
+                "Dieta": ""
+            }
+        }
+    ],
+    "konto": "0.00"
+}
+```
+
+Vrati informace o stavu vsech jidel na tento den.
+
+Kdyz jsem se snazil tento request rychle udelat pres webovy JavaScript, dostal jsem error 555 se zpravou "Chyba odchycena v api callu", takze to mozna bude slozitejsi.
+
+### saveOrders request
+
+#### Request payload
+
+Request URL: https://app.strava.cz/api/saveOrders
+
+Request type: POST
+
+Payload type: JSON
+
+Payload value:
+```json
+{
+    "cislo":"3753",
+    "sid":"01C6FCF02A7146159BC5F245A57AF29F",
+    "url":"https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc",
+    "xml":null,
+    "lang":"EN",
+    "ignoreCert":"false"
+}
+```
+
+| key        | description                                         | example                                             | type   |
+|------------|-----------------------------------------------------|-----------------------------------------------------|--------|
+| cislo      | cislo jidelny                                       | 3753                                                | string |
+| sid        | session identifier, slouzi k identifikaci uzivatele | 01C6FCF02A7146159BC5F245A57AF29F                    | string |
+| url        | SOAP Web Service Endpoint URL                       | https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc | string |
+| xml        | ...                                                 | null                                                | ...    |
+| lang       | jazyk                                               | EN                                                  | string |
+| ignoreCert | ...                                                 | false                                               | string |
+
+
+#### Response
+
+Response type: JSON
+
+Response value:
+
+```json
+{
+    "produkty": [
+        {
+            "veta": "75",
+            "pocet": 0,
+            "burza": {
+                "zmena": "0",
+                "ostatni": "0",
+                "nabidka": "0",
+                "poptavka": "0"
+            }
+        },
+        {
+            "veta": "1",
+            "pocet": 1,
+            "burza": {
+                "zmena": "0",
+                "ostatni": "0",
+                "nabidka": "0",
+                "poptavka": "0"
+            }
+        },
+        ...
+        {
+            "veta": "74",
+            "pocet": 0,
+            "burza": {
+                "zmena": "0",
+                "ostatni": "0",
+                "nabidka": "0",
+                "poptavka": "0"
+            }
+        }
+    ],
+    "konto": "0.00"
+}
+```
+
+Nejspis pouze aktualni stav objednavek.
