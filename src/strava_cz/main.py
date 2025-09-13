@@ -48,7 +48,7 @@ class StravaCZ:
         # Initial GET request to establish session
         self.session.get('https://app.strava.cz/en/prihlasit-se?jidelna')
 
-        if username and password:
+        if username != None and password != None:
             self.login(username=username, password=password, canteen_number=canteen_number)
 
 
@@ -61,6 +61,8 @@ class StravaCZ:
     def login(self, username, password, canteen_number=None):
         if self.user.is_logged_in:
             raise Exception("User already logged in")
+        if not username or not password:
+            raise ValueError("Username and password are required for login")
 
         self.user.username = username
         self.user.password = password
@@ -112,6 +114,10 @@ class StravaCZ:
         }
         
         response = self.api_request('objednavky', payload)
+
+        if response['status_code'] != 200:
+            raise Exception("Failed to fetch orders")
+        
         orders_unformated = response['response']
         self.orders = []
 
@@ -189,7 +195,7 @@ class StravaCZ:
 
         response = self.api_request('pridejJidloS5', payload)
         if response['status_code'] != 200:
-            return False
+            raise Exception("Failed to add meal to order")
         return True
     
     def save_order(self):
@@ -211,7 +217,7 @@ class StravaCZ:
         response = self.api_request('saveOrders', payload)
         
         if response['status_code'] != 200:
-            return False
+            raise Exception("Failed to save order")
         return True
 
     def order_meal(self, meal_id):
@@ -243,18 +249,8 @@ class StravaCZ:
             self.user = self.User()  # Reset user
             self.orders = []  # Clear orders
             return True
-        return False
+        else:
+            raise Exception("Failed to logout")
 
-if __name__ == "__main__":
-    import os
-    from dotenv import load_dotenv
-    load_dotenv()
-    
-    # Example usage
-    strava = StravaCZ("vojtech.nerad", os.getenv("TEST_PASSWORD"), "3753")
-    print(strava.user)
-    print(strava.get_orders_list())
-    strava.order_meal(4)
-    strava.order_meals(3, 6)
-    strava.logout()
+
 
