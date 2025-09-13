@@ -22,7 +22,7 @@ class Strava:
 
 
         def __repr__(self):
-            return f"User:\nusername={self.username}, \nfull_name={self.full_name}, \nemail={self.email}, \nbalance={self.balance}, \ncurrency={self.currency}, \ncanteen_name={self.canteen_name}, \nsid={self.sid}, \nis_logged_in={self.is_logged_in}"
+            return f"User:\nusername={self.username}, \nfull_name={self.full_name}, \nemail={self.email}, \nbalance={self.balance}, \ncurrency={self.currency}, \ncanteen_name={self.canteen_name}, \nsid={self.sid}, \nis_logged_in={self.is_logged_in}\n"
 
         
     def __init__(self, username=None, password=None, canteen_number=None):
@@ -141,7 +141,7 @@ class Strava:
                     "forbiddenAlergens": meal["zakazaneAlergeny"],
                     "alergens": meal["alergeny"],
                     "ordered": True if meal["pocet"] == 1 else False,
-                    "order_id": int(meal["veta"])
+                    "meal_id": int(meal["veta"])
                 }
                 
                 # Group by date
@@ -166,7 +166,7 @@ class Strava:
         
         for day in self.orders:
             for meal in day['meals']:
-                if meal['order_id'] == meal_id:
+                if meal['meal_id'] == meal_id:
                     return meal['ordered']
         return False
     
@@ -223,7 +223,7 @@ class Strava:
         self.save_order()
         self.get_orders_list()
 
-    def order_meals(self, meal_ids):
+    def order_meals(self, *meal_ids):
         for meal_id in meal_ids:
             self.add_meal_to_order(meal_id)
         self.save_order()
@@ -249,8 +249,12 @@ class Strava:
             return True
         return False
 
-app = Strava("vojtech.nerad", os.getenv("TEST_PASSWORD"), "3753")
-print(app.user)
-app.order_meals((4, 6))
-app.logout()
+if __name__ == "__main__":
+    # Example usage
+    strava = Strava("vojtech.nerad", os.getenv("TEST_PASSWORD"), "3753")
+    print(strava.user)
+    print(strava.get_orders_list())
+    strava.order_meal(4)
+    strava.order_meals(3, 6)
+    strava.logout()
 
