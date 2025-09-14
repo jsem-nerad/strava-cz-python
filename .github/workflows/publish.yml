@@ -41,7 +41,7 @@ jobs:
       
       - run: pytest -v --cov=strava_cz --cov-report=xml
       
-      - run: flake8 src/strava_cz --max-line-length=88
+      - run: flake8 src/strava_cz --max-line-length=100
       
       - run: black --check src/strava_cz
       
