@@ -22,7 +22,11 @@ pip install strava-cz
 from strava_cz import StravaCZ
 
 # vytvoreni objektu strava a prihlaseni uzivatele
-strava = StravaCZ(username="your.username", password="YourPassword123", canteen_number="3753")
+strava = StravaCZ(
+    username="your.username", 
+    password="YourPassword123", 
+    canteen_number="3753"
+    )
 
 # vypsani informaci o uzivateli
 print(strava.user)
