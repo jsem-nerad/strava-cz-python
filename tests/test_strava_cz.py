@@ -102,8 +102,8 @@ class TestStravaCZ:
             StravaCZ("bad_user", "bad_pass", "1234")
     
     @patch('strava_cz.main.requests.Session')
-    def test_get_orders_list(self, mock_Session):
-        """Test get_orders_list returns correctly formatted data without real HTTP calls."""
+    def test_get_menu_list(self, mock_Session):
+        """Test get_menu_list returns correctly formatted data without real HTTP calls."""
         # Arrange: fake session and responses
         fake_session = MagicMock()
         mock_Session.return_value = fake_session
@@ -128,10 +128,10 @@ class TestStravaCZ:
             "zustatPrihlasen": False
         }
 
-        # 2) Orders response
-        orders_response = MagicMock()
-        orders_response.status_code = 200
-        orders_response.json.return_value = {
+        # 2) menu response
+        menu_response = MagicMock()
+        menu_response.status_code = 200
+        menu_response.json.return_value = {
             "table0": [
                 {
                     "id": 0,
@@ -156,17 +156,17 @@ class TestStravaCZ:
             ]
         }
 
-        # Configure post side_effect: first call is login, second is orders list
-        fake_session.post.side_effect = [login_response, orders_response]
+        # Configure post side_effect: first call is login, second is menu list
+        fake_session.post.side_effect = [login_response, menu_response]
 
-        # Act: initialize (logs in) and fetch orders
+        # Act: initialize (logs in) and fetch menu
         s = StravaCZ("user", "pass", "3753")
-        orders = s.get_orders_list()
+        menu = s.get_menu_list()
 
         # Assert structure
-        assert isinstance(orders, list)
-        assert len(orders) == 1
-        day = orders[0]
+        assert isinstance(menu, list)
+        assert len(menu) == 1
+        day = menu[0]
         assert day["date"] == "15.09.2025"
         meals = day["meals"]
         assert len(meals) == 2
