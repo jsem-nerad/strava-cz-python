@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from strava_cz import StravaCZ
+from strava_cz import StravaCZ, AuthenticationError
 
 class TestStravaCZ:
     """Test StravaCZ without real credentials using mocks."""
@@ -48,7 +48,7 @@ class TestStravaCZ:
     
     def test_initialization_invalid_params(self):
         """Test initialization with invalid parameters."""
-        with pytest.raises(ValueError):
+        with pytest.raises(AuthenticationError):
             StravaCZ("", "", "")
     
     @patch('strava_cz.main.requests.Session')
@@ -102,8 +102,8 @@ class TestStravaCZ:
             StravaCZ("bad_user", "bad_pass", "1234")
     
     @patch('strava_cz.main.requests.Session')
-    def test_get_menu_list(self, mock_Session):
-        """Test get_menu_list returns correctly formatted data without real HTTP calls."""
+    def test_get_menu(self, mock_Session):
+        """Test get_menu returns correctly formatted data without real HTTP calls."""
         # Arrange: fake session and responses
         fake_session = MagicMock()
         mock_Session.return_value = fake_session
@@ -161,7 +161,7 @@ class TestStravaCZ:
 
         # Act: initialize (logs in) and fetch menu
         s = StravaCZ("user", "pass", "3753")
-        menu = s.get_menu_list()
+        menu = s.get_menu()
 
         # Assert structure
         assert isinstance(menu, list)

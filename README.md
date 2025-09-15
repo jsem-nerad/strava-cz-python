@@ -21,42 +21,38 @@ pip install strava-cz
 ```python
 from strava_cz import StravaCZ
 
-# vytvoreni objektu strava a prihlaseni uzivatele
+# Vytvoreni objektu strava a prihlaseni uzivatele
 strava = StravaCZ(
     username="your.username", 
     password="YourPassword123", 
-    canteen_number="3753"
+    canteen_number="your canteen number"
     )
 
-# vypsani informaci o uzivateli
+# Vypsani informaci o uzivateli
 print(strava.user)
 
-# ziskani jidelnicku; ulozi list do strava.menu
-print(strava.get_menu_list())
+# Ziskani jidelnicku; ulozi list do strava.menu
+print(strava.get_menu())
 
-# zjisti, jestli je jidlo s meal_id 4 objednano (True/False)
+# Zjisti, jestli je jidlo s meal_id 4 objednano (True/False)
 print(strava.is_ordered(4))
 
-# objedna jidlo s meal_id 4
-strava.order_meal(4)
-
-# objedna jidla s meal_id 3 a 6
+# Objedna jidla s meal_id 3 a 6
 strava.order_meals(3, 6)
 
-# odhlasi uzivatele
+# Odhlasi uzivatele
 strava.logout()
 ```
 
-> meal_id je unikatni identifikacni cislo jidla v celem jidelnicku. jeste jsem poradne nezjistil, jak a jestli se meni v zavislosti na zmene jidelnicku.
+> meal_id je unikatni identifikacni cislo jidla v celem jidelnicku. neni ovsem stale vazane na konkretni jidlo a meni se se zmenami jidelnicku
 
 
 | funkce              | parametry                                                 | return type | popis                                                                                                              |
 |---------------------|-----------------------------------------------------------|-------------|--------------------------------------------------------------------------------------------------------------------|
-| `__init__()`        | username=None, password=None, canteen_number=None         | None        | Inicializuje objekt StravaCZ a automaticky prihlasi uzivatele, pokud jsou vyplnene parametry username a password   |
+| `__init__()` (=`StravaCZ()`)        | username=None, password=None, canteen_number=None         | None        | Inicializuje objekt StravaCZ a automaticky prihlasi uzivatele, pokud jsou vyplnene parametry username a password   |
 | `login()`           | username (str), password (str), canteen_number=None (str) | User        | Prihlasi uzivatele pomoci uzivatelskeho jmena a hesla; pokud neni vyplnene cislo jidelny, automaticky pouzije 3753 |
-| `get_menu_list()` | None                                                      | list        | Vrati jidelnicek jako seznam podle dni; zaroven ho ulozi do promenne menu                        |
+| `get_menu()` | None                                                      | list        | Vrati jidelnicek jako seznam podle dni; zaroven ho ulozi do promenne menu                        |
 | `is_ordered()`      | meal_id (int)                                             | bool        | Zjisti, jestli je dane jidlo objednano        |
-| `order_meal()`      | meal_id (int)                                             | None        | Objedna jidlo podle meal_id                                                                                        |
 | `order_meals()`     | *meal_ids (int)                                           | None        | Objedna vice jidel podle meal_id                                                                                   |
 | `logout()`          | None                                                      | bool        | Odhlasi uzivatele                                                                                                  |
 

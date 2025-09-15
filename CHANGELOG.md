@@ -2,6 +2,21 @@
 
 Vsechny vyznamne zmeny v tomto projektu budou dokumentovany v tomto souboru.
 
+## [Unreleased]
+### Added
+- Popisy funkci v kodu knihovny
+- Vlastni error exceptions
+- Jasne deklarovane datove typy
+
+### Changed
+- Lepe zorganizovany kod
+- Funkce `get_menu_list` prejmenovana na `get_menu`
+- `User` class presunut mimo `StravaCZ`
+
+### Removed
+- Funkce `order_meal`
+
+
 ## [0.1.1] - 2025-9-14
 ### Added
 - repo_rules.md soubor, kam budu postupne zapisovat spravne zachazeni s repozitarem
@@ -11,9 +26,9 @@ Vsechny vyznamne zmeny v tomto projektu budou dokumentovany v tomto souboru.
 
 ### Changed
 - Upravene README
-- Zmena promenne StravaCZ.orders na StravaCZ.menu
-- Zmena nazvu funkce StravaCZ.get_orders_list na StravaCZ.get_menu_list
-- Zmena StravaCZ.menu a StravaCZ.get_menu_list v testech
+- Zmena promenne `orders` na `menu`
+- Zmena nazvu funkce `get_orders_list` na `get_menu_list`
+- Zmena `menu` a `get_menu_list` v testech
 
 ## [0.1.0] - 2025-9-14
 ### Added

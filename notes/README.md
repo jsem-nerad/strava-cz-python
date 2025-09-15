@@ -89,7 +89,7 @@ Dulezite hodnoty:
 | key            | description                                                                                             | example                                             | type   |
 |----------------|---------------------------------------------------------------------------------------------------------|-----------------------------------------------------|--------|
 | sid            | session identifier, slouzi k identifikaci uzivatele, musi byt u kazdeho dalsiho autorizovaneho requestu | 01C6FCF02A7146159BC5F245A57AF29F                    | string |
-| s5url          | SOAP Web Service Endpoint URL                                                                           | https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc | string |
+| s5url          | Web service Stravne 5 endpoint                                                                          | https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc | string |
 | jmeno          | uzivatelske jmeno uzivatele                                                                             | vojtech.nerad                                       | string |
 | uzivatel/konto | penize na uctu uzivatele                                                                                | 0.00                                                | string |
 | uzivatel/jmeno | jmeno a prijmeni uzivatele                                                                              | Vojtěch Nerad                                       | string |
@@ -125,7 +125,7 @@ Payload value:
 |------------|-----------------------------------------------------|-----------------------------------------------------|---------------|
 | cislo      | cislo jidelny                                       | 3753                                                | string        |
 | sid        | session identifier, slouzi k identifikaci uzivatele | 01C6FCF02A7146159BC5F245A57AF29F                    | string        |
-| s5url      | SOAP Web Service Endpoint URL                       | https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc | string        |
+| s5url      | Web service Stravne 5 endpoint                      | https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc | string        |
 | lang       | jazyk                                               | EN                                                  | string        |
 | konto      | penize na uctu uzivatele                            | 0                                                   | integer/float |
 | podminka   | ...                                                 |                                                     | string        |
@@ -414,7 +414,7 @@ Payload value:
 |------------|---------------------------------------------------------------|-----------------------------------------------------|---------|
 | cislo      | cislo jidelny                                                 | 3753                                                | string  |
 | sid        | session identifier, slouzi k identifikaci uzivatele           | 01C6FCF02A7146159BC5F245A57AF29F                    | string  |
-| url        | SOAP Web Service Endpoint URL                                 | https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc | string  |
+| url        | Web service Stravne 5 endpoint                                | https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc | string  |
 | veta       | nejspis to bude identifikacni cislo jidla z celeho jidelnicku | 7                                                   | string  |
 | pocet      | stav objednani: 0 = neobjednano, 1 = objednano                | 1                                                   | integer |
 | lang       | jazyk                                                         | EN                                                  | string  |
@@ -521,7 +521,7 @@ Payload value:
 |------------|-----------------------------------------------------|-----------------------------------------------------|--------|
 | cislo      | cislo jidelny                                       | 3753                                                | string |
 | sid        | session identifier, slouzi k identifikaci uzivatele | 01C6FCF02A7146159BC5F245A57AF29F                    | string |
-| url        | SOAP Web Service Endpoint URL                       | https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc | string |
+| url        | Web service Stravne 5 endpoint                      | https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc | string |
 | xml        | ...                                                 | null                                                | ...    |
 | lang       | jazyk                                               | EN                                                  | string |
 | ignoreCert | ...                                                 | false                                               | string |
@@ -603,7 +603,7 @@ Payload value:
 |------------|-----------------------------------------------------|-----------------------------------------------------|--------|
 | sid        | session identifier, slouzi k identifikaci uzivatele | E9D5B96FE3D14DED8E543B33A4D910F2                    | string |
 | cislo      | cislo jidelny                                       | 3753                                                | string |
-| url        | SOAP Web Service Endpoint URL                       | https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc | string |
+| url        | Web service Stravne 5 endpoint                      | https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc | string |
 | lang       | jazyk                                               | EN                                                  | string |
 | ignoreCert | ...                                                 | false                                               | string |
 
