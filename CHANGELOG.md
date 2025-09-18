@@ -2,7 +2,7 @@
 
 Vsechny vyznamne zmeny v tomto projektu budou dokumentovany v tomto souboru.
 
-## [Unreleased]
+## [0.1.2] 2025-9-18
 ### Added
 - Popisy funkci v kodu knihovny
 - Vlastni error exceptions
