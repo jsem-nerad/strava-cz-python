@@ -178,7 +178,9 @@ class StravaCZ:
         self.user.currency = user_data.get("mena", "Kč")
         self.user.canteen_name = user_data.get("nazevJidelny", "")
 
-    def get_menu(self, include_soup: bool = False, include_empty: bool = False) -> List[Dict[str, Any]]:
+    def get_menu(
+        self, include_soup: bool = False, include_empty: bool = False
+    ) -> List[Dict[str, Any]]:
         """Retrieve and parse user's menu list from API.
 
         Args:
@@ -213,7 +215,9 @@ class StravaCZ:
         self.menu = self._parse_menu_response(response["response"], include_soup, include_empty)
         return self.menu
 
-    def _parse_menu_response(self, menu_data: Dict[str, Any], include_soup: bool = False, include_empty: bool = False) -> List[Dict[str, Any]]:
+    def _parse_menu_response(
+        self, menu_data: Dict[str, Any], include_soup: bool = False, include_empty: bool = False
+    ) -> List[Dict[str, Any]]:
         """Parse raw menu response into structured format."""
         meals_by_date: Dict[str, Any] = {}
 
@@ -231,7 +235,6 @@ class StravaCZ:
                 unformated_date = meal["datum"]  # Format: "dd-mm.yyyy"
                 date = f"{unformated_date[6:10]}-{unformated_date[3:5]}-{unformated_date[0:2]}"
 
-
                 meal_filtered = {
                     "local_id": meal["id"],
                     "type": meal["druh_popis"],
@@ -248,7 +251,7 @@ class StravaCZ:
 
         # Convert to final format
         return [{"date": date, "meals": meals} for date, meals in meals_by_date.items()]
-    
+
     def print_menu(self) -> None:
         """Print the current menu in a readable format."""
         if not self.menu:
@@ -388,6 +391,7 @@ class StravaCZ:
 if __name__ == "__main__":
     import os
     import dotenv
+
     dotenv.load_dotenv()
 
     STRAVA_USERNAME = os.getenv("STRAVA_USERNAME", "")
