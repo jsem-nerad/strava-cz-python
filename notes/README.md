@@ -337,7 +337,7 @@ JSON struktura seznamu objednavek:
 }
 ```
 
-Kazdy prvek s nazvem tableX odpovida urcitemu dni. V kazdem z techto prvku se nachazi nekolik prvku jidel.
+Kazdy prvek s nazvem table[X] odpovida urcitemu dni. V kazdem z techto prvku se nachazi nekolik prvku jidel.
 
 JSON struktura prvku jednotlivych jidel (dulezite info):
 ```json
@@ -360,6 +360,8 @@ JSON struktura prvku jednotlivych jidel (dulezite info):
 
 }
 ```
+
+Nektere obedy jsou vypsane beze jmena, nebo se jmenuji napriklad "Polevka", "Obed 1", "Obed 2" nebo "Obed 3". To lze poznat porovnanim hodnoty "nazev" a hodnoty "druh_popis": pokud se shoduji, znamena to, ze obed jeste nebyl vypsan.
 
 Sepsane dulezite hodnoty jednotlivych jidel:
 

@@ -61,8 +61,8 @@ strava.logout()
 
 - [x] Nahrat jako knihovnu na PyPi
 - [x] Lepe zorganizovat kod
-- [ ] Univerzalni datum
-- [ ] Moznost detailni filtrace jidelnicku
+- [x] Lepsi datum format
+- [x] Moznost detailnejsi filtrace jidelnicku
 - [ ] Lepe zdokumentovat pouziti
 
 ## Co bude dal?

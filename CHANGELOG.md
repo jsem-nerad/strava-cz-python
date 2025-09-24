@@ -2,6 +2,15 @@
 
 Vsechny vyznamne zmeny v tomto projektu budou dokumentovany v tomto souboru.
 
+## [unreleased]
+### Added
+- Funkce `print_menu`, ktera vypise prehledne menu
+- Moznost filtrace prazdnych obedu a polevek ve funkci `get_menu`
+
+### Changed
+- Zmena formatu hodnoty `date` ve funkci `_parse_menu_response`
+- Mensi zmeny filtrovani ve funkci `_parse_menu_response`
+
 ## [0.1.2] 2025-9-18
 ### Added
 - Popisy funkci v kodu knihovny

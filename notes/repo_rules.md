@@ -1,4 +1,6 @@
-# Toto je jednoduchy seznam na udrzovani funkcniho repozitare
+# Repo rules
+
+Toto je jednoduchy seznam na udrzovani funkcniho repozitare
 
 ## Lokalni development
 
