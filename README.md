@@ -50,10 +50,11 @@ strava.logout()
 | funkce              | parametry                                                 | return type | popis                                                                                                              |
 |---------------------|-----------------------------------------------------------|-------------|--------------------------------------------------------------------------------------------------------------------|
 | `__init__()` (=`StravaCZ()`)        | username=None, password=None, canteen_number=None         | None        | Inicializuje objekt StravaCZ a automaticky prihlasi uzivatele, pokud jsou vyplnene parametry username a password   |
-| `login()`           | username (str), password (str), canteen_number=None (str) | User        | Prihlasi uzivatele pomoci uzivatelskeho jmena a hesla; pokud neni vyplnene cislo jidelny, automaticky pouzije 3753 |
+| `login()`           | username [str], password [str], canteen_number=None [str] | User        | Prihlasi uzivatele pomoci uzivatelskeho jmena a hesla; pokud neni vyplnene cislo jidelny, automaticky pouzije 3753 |
 | `get_menu()` | None                                                      | list        | Vrati jidelnicek jako seznam podle dni; zaroven ho ulozi do promenne menu                        |
-| `is_ordered()`      | meal_id (int)                                             | bool        | Zjisti, jestli je dane jidlo objednano        |
-| `order_meals()`     | *meal_ids (int)                                           | None        | Objedna vice jidel podle meal_id                                                                                   |
+| `print_menu()`          | include_soup [bool], include_empty [bool]             | None        | Vypise zformatovane menu         |
+| `is_ordered()`      | meal_id [int]                                             | bool        | Zjisti, jestli je dane jidlo objednano        |
+| `order_meals()`     | *meal_ids [int]                                           | None        | Objedna vice jidel podle meal_id                                                                                   |
 | `logout()`          | None                                                      | bool        | Odhlasi uzivatele                                                                                                  |
 
 
