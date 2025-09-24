@@ -2,7 +2,7 @@
 
 Vsechny vyznamne zmeny v tomto projektu budou dokumentovany v tomto souboru.
 
-## [unreleased]
+## [0.1.3] 2025-09-24
 ### Added
 - Funkce `print_menu`, ktera vypise prehledne menu
 - Moznost filtrace prazdnych obedu a polevek ve funkci `get_menu`
@@ -11,7 +11,7 @@ Vsechny vyznamne zmeny v tomto projektu budou dokumentovany v tomto souboru.
 - Zmena formatu hodnoty `date` ve funkci `_parse_menu_response`
 - Mensi zmeny filtrovani ve funkci `_parse_menu_response`
 
-## [0.1.2] 2025-9-18
+## [0.1.2] 2025-09-18
 ### Added
 - Popisy funkci v kodu knihovny
 - Vlastni error exceptions
@@ -26,7 +26,7 @@ Vsechny vyznamne zmeny v tomto projektu budou dokumentovany v tomto souboru.
 - Funkce `order_meal`
 
 
-## [0.1.1] - 2025-9-14
+## [0.1.1] - 2025-09-14
 ### Added
 - repo_rules.md soubor, kam budu postupne zapisovat spravne zachazeni s repozitarem
 
@@ -39,7 +39,7 @@ Vsechny vyznamne zmeny v tomto projektu budou dokumentovany v tomto souboru.
 - Zmena nazvu funkce `get_orders_list` na `get_menu_list`
 - Zmena `menu` a `get_menu_list` v testech
 
-## [0.1.0] - 2025-9-14
+## [0.1.0] - 2025-09-14
 ### Added
 - Prvni verejna verze
 - Zakladni funkcionalita pro praci se Strava.cz

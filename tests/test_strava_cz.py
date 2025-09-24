@@ -137,9 +137,10 @@ class TestStravaCZ:
                     "id": 0,
                     "datum": "15.09.2025",
                     "druh_popis": "Polévka",
+                    "delsiPopis": "zelnacka",
                     "nazev": "Vývar",
                     "zakazaneAlergeny": None,
-                    "alergeny": [["01", "Gluten"]],
+                    "alergeny": [["01", "brambory"]],
                     "pocet": 0,
                     "veta": "75"
                 },
@@ -147,7 +148,8 @@ class TestStravaCZ:
                     "id": 1,
                     "datum": "15.09.2025",
                     "druh_popis": "Oběd1",
-                    "nazev": "Jídlo1",
+                    "delsiPopis": "Rajská omáčka s těstovinami",
+                    "nazev": "Rajská omáčka s těstovinami",
                     "zakazaneAlergeny": None,
                     "alergeny": [],
                     "pocet": 1,
@@ -161,13 +163,13 @@ class TestStravaCZ:
 
         # Act: initialize (logs in) and fetch menu
         s = StravaCZ("user", "pass", "3753")
-        menu = s.get_menu()
+        menu = s.get_menu(include_soup=True)
 
         # Assert structure
         assert isinstance(menu, list)
         assert len(menu) == 1
         day = menu[0]
-        assert day["date"] == "15.09.2025"
+        assert day["date"] == "2025-09-15"
         meals = day["meals"]
         assert len(meals) == 2
 
@@ -183,7 +185,7 @@ class TestStravaCZ:
         second = meals[1]
         assert second["local_id"] == 1
         assert second["type"] == "Oběd1"
-        assert second["name"] == "Jídlo1"
+        assert second["name"] == "Rajská omáčka s těstovinami"
         assert second["ordered"] is True
         assert second["meal_id"] == 1
 
