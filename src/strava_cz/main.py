@@ -227,8 +227,12 @@ class StravaCZ:
                 continue
 
             for meal in meals_list:
-                if not include_empty and not meal["delsiPopis"]:
-                    continue
+                if not include_empty:
+                    has_no_description = not meal["delsiPopis"] and not meal["alergeny"]
+                    is_unnamed_meal = meal["nazev"] == meal["druh_popis"]
+                    if has_no_description or is_unnamed_meal:
+                        continue
+                
                 if not include_soup and meal["druh_popis"] == "Polévka":
                     continue
 
@@ -250,7 +254,7 @@ class StravaCZ:
                 meals_by_date[date].append(meal_filtered)
 
         # Convert to final format
-        return [{"date": date, "meals": meals} for date, meals in meals_by_date.items()]
+        return [{"date": date, "ordered": any(meal["ordered"] for meal in meals), "meals": meals} for date, meals in meals_by_date.items()]
 
     def print_menu(self) -> None:
         """Print the current menu in a readable format."""
@@ -258,7 +262,7 @@ class StravaCZ:
             self.get_menu()
 
         for day in self.menu:
-            print(f"Date: {day['date']}")
+            print(f"Date: {day['date']} - {'Ordered' if day['ordered'] else 'Not ordered'}")
             for meal in day["meals"]:
                 status = "Ordered" if meal["ordered"] else "Not ordered"
                 print(f"  - {meal['name']} ({meal['type']}) [{status}]")

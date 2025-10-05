@@ -2,6 +2,14 @@
 
 Vsechny vyznamne zmeny v tomto projektu budou dokumentovany v tomto souboru.
 
+
+## [unreleased]
+### Added
+- Hodnota `ordered` u kazdeho dne
+
+### Fixed
+- Opravene filtrovani prazdnych jidel
+
 ## [0.1.3] 2025-09-24
 ### Added
 - Funkce `print_menu`, ktera vypise prehledne menu
