@@ -65,6 +65,11 @@ strava.logout()
 - [x] Lepsi datum format
 - [x] Moznost detailnejsi filtrace jidelnicku
 - [ ] Lepe zdokumentovat pouziti
+- [ ] Rate limiting
+- [ ] Balance check pred objednanim
+- [ ] Kontrola stavu po objednani
+- [ ] Filtrace dnu, ktere nejdou objednat
+
 
 ## Co bude dal?
 
