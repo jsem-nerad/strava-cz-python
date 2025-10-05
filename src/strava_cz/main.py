@@ -231,7 +231,7 @@ class StravaCZ:
                     is_unnamed_meal = meal["nazev"] == meal["druh_popis"]
                     if has_no_description or is_unnamed_meal:
                         continue
-                
+
                 if not include_soup and meal["druh_popis"] == "Polévka":
                     continue
 
@@ -254,7 +254,10 @@ class StravaCZ:
                 meals_by_date[date].append(meal_filtered)
 
         # Convert to final format
-        return [{"date": date, "ordered": any(meal["ordered"] for meal in meals), "meals": meals} for date, meals in meals_by_date.items()]
+        return [
+            {"date": date, "ordered": any(meal["ordered"] for meal in meals), "meals": meals}
+            for date, meals in meals_by_date.items()
+        ]
 
     def print_menu(self) -> None:
         """Print the current menu in a readable format."""
@@ -307,7 +310,7 @@ class StravaCZ:
             raise AuthenticationError("User not logged in")
 
         if self.is_ordered(meal_id) == ordered:
-            return True 
+            return True
 
         payload = {
             "cislo": self.user.canteen_number,
@@ -345,7 +348,6 @@ class StravaCZ:
             True if meal was canceled successfully
         """
         return self._change_meal_order(meal_id, False)
-
 
     def _save_order(self) -> bool:
         """Save current order changes.

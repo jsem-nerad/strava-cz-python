@@ -142,7 +142,8 @@ class TestStravaCZ:
                     "zakazaneAlergeny": None,
                     "alergeny": [["01", "brambory"]],
                     "pocet": 0,
-                    "veta": "75"
+                    "veta": "75",
+                    "cena": "40.00"
                 },
                 {
                     "id": 1,
@@ -151,9 +152,10 @@ class TestStravaCZ:
                     "delsiPopis": "Rajská omáčka s těstovinami",
                     "nazev": "Rajská omáčka s těstovinami",
                     "zakazaneAlergeny": None,
-                    "alergeny": [],
+                    "alergeny": [["69", "pavel"]],
                     "pocet": 1,
-                    "veta": "1"
+                    "veta": "1",
+                    "cena": "40.00"
                 }
             ]
         }
@@ -179,7 +181,7 @@ class TestStravaCZ:
         assert first["type"] == "Polévka"
         assert first["name"] == "Vývar"
         assert first["ordered"] is False
-        assert first["meal_id"] == 75
+        assert first["id"] == 75
 
         # Second meal: ordered
         second = meals[1]
@@ -187,7 +189,7 @@ class TestStravaCZ:
         assert second["type"] == "Oběd1"
         assert second["name"] == "Rajská omáčka s těstovinami"
         assert second["ordered"] is True
-        assert second["meal_id"] == 1
+        assert second["id"] == 1
 
         # Verify two POST calls occurred
         assert fake_session.post.call_count == 2
