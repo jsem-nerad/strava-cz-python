@@ -36,10 +36,9 @@ class User:
     def __repr__(self):
         """Return string with basic formated user info"""
         return (
-            f"User:\nusername={self.username}, \nfull_name={self.full_name}, "
-            f"\nemail={self.email}, \nbalance={self.balance}, \ncurrency={self.currency}, "
-            f"\ncanteen_name={self.canteen_name}, \nsid={self.sid}, "
-            f"\nis_logged_in={self.is_logged_in}\n"
+            f"User information:\n  - {self.full_name} ({self.username})"
+            f"\n  - Email: {self.email} \n  - Balance: {self.balance} {self.currency}"
+            f"\n  - Canteen: {self.canteen_name}\n\n"
         )
 
 
@@ -246,7 +245,8 @@ class StravaCZ:
                     "forbiddenAlergens": meal["zakazaneAlergeny"],
                     "alergens": meal["alergeny"],
                     "ordered": meal["pocet"] == 1,
-                    "meal_id": int(meal["veta"]),
+                    "id": int(meal["veta"]),
+                    "price": float(meal["cena"]),
                 }
 
                 if date not in meals_by_date:
@@ -265,7 +265,7 @@ class StravaCZ:
             print(f"Date: {day['date']} - {'Ordered' if day['ordered'] else 'Not ordered'}")
             for meal in day["meals"]:
                 status = "Ordered" if meal["ordered"] else "Not ordered"
-                print(f"  - {meal['name']} ({meal['type']}) [{status}]")
+                print(f"  - {meal['id']} {meal['name']} ({meal['type']}) - [{status}]")
             print()
 
     def is_ordered(self, meal_id: int) -> bool:
@@ -285,9 +285,44 @@ class StravaCZ:
 
         for day in self.menu:
             for meal in day["meals"]:
-                if meal["meal_id"] == meal_id:
+                if meal["id"] == meal_id:
                     return meal["ordered"]
         return False
+
+    def _change_meal_order(self, meal_id: int, ordered: bool) -> bool:
+        """Change the order status of a meal (without saving).
+
+        Args:
+            meal_id: Meal identification number
+            ordered: New order status
+
+        Returns:
+            True if meal order status was changed successfully
+
+        Raises:
+            AuthenticationError: If user is not logged in
+            StravaAPIError: If changing meal order status fails
+        """
+        if not self.user.is_logged_in:
+            raise AuthenticationError("User not logged in")
+
+        if self.is_ordered(meal_id) == ordered:
+            return True 
+
+        payload = {
+            "cislo": self.user.canteen_number,
+            "sid": self.user.sid,
+            "url": self.user.s5url,
+            "veta": str(meal_id),
+            "pocet": "1" if ordered else "0",
+            "lang": "EN",
+            "ignoreCert": "false",
+        }
+
+        response = self._api_request("pridejJidloS5", payload)
+        if response["status_code"] != 200:
+            raise StravaAPIError("Failed to change meal order status")
+        return True
 
     def _add_meal_to_order(self, meal_id: int) -> bool:
         """Add a meal to the order (without saving).
@@ -297,31 +332,20 @@ class StravaCZ:
 
         Returns:
             True if meal was added successfully
-
-        Raises:
-            AuthenticationError: If user is not logged in
-            StravaAPIError: If adding meal fails
         """
-        if not self.user.is_logged_in:
-            raise AuthenticationError("User not logged in")
+        return self._change_meal_order(meal_id, True)
 
-        if self.is_ordered(meal_id):
-            return True  # Already ordered
+    def _cancel_meal_order(self, meal_id: int) -> bool:
+        """Cancel a meal order (without saving).
 
-        payload = {
-            "cislo": self.user.canteen_number,
-            "sid": self.user.sid,
-            "url": self.user.s5url,
-            "veta": str(meal_id),
-            "pocet": 1,
-            "lang": "EN",
-            "ignoreCert": "false",
-        }
+        Args:
+            meal_id: Meal identification number
 
-        response = self._api_request("pridejJidloS5", payload)
-        if response["status_code"] != 200:
-            raise StravaAPIError("Failed to add meal to order")
-        return True
+        Returns:
+            True if meal was canceled successfully
+        """
+        return self._change_meal_order(meal_id, False)
+
 
     def _save_order(self) -> bool:
         """Save current order changes.
@@ -361,6 +385,25 @@ class StravaCZ:
             self._add_meal_to_order(meal_id)
         self._save_order()
         self.get_menu()
+
+        for meal_id in meal_ids:
+            if not self.is_ordered(meal_id):
+                raise StravaAPIError(f"Failed to order meal with ID {meal_id}")
+
+    def cancel_meals(self, *meal_ids: int) -> None:
+        """Cancel multiple meal orders in a single transaction.
+
+        Args:
+            *meal_ids: Variable number of meal identification numbers
+        """
+        for meal_id in meal_ids:
+            self._cancel_meal_order(meal_id)
+        self._save_order()
+        self.get_menu()
+
+        for meal_id in meal_ids:
+            if self.is_ordered(meal_id):
+                raise StravaAPIError(f"Failed to cancel meal with ID {meal_id}")
 
     def logout(self) -> bool:
         """Log out from Strava.cz account.

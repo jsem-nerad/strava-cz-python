@@ -6,6 +6,9 @@ Vsechny vyznamne zmeny v tomto projektu budou dokumentovany v tomto souboru.
 ## [unreleased]
 ### Added
 - Hodnota `ordered` u kazdeho dne
+- Hodnota `price` u kazdeho jidla
+- `cancel_meals` funkce
+- Overovani uspesnosti objednani/odhlaseni
 
 ### Fixed
 - Opravene filtrovani prazdnych jidel
