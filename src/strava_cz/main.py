@@ -454,6 +454,8 @@ if __name__ == "__main__":
     )
     print(strava.user)
 
+    strava.get_menu(include_soup=True)
+
     strava.print_menu()
 
     strava.logout()

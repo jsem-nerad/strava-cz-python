@@ -71,6 +71,13 @@ strava.logout()
 - [ ] Filtrace dnu, ktere nejdou objednat
 
 
+## Known bugs
+
+- Procesovani jidelnicku necha projit statni svatek. problem je, ze nazev je sice statni svatek, ale hodnota `druhPopis` obsahuje popis nejakeho jidla - neni prazdna, tudiz si program mysli, ze na tento den nejake jidlo je. list alergenu je ovsem prazdny, takze by byla moznost ridit se ciste podle listu alergenu, ale mohla by nastat situace, ze je nejake realne jidlo bez alergenu a mohlo by se oznacit jako prazdne
+
+
+
+
 ## Co bude dal?
 
 Planuji udelat aplikaci, ktera bude uzivateli automaticky objednavat obedy podle jeho preferenci.
