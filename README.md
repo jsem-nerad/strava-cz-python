@@ -64,17 +64,15 @@ strava.logout()
 - [x] Lepe zorganizovat kod
 - [x] Lepsi datum format
 - [x] Moznost detailnejsi filtrace jidelnicku
+- [x] Kontrola stavu po objednani
 - [ ] Lepe zdokumentovat pouziti
 - [ ] Rate limiting
 - [ ] Balance check pred objednanim
-- [ ] Kontrola stavu po objednani
 - [ ] Filtrace dnu, ktere nejdou objednat
+- [ ] Lepsi testing
 
 
 ## Known bugs
-
-- Procesovani jidelnicku necha projit statni svatek. problem je, ze nazev je sice statni svatek, ale hodnota `druhPopis` obsahuje popis nejakeho jidla - neni prazdna, tudiz si program mysli, ze na tento den nejake jidlo je. list alergenu je ovsem prazdny, takze by byla moznost ridit se ciste podle listu alergenu, ale mohla by nastat situace, ze je nejake realne jidlo bez alergenu a mohlo by se oznacit jako prazdne
-
 
 
 

@@ -11,6 +11,9 @@ Vsechny vyznamne zmeny v tomto projektu budou dokumentovany v tomto souboru.
 - Overovani uspesnosti objednani/odhlaseni
 
 ### Fixed
+- Filtrace prazdnych jidel, vcetne svatku a prazdnin
+
+### Fixed
 - Opravene filtrovani prazdnych jidel
 
 ## [0.1.3] 2025-09-24
