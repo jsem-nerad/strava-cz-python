@@ -229,7 +229,10 @@ class StravaCZ:
                 if not include_empty:
                     has_no_description = not meal["delsiPopis"] and not meal["alergeny"]
                     is_unnamed_meal = meal["nazev"] == meal["druh_popis"]
-                    if has_no_description or is_unnamed_meal:
+                    cant_be_ordered = (
+                        "CO" in meal["omezeniObj"]["den"] or "VP" in meal["omezeniObj"]["den"]
+                    )  # Hardcoded values for meals that can't be ordered, there may be more
+                    if has_no_description or is_unnamed_meal or cant_be_ordered:
                         continue
 
                 if not include_soup and meal["druh_popis"] == "Polévka":

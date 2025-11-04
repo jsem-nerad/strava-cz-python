@@ -141,6 +141,7 @@ class TestStravaCZ:
                     "nazev": "Vývar",
                     "zakazaneAlergeny": None,
                     "alergeny": [["01", "brambory"]],
+                    "omezeniObj": {"den": ""},
                     "pocet": 0,
                     "veta": "75",
                     "cena": "40.00"
@@ -153,6 +154,7 @@ class TestStravaCZ:
                     "nazev": "Rajská omáčka s těstovinami",
                     "zakazaneAlergeny": None,
                     "alergeny": [["69", "pavel"]],
+                    "omezeniObj": {"den": ""},
                     "pocet": 1,
                     "veta": "1",
                     "cena": "40.00"
