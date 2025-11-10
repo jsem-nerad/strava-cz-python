@@ -110,11 +110,9 @@ class Menu:
         return self
 
     def _parse_menu_data(self) -> None:
-        """Parse raw menu response into structured lists."""
-        # Temporary storage categorized by restriction status
-        all_meals: Dict[str, List[Dict]] = {}  # Orderable (empty string)
-        restricted_meals: Dict[str, List[Dict]] = {}  # "CO" - too late
-        optional_meals: Dict[str, List[Dict]] = {}  # "T" - not usually ordered
+        """Parse raw menu response into internal storage."""
+        # Single storage for all meals grouped by date
+        meals_by_date: Dict[str, List[Dict]] = {}
         
         # Process all table entries (table0, table1, etc.)
         for table_key, meals_list in self.raw_data.items():
@@ -169,294 +167,144 @@ class Menu:
                     "ordered": meal["pocet"] == 1,
                     "id": int(meal["veta"]),
                     "price": float(meal["cena"]),
+                    "date": date,
                 }
 
-                # Categorize by restriction status
-                if order_type == OrderType.RESTRICTED:
-                    if date not in restricted_meals:
-                        restricted_meals[date] = []
-                    restricted_meals[date].append(meal_filtered)
-                elif order_type == OrderType.OPTIONAL:
-                    if date not in optional_meals:
-                        optional_meals[date] = []
-                    optional_meals[date].append(meal_filtered)
-                else:  # NORMAL - orderable
-                    if date not in all_meals:
-                        all_meals[date] = []
-                    all_meals[date].append(meal_filtered)
+                # Store all meals together
+                if date not in meals_by_date:
+                    meals_by_date[date] = []
+                meals_by_date[date].append(meal_filtered)
 
         # Convert to day-grouped format and sort by date
-        self.all = sorted([
+        self._all_meals = sorted([
             {"date": date, "ordered": any(m["ordered"] for m in meals), "meals": meals}
-            for date, meals in all_meals.items()
+            for date, meals in meals_by_date.items()
         ], key=lambda x: x["date"])
-        
-        self.restricted = sorted([
-            {"date": date, "ordered": any(m["ordered"] for m in meals), "meals": meals}
-            for date, meals in restricted_meals.items()
-        ], key=lambda x: x["date"])
-        
-        self.optional = sorted([
-            {"date": date, "ordered": any(m["ordered"] for m in meals), "meals": meals}
-            for date, meals in optional_meals.items()
-        ], key=lambda x: x["date"])
-        
-        # Create filtered views by meal type
-        self.main_only = self._filter_by_type_internal(self.all, MealType.MAIN)
-        self.soup_only = self._filter_by_type_internal(self.all, MealType.SOUP)
-        
-        # Create complete list (all + optional, sorted)
-        self.complete = self._merge_sorted_lists(self.all, self.optional)
 
-    def _filter_by_type_internal(self, days: List[Dict[str, Any]], meal_type: MealType) -> List[Dict[str, Any]]:
-        """Filter days to only include specific meal type."""
+    def get_days(
+        self,
+        meal_types: Optional[List[MealType]] = None,
+        order_types: Optional[List[OrderType]] = None,
+        ordered: Optional[bool] = None,
+    ) -> List[Dict[str, Any]]:
+        """Get menu grouped by days with optional filtering.
+
+        Args:
+            meal_types: List of meal types to include (None = all types)
+            order_types: List of order types to include (None = [OrderType.NORMAL] only)
+            ordered: Filter by order status (True = ordered only, False = unordered only, None = all)
+
+        Returns:
+            List of days with meals: [{"date": "YYYY-MM-DD", "ordered": bool, "meals": [...]}]
+        """
+        # Default to NORMAL order type only
+        if order_types is None:
+            order_types = [OrderType.NORMAL]
+
         filtered_days = []
-        for day in days:
-            filtered_meals = [m for m in day["meals"] if m["type"] == meal_type]
-            if filtered_meals:
-                filtered_days.append({
-                    "date": day["date"],
-                    "ordered": any(m["ordered"] for m in filtered_meals),
-                    "meals": filtered_meals
-                })
+        for day in self._all_meals:
+            # Filter meals by type and order type
+            filtered_meals = [
+                meal for meal in day["meals"]
+                if (meal_types is None or meal["type"] in meal_types)
+                and (meal["orderType"] in order_types)
+            ]
+
+            if not filtered_meals:
+                continue
+
+            # Check if day has ordered meals
+            day_has_orders = any(m["ordered"] for m in filtered_meals)
+
+            # Apply ordered filter
+            if ordered is not None:
+                if ordered and not day_has_orders:
+                    continue
+                if not ordered and day_has_orders:
+                    continue
+
+            filtered_days.append({
+                "date": day["date"],
+                "ordered": day_has_orders,
+                "meals": filtered_meals
+            })
+
         return filtered_days
 
-    def _merge_sorted_lists(self, list1: List[Dict[str, Any]], list2: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Merge two sorted day lists, combining meals for same dates."""
-        merged = {}
-        
-        for day in list1 + list2:
-            date = day["date"]
-            if date not in merged:
-                merged[date] = {"date": date, "meals": [], "ordered": False}
-            merged[date]["meals"].extend(day["meals"])
-            merged[date]["ordered"] = merged[date]["ordered"] or day["ordered"]
-        
-        return sorted(merged.values(), key=lambda x: x["date"])
+    def get_meals(
+        self,
+        meal_types: Optional[List[MealType]] = None,
+        order_types: Optional[List[OrderType]] = None,
+        ordered: Optional[bool] = None,
+    ) -> List[Dict[str, Any]]:
+        """Get all meals as flat list with optional filtering.
 
-    def get_by_date(
-        self, date: str, include_restricted: bool = True, include_optional: bool = True
-    ) -> Optional[Dict[str, Any]]:
-        """Get menu items for a specific date.
+        Args:
+            meal_types: List of meal types to include (None = all types)
+            order_types: List of order types to include (None = [OrderType.NORMAL] only)
+            ordered: Filter by order status (True = ordered only, False = unordered only, None = all)
+
+        Returns:
+            Flat list of meals with date: [{...meal, "date": "YYYY-MM-DD"}]
+        """
+        # Default to NORMAL order type only
+        if order_types is None:
+            order_types = [OrderType.NORMAL]
+
+        meals = []
+        for day in self._all_meals:
+            for meal in day["meals"]:
+                # Apply filters
+                if meal_types is not None and meal["type"] not in meal_types:
+                    continue
+                if meal["orderType"] not in order_types:
+                    continue
+                if ordered is not None and meal["ordered"] != ordered:
+                    continue
+
+                meals.append(meal)
+
+        return meals
+
+    def get_by_date(self, date: str) -> Optional[Dict[str, Any]]:
+        """Get menu items for a specific date (searches all order types).
 
         Args:
             date: Date in YYYY-MM-DD format
-            include_restricted: Include restricted ("CO") meals in search
-            include_optional: Include optional ("T") meals in search
 
         Returns:
             Dictionary with date and meals, or None if not found
         """
-        # Build list of lists to search
-        lists_to_search = [self.all]
-        if include_restricted:
-            lists_to_search.append(self.restricted)
-        if include_optional:
-            lists_to_search.append(self.optional)
-        
-        for day_list in lists_to_search:
-            for day in day_list:
-                if day["date"] == date:
-                    return day
+        for day in self._all_meals:
+            if day["date"] == date:
+                return day
         return None
 
-    def get_unordered_days(
-        self, include_restricted: bool = False, include_optional: bool = False
-    ) -> List[Dict[str, Any]]:
-        """Get all days where no meals are ordered.
-
-        Args:
-            include_restricted: Include restricted ("CO") days
-            include_optional: Include optional ("T") days
-
-        Returns:
-            List of days with no ordered meals
-        """
-        lists_to_search = [self.all]
-        if include_restricted:
-            lists_to_search.append(self.restricted)
-        if include_optional:
-            lists_to_search.append(self.optional)
-        
-        unordered_days = []
-        for day_list in lists_to_search:
-            for day in day_list:
-                if not day["ordered"]:
-                    unordered_days.append(day)
-        
-        return sorted(unordered_days, key=lambda x: x["date"])
-
-    def get_ordered_meals(
-        self, include_restricted: bool = True, include_optional: bool = True
-    ) -> List[Dict[str, Any]]:
-        """Get all ordered meals across all dates.
-
-        Args:
-            include_restricted: Include restricted ("CO") meals in results
-            include_optional: Include optional ("T") meals in results
-
-        Returns:
-            List of ordered meals with their date information
-        """
-        lists_to_search = [self.all]
-        if include_restricted:
-            lists_to_search.append(self.restricted)
-        if include_optional:
-            lists_to_search.append(self.optional)
-        
-        ordered_meals = []
-        for day_list in lists_to_search:
-            for day in day_list:
-                for meal in day["meals"]:
-                    if meal["ordered"]:
-                        ordered_meals.append({**meal, "date": day["date"]})
-        
-        return sorted(ordered_meals, key=lambda x: x["date"])
-
-    def filter_by_type(
-        self, meal_type: MealType, include_restricted: bool = False, include_optional: bool = False
-    ) -> List[Dict[str, Any]]:
-        """Filter meals by type.
-
-        Args:
-            meal_type: Type of meal to filter by (MealType.SOUP or MealType.MAIN)
-            include_restricted: Include restricted ("CO") meals
-            include_optional: Include optional ("T") meals
-
-        Returns:
-            List of meals matching the type with their date information
-        """
-        lists_to_search = [self.all]
-        if include_restricted:
-            lists_to_search.append(self.restricted)
-        if include_optional:
-            lists_to_search.append(self.optional)
-        
-        filtered_meals = []
-        for day_list in lists_to_search:
-            for day in day_list:
-                for meal in day["meals"]:
-                    if meal["type"] == meal_type:
-                        filtered_meals.append({**meal, "date": day["date"]})
-        return sorted(filtered_meals, key=lambda x: x["date"])
-
-    def get_meals(
-        self, include_restricted: bool = False, include_optional: bool = False
-    ) -> List[Dict[str, Any]]:
-        """Get all meals as flat list with date.
-
-        Args:
-            include_restricted: Include restricted ("CO") meals
-            include_optional: Include optional ("T") meals
-
-        Returns:
-            List of all meals (flattened) with date included in each meal
-        """
-        lists_to_search = [self.all]
-        if include_restricted:
-            lists_to_search.append(self.restricted)
-        if include_optional:
-            lists_to_search.append(self.optional)
-        
-        meals = []
-        for day_list in lists_to_search:
-            for day in day_list:
-                for meal in day["meals"]:
-                    meals.append({**meal, "date": day["date"]})
-        return meals
-
-    def get_main_meals(
-        self, include_restricted: bool = False, include_optional: bool = False
-    ) -> List[Dict[str, Any]]:
-        """Get only main meals as flat list with date.
-
-        Args:
-            include_restricted: Include restricted ("CO") meals
-            include_optional: Include optional ("T") meals
-
-        Returns:
-            List of main meals (flattened) with date included in each meal
-        """
-        lists_to_search = [self.all]
-        if include_restricted:
-            lists_to_search.append(self.restricted)
-        if include_optional:
-            lists_to_search.append(self.optional)
-        
-        meals = []
-        for day_list in lists_to_search:
-            for day in day_list:
-                for meal in day["meals"]:
-                    if meal["type"] == MealType.MAIN:
-                        meals.append({**meal, "date": day["date"]})
-        return meals
-
-    def get_soup_meals(
-        self, include_restricted: bool = False, include_optional: bool = False
-    ) -> List[Dict[str, Any]]:
-        """Get only soup meals as flat list with date.
-
-        Args:
-            include_restricted: Include restricted ("CO") meals
-            include_optional: Include optional ("T") meals
-
-        Returns:
-            List of soup meals (flattened) with date included in each meal
-        """
-        lists_to_search = [self.all]
-        if include_restricted:
-            lists_to_search.append(self.restricted)
-        if include_optional:
-            lists_to_search.append(self.optional)
-        
-        meals = []
-        for day_list in lists_to_search:
-            for day in day_list:
-                for meal in day["meals"]:
-                    if meal["type"] == MealType.SOUP:
-                        meals.append({**meal, "date": day["date"]})
-        return meals
-
-    def get_by_id(
-        self, meal_id: int, include_restricted: bool = True, include_optional: bool = True
-    ) -> Optional[Dict[str, Any]]:
-        """Get a specific meal by its ID.
+    def get_by_id(self, meal_id: int) -> Optional[Dict[str, Any]]:
+        """Get a specific meal by its ID (searches all order types).
 
         Args:
             meal_id: Meal identification number
-            include_restricted: Include restricted ("CO") meals in search
-            include_optional: Include optional ("T") meals in search
 
         Returns:
-            Meal dictionary with date information, or None if not found
+            Meal dictionary, or None if not found
         """
-        lists_to_search = [self.all]
-        if include_restricted:
-            lists_to_search.append(self.restricted)
-        if include_optional:
-            lists_to_search.append(self.optional)
-        
-        for day_list in lists_to_search:
-            for day in day_list:
-                for meal in day["meals"]:
-                    if meal["id"] == meal_id:
-                        return {**meal, "date": day["date"]}
+        for day in self._all_meals:
+            for meal in day["meals"]:
+                if meal["id"] == meal_id:
+                    return meal
         return None
 
-    def is_ordered(
-        self, meal_id: int, include_restricted: bool = True, include_optional: bool = True
-    ) -> bool:
-        """Check whether a meal is ordered or not.
+    def is_ordered(self, meal_id: int) -> bool:
+        """Check whether a meal is ordered or not (searches all order types).
 
         Args:
             meal_id: Meal identification number
-            include_restricted: Include restricted ("CO") meals in search
-            include_optional: Include optional ("T") meals in search
 
         Returns:
             True if meal is ordered, False otherwise
         """
-        meal = self.get_by_id(meal_id, include_restricted, include_optional)
+        meal = self.get_by_id(meal_id)
         return meal["ordered"] if meal else False
 
     def _change_meal_order(self, meal_id: int, ordered: bool) -> bool:
@@ -559,45 +407,44 @@ class Menu:
                 raise StravaAPIError(f"Failed to cancel meal with ID {meal_id}")
 
     def print(self) -> None:
-        """Print the current menu in a readable format."""
-        if not self.all:
-            print("No menu data available")
-            return
-
-        for day in self.all:
-            print(f"Date: {day['date']} - {'Ordered' if day['ordered'] else 'Not ordered'}")
+        """Print formatted menu (default: orderable meals only)."""
+        days = self.get_days()
+        for day in days:
+            print(f"{day['date']}:")
             for meal in day["meals"]:
+                meal_type_str = meal["type"].value
                 status = "Ordered" if meal["ordered"] else "Not ordered"
-                meal_type_str = meal['type'].value  # Get string value from enum
-                print(f"  - {meal['id']} {meal['name']} ({meal_type_str}) - [{status}]")
+                order_type_info = f" [{meal['orderType'].name}]" if meal["orderType"] != OrderType.NORMAL else ""
+                print(f"  - {meal['id']} {meal['name']} ({meal_type_str}){order_type_info} - [{status}]")
             print()
 
     def __repr__(self) -> str:
-        """Return the default processed list representation."""
-        return repr(self.all)
+        """Return representation of menu."""
+        days = self.get_days()
+        total_meals = sum(len(day["meals"]) for day in days)
+        return f"Menu(days={len(days)}, meals={total_meals})"
 
     def __str__(self) -> str:
-        """Return string representation of the default list."""
-        return str(self.all)
+        """Return string representation of menu."""
+        return self.__repr__()
 
     def __iter__(self):
-        """Iterate over the default processed list."""
-        return iter(self.all)
+        """Iterate over orderable days."""
+        return iter(self.get_days())
 
     def __len__(self) -> int:
-        """Return the number of days in default menu."""
-        return len(self.all)
+        """Return the number of orderable days."""
+        return len(self.get_days())
 
     def __getitem__(self, key):
-        """Access days by index from default list."""
-        return self.all[key]
+        """Access days by index from orderable days."""
+        return self.get_days()[key]
 
 
 class StravaCZ:
     """Strava.cz API client"""
 
     BASE_URL = "https://app.strava.cz"
-    DEFAULT_CANTEEN_NUMBER = "3753"  # Default SSPS canteen number
 
     def __init__(
         self,
@@ -610,7 +457,7 @@ class StravaCZ:
         Args:
             username: User's login username
             password: User's login password
-            canteen_number: Canteen number
+            canteen_number: Canteen number (required for login)
         """
 
         self.session = requests.Session()
@@ -672,29 +519,31 @@ class StravaCZ:
         except requests.RequestException as e:
             raise StravaAPIError(f"API request failed: {e}")
 
-    def login(self, username, password, canteen_number=None):
+    def login(self, username, password, canteen_number):
         """Log in to Strava.cz account.
 
         Args:
             username: User's login username
             password: User's login password
-            canteen_number: Canteen number
+            canteen_number: Canteen number (required)
 
         Returns:
             User object with populated account information
 
         Raises:
             AuthenticationError: If user is already logged in or login fails
-            ValueError: If username or password is empty
+            ValueError: If username, password, or canteen_number is missing
         """
         if self.user.is_logged_in:
             raise AuthenticationError("User already logged in")
         if not username or not password:
             raise ValueError("Username and password are required for login")
+        if not canteen_number:
+            raise ValueError("Canteen number is required for login")
 
         self.user.username = username
         self.user.password = password
-        self.user.canteen_number = canteen_number or self.DEFAULT_CANTEEN_NUMBER
+        self.user.canteen_number = canteen_number
 
         payload = {
             "cislo": self.user.canteen_number,
@@ -773,20 +622,18 @@ if __name__ == "__main__":
         password=STRAVA_PASSWORD,
         canteen_number=STRAVA_CANTEEN_NUMBER,
     )
-    print(strava.user)
 
-    # Fetch and display menu
+    # Ziskani jidelnicku a vypsani
     strava.menu.fetch()
-    #strava.menu.print()
+    
+    # Vsechna objednavatelna jidla
+    days = strava.menu.get_days(order_types=[OrderType.NORMAL], ordered=False, meal_types=[MealType.MAIN])
+    print(days)
 
-    #print(strava.menu.optional)
-    #print(strava.menu.restricted)
-    #print(strava.menu.all)
-    #print(strava.menu.complete)
-    #ordered = strava.menu.get_ordered_meals()
-    #print(f"\nOrdered meals: {len(ordered)}")
+    meal_ids = []
+    for day in days:
+        meal_ids.append(day["meals"][1]["id"])
 
-    print(strava.menu)
+    strava.menu.order_meals(*meal_ids)
 
     strava.logout()
-    print("Logged out")

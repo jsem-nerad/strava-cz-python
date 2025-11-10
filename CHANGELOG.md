@@ -5,35 +5,27 @@ Vsechny vyznamne zmeny v tomto projektu budou dokumentovany v tomto souboru.
 
 ## [unreleased]
 
-## [0.2.0] 2025-11-06
+## [0.2.0] 2025-11-10
 ### Added
 - `Menu` class jako samostatna trida pro praci s jidelnickem
 - `MealType` enum pro typy jidel (SOUP, MAIN, UNKNOWN)
 - `OrderType` enum pro typy objednavek (NORMAL, RESTRICTED, OPTIONAL)
 - Kazde jidlo nyni obsahuje `orderType` pole s informaci o typu objednavky
 - `Menu.fetch()` pro ziskani jidelnicku z API (bez parametru)
-- Vice pohledu na menu jako vlastnosti:
-  - `Menu.all` - default seznam (polevky + hlavni, objednavatelne)
-  - `Menu.main_only` - pouze hlavni jidla
-  - `Menu.soup_only` - pouze polevky
-  - `Menu.complete` - kompletni seznam vcetne volitelnych jidel
-  - `Menu.restricted` - jidla "CO" (uz nelze objednat)
-  - `Menu.optional` - jidla "T" (obvykle neobjednavana)
-- Ploschy seznamy jidel s datem:
-  - `Menu.get_meals()` - vsechna jidla jako ploschy seznam
-  - `Menu.get_main_meals()` - pouze hlavni jidla
-  - `Menu.get_soup_meals()` - pouze polevky
-- `Menu.get_unordered_days()` - vrati seznam dnu bez objednavek
-- Parametry `include_restricted` a `include_optional` pro vsechny metody vracejici jidla nebo dny:
-  - Default False pro seznamove metody (get_meals, get_main_meals, get_soup_meals, filter_by_type, get_unordered_days)
-  - Default True pro vyhledavaci metody (get_by_id, get_by_date, get_ordered_meals, is_ordered)
+- Dva hlavni metody pro ziskani dat:
+  - `Menu.get_days(meal_types, order_types, ordered)` - jidla seskupena podle dni
+  - `Menu.get_meals(meal_types, order_types, ordered)` - vsechna jidla jako ploschy seznam
+- Flexibilni filtrovani pomoci parametru:
+  - `meal_types` - seznam typu jidel k ziskani (napr. `[MealType.SOUP, MealType.MAIN]`)
+  - `order_types` - seznam typu objednavek (napr. `[OrderType.NORMAL, OrderType.RESTRICTED]`)
+  - `ordered` - filtrovani podle stavu objednavky (True/False/None)
 - Magic methods pro Menu: `__repr__`, `__str__`, `__iter__`, `__len__`, `__getitem__`
 - Automaticke filtrovani podle omezeniObj hodnot:
   - "VP" jidla se preskakuji (zadna skola)
-  - "CO" jidla jdou do `restricted` seznamu (OrderType.RESTRICTED)
-  - "T" jidla jdou do `optional` seznamu (OrderType.OPTIONAL)
-  - Prazdny string = objednavatelne jidla (OrderType.NORMAL)
-- Inteligentni vyhledavani pres vybrane seznamy podle parametru include_restricted a include_optional
+  - "CO" jidla maji OrderType.RESTRICTED
+  - "T" jidla maji OrderType.OPTIONAL
+  - Prazdny string = OrderType.NORMAL (objednavatelne)
+- Pomocne metody: `get_by_id()`, `get_by_date()`, `is_ordered()` (prohledavaji vsechny typy automaticky)
 - `Menu.order_meals()` a `Menu.cancel_meals()` primo v Menu objektu
 - Export `MealType`, `OrderType` a `Menu` z hlavniho modulu
 - MIGRATION_GUIDE.md s detailnim navodem pro prechod na novou verzi
@@ -42,11 +34,15 @@ Vsechny vyznamne zmeny v tomto projektu budou dokumentovany v tomto souboru.
 - Menu je nyni samostatny objekt pristupny pres `strava.menu`
 - Uzivatel nyni interaguje primo s Menu objektem misto volani metod na StravaCZ
 - `fetch()` uz nema parametry include_soup a include_empty - vse se zpracovava automaticky
-- `filter_by_type()` nyni pouziva `MealType` enum misto stringu
 - `meal["type"]` je nyni primo `MealType` enum misto stringu
+- `meal["orderType"]` indikuje typ objednavky (NORMAL/RESTRICTED/OPTIONAL)
 - `find_meal_by_id()` prejmenovano na `get_by_id()`
 - `is_meal_ordered()` prejmenovano na `is_ordered()`
-- Vyhledavaci metody nyni prohledavaji vsechny seznamy (all, restricted, optional)
+- Vyhledavaci metody nyni prohledavaji vsechny typy objednavek automaticky
+- Filtrovani pomoci parametru misto specializovanych metod nebo vlastnosti
+- Default behavior: `order_types=None` vraci pouze `OrderType.NORMAL` (objednavatelne jidla)
+- Magic metoda `__str__` vraci format `Menu(days=X, meals=Y)`
+- **`canteen_number` je nyni povinny parametr** - odstranena default hodnota "3753"
 - Zmena verze z 0.1.3 na 0.2.0
 
 ### Removed
@@ -54,6 +50,9 @@ Vsechny vyznamne zmeny v tomto projektu budou dokumentovany v tomto souboru.
 - `StravaCZ.print_menu()` - pouzij `strava.menu.print()`
 - `StravaCZ.is_ordered()` - pouzij `strava.menu.is_ordered()`
 - `StravaCZ.order_meals()` - pouzij `strava.menu.order_meals()`
+- `StravaCZ.cancel_meals()` - pouzij `strava.menu.cancel_meals()`
+- `StravaCZ.filter_by_price_range()` - odstraneno filtrovani podle ceny
+- Pole `local_id` z jidel - nepouzivane
 - `StravaCZ.cancel_meals()` - pouzij `strava.menu.cancel_meals()`
 - `StravaCZ._change_meal_order()` - presunuto do Menu class
 - `StravaCZ._add_meal_to_order()` - presunuto do Menu class

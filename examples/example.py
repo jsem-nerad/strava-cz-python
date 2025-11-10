@@ -14,52 +14,104 @@ print(strava.user)
 strava.menu.fetch()
 strava.menu.print()
 
-# Pristup k ruznym seznamum
-print(f"Vsechny jidla: {len(strava.menu)} dni")
-print(f"Pouze hlavni jidla: {len(strava.menu.main_only)} dni")
-print(f"Pouze polevky: {len(strava.menu.soup_only)} dni")
-print(f"Kompletni (s volitelymi): {len(strava.menu.complete)} dni")
-print(f"Omezene objednavky: {len(strava.menu.restricted)} dni")
-print(f"Volitelne objednavky: {len(strava.menu.optional)} dni")
+# Informace o menu
+print(f"\nMenu: {strava.menu}")
+print(f"Pocet objednatelnych dni: {len(strava.menu)}")
 
-# Iterace pres menu
+# Iterace pres objednavatelna jidla (default)
 for day in strava.menu:
     print(f"Datum: {day['date']}, Pocet jidel: {len(day['meals'])}")
 
-# Priklad: Kontrola typu objednavky
-for day in strava.menu.complete:
-    for meal in day['meals']:
-        if meal['orderType'] == OrderType.RESTRICTED:
-            print(f"Jidlo {meal['id']} ({meal['name']}) uz nelze objednat")
-        elif meal['orderType'] == OrderType.OPTIONAL:
-            print(f"Jidlo {meal['id']} ({meal['name']}) je volitelne")
-        elif meal['orderType'] == OrderType.NORMAL:
-            print(f"Jidlo {meal['id']} ({meal['name']}) lze objednat normalne")
+# ===== Ziskani jidel podle dni =====
+
+# Pouze objednavatelna jidla (default)
+normal_days = strava.menu.get_days()
+print(f"\nObjednavatelne dny: {len(normal_days)}")
+
+# Pouze polevky
+soup_days = strava.menu.get_days(meal_types=[MealType.SOUP])
+print(f"Dny s polevkami: {len(soup_days)}")
+
+# Pouze hlavni jidla
+main_days = strava.menu.get_days(meal_types=[MealType.MAIN])
+print(f"Dny s hlavnimi jidly: {len(main_days)}")
+
+# Vsechna jidla (vcetne omezenych a volitelnych)
+all_days = strava.menu.get_days(
+    order_types=[OrderType.NORMAL, OrderType.RESTRICTED, OrderType.OPTIONAL]
+)
+print(f"Vsechny dny: {len(all_days)}")
+
+# Pouze dny s objednavkami
+ordered_days = strava.menu.get_days(ordered=True)
+print(f"Dny s objednavkami: {len(ordered_days)}")
+
+# Pouze dny bez objednavek
+unordered_days = strava.menu.get_days(ordered=False)
+print(f"Dny bez objednavek: {len(unordered_days)}")
+
+# ===== Ziskani jidel jako ploschy seznam =====
+
+# Vsechna objednavatelna jidla
+meals = strava.menu.get_meals()
+print(f"\nCelkem objednatelnych jidel: {len(meals)}")
+
+# Pouze polevky
+soups = strava.menu.get_meals(meal_types=[MealType.SOUP])
+print(f"Polevky: {len(soups)}")
+
+# Pouze hlavni jidla
+mains = strava.menu.get_meals(meal_types=[MealType.MAIN])
+print(f"Hlavni jidla: {len(mains)}")
+
+# Pouze objednana jidla
+ordered = strava.menu.get_meals(ordered=True)
+print(f"Objednana jidla: {len(ordered)}")
+
+# Vcetne omezenych jidel
+with_restricted = strava.menu.get_meals(
+    order_types=[OrderType.NORMAL, OrderType.RESTRICTED]
+)
+print(f"S omezenymi: {len(with_restricted)}")
+
+# Vsechna jidla (vcetne omezenych a volitelnych)
+all_meals = strava.menu.get_meals(
+    order_types=[OrderType.NORMAL, OrderType.RESTRICTED, OrderType.OPTIONAL]
+)
+print(f"Vsechna jidla: {len(all_meals)}")
+
+# ===== Priklady kontroly typu objednavky =====
+
+for meal in all_meals[:5]:  # Prvnich 5 jidel
+    if meal['orderType'] == OrderType.RESTRICTED:
+        print(f"  {meal['name']} - NELZE OBJEDNAT")
+    elif meal['orderType'] == OrderType.OPTIONAL:
+        print(f"  {meal['name']} - VOLITELNE")
+    else:
+        print(f"  {meal['name']} - NORMALNI")
+
+# ===== Vyhledavani =====
 
 # Zjisti, jestli je jidlo s meal_id 4 objednano (True/False)
-print(strava.menu.is_ordered(4))
+print(f"\nJidlo 4 je objednano: {strava.menu.is_ordered(4)}")
+
+# Ziskej jidlo podle ID
+meal = strava.menu.get_by_id(4)
+if meal:
+    print(f"Jidlo 4: {meal['name']} ({meal['type'].value})")
+
+# Ziskej jidla pro konkretni datum
+today_meals = strava.menu.get_by_date("2025-11-11")
+if today_meals:
+    print(f"Jidla na 11.11: {len(today_meals['meals'])} jidel")
+
+# ===== Objednavani =====
 
 # Objedna jidla s meal_id 3 a 6
 strava.menu.order_meals(3, 6)
 
-# Priklad: Ziskani vsech objednanych jidel
-ordered_meals = strava.menu.get_ordered_meals()
-print(f"Objednana jidla: {len(ordered_meals)}")
-
-# Priklad: Ziskani neobjednanych dni
-unordered_days = strava.menu.get_unordered_days()
-print(f"Dny bez objednavky: {unordered_days}")
-
-# Priklad: Ziskani ploschych seznamu jidel
-all_meals = strava.menu.get_meals()
-main_meals = strava.menu.get_main_meals()
-soup_meals = strava.menu.get_soup_meals()
-print(f"Celkem jidel: {len(all_meals)} (hlavni: {len(main_meals)}, polevky: {len(soup_meals)})")
-
-# Priklad: Zahrnuti omezenych a volitelnych jidel
-all_with_restricted = strava.menu.get_meals(include_restricted=True)
-all_complete = strava.menu.get_meals(include_restricted=True, include_optional=True)
-print(f"S omezenymi: {len(all_with_restricted)}, kompletni: {len(all_complete)}")
+# Zrus objednavky
+strava.menu.cancel_meals(3, 6)
 
 # Odhlasi uzivatele
 strava.logout()

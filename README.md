@@ -102,39 +102,57 @@ Kazde jidlo v menu obsahuje nasledujici polozky:
 #### Vlastnosti (Properties)
 | vlastnost      | typ                  | popis                                                                          |
 |----------------|----------------------|--------------------------------------------------------------------------------|
-| `all`          | list                 | Default seznam - vsechna objednavatelna jidla (polevky + hlavni) podle dni    |
-| `main_only`    | list                 | Pouze hlavni jidla podle dni                                                   |
-| `soup_only`    | list                 | Pouze polevky podle dni                                                        |
-| `complete`     | list                 | Kompletni seznam vcetne volitelnych jidel ("T") podle dni                      |
-| `restricted`   | list                 | Jidla, ktera uz nelze objednat ("CO") podle dni                                |
-| `optional`     | list                 | Jidla, ktera obvykle nejsou objednavana ("T") podle dni                        |
+| `raw_data`     | dict                 | Surova odpoved z API bez zpracovani                                            |
 
-#### Metody
+#### Hlavni Metody
 | funkce              | parametry                                                 | return type | popis                                                                                                              |
 |---------------------|-----------------------------------------------------------|-------------|--------------------------------------------------------------------------------------------------------------------|
-| `fetch()`           | None                                                      | Menu        | Ziska jidelnicek z API a zpracuje ho do vsech seznamu; vraci sam sebe                                             |
-| `print()`           | None                                                      | None        | Vypise zformatovane default menu                                                                                   |
-| `get_meals()`       | include_restricted=False, include_optional=False          | list        | Vrati vsechna jidla z prislusnych seznamu jako ploschy seznam s datem                                             |
-| `get_main_meals()`  | include_restricted=False, include_optional=False          | list        | Vrati pouze hlavni jidla z prislusnych seznamu jako ploschy seznam s datem                                        |
-| `get_soup_meals()`  | include_restricted=False, include_optional=False          | list        | Vrati pouze polevky z prislusnych seznamu jako ploschy seznam s datem                                             |
-| `get_by_date()`     | date [str], include_restricted=True, include_optional=True | dict/None   | Vrati jidla pro konkretni datum (prohledava vybrane seznamy)                                                      |
-| `get_by_id()`       | meal_id [int], include_restricted=True, include_optional=True | dict/None   | Vrati konkretni jidlo podle ID (prohledava vybrane seznamy)                                                       |
-| `get_ordered_meals()` | include_restricted=True, include_optional=True          | list        | Vrati vsechna objednana jidla z vybranych seznamu                                                                 |
-| `get_unordered_days()` | include_restricted=False, include_optional=False       | list        | Vrati seznam dnu (datumy), ve kterych neni objednano zadne jidlo                                                  |
-| `filter_by_type()`  | meal_type [MealType], include_restricted=False, include_optional=False | list | Filtruje jidla z vybranych seznamu podle typu                                                                      |
-| `is_ordered()`      | meal_id [int], include_restricted=True, include_optional=True | bool        | Zjisti, jestli je dane jidlo objednano (prohledava vybrane seznamy)                                               |
+| `fetch()`           | None                                                      | Menu        | Ziska jidelnicek z API a zpracuje ho; vraci sam sebe                                                              |
+| `print()`           | None                                                      | None        | Vypise zformatovane menu (default: pouze objednavatelna jidla)                                                    |
+| `get_days()`        | meal_types=None, order_types=None, ordered=None           | list        | Vrati jidla seskupena podle dni: `[{date, ordered, meals: [...]}]`                                                |
+| `get_meals()`       | meal_types=None, order_types=None, ordered=None           | list        | Vrati vsechna jidla jako ploschy seznam: `[{...meal}]`                                                            |
+
+**Parametry filtrovani:**
+- `meal_types` - Seznam typu jidel k ziskani (napr. `[MealType.SOUP, MealType.MAIN]`). None = vsechny typy
+- `order_types` - Seznam typu objednavek k ziskani (napr. `[OrderType.NORMAL, OrderType.OPTIONAL]`). None = pouze `[OrderType.NORMAL]`
+- `ordered` - Filtrovani podle stavu objednavky: `True` = pouze objednane, `False` = pouze neobjednane, `None` = vse
+
+**Priklady:**
+```python
+# Vsechna objednavatelna jidla podle dni (default)
+menu.get_days()
+
+# Vsechna jidla jako ploschy seznam
+menu.get_meals()
+
+# Pouze polevky
+menu.get_meals(meal_types=[MealType.SOUP])
+
+# Pouze objednana jidla
+menu.get_meals(ordered=True)
+
+# Vcetne omezenych a volitelnych jidel
+menu.get_days(order_types=[OrderType.NORMAL, OrderType.RESTRICTED, OrderType.OPTIONAL])
+```
+
+#### Pomocne Metody
+| funkce              | parametry                                                 | return type | popis                                                                                                              |
+|---------------------|-----------------------------------------------------------|-------------|--------------------------------------------------------------------------------------------------------------------|
+| `get_by_date()`     | date [str]                                                | dict/None   | Vrati jidla pro konkretni datum (prohledava vsechny typy objednavek)                                              |
+| `get_by_id()`       | meal_id [int]                                             | dict/None   | Vrati konkretni jidlo podle ID (prohledava vsechny typy objednavek)                                               |
+| `is_ordered()`      | meal_id [int]                                             | bool        | Zjisti, jestli je dane jidlo objednano (prohledava vsechny typy objednavek)                                       |
 | `order_meals()`     | *meal_ids [int]                                           | None        | Objedna vice jidel podle meal_id                                                                                   |
 | `cancel_meals()`    | *meal_ids [int]                                           | None        | Zrusi objednavky vice jidel podle meal_id                                                                          |
 
-Menu objekt podporuje iteraci, indexovani a len() - vse pracuje s default seznamem `all`.
+**Poznamka:** Menu objekt podporuje iteraci, indexovani a len() - vse pracuje s defaultnim seznamem objednatelnych jidel.
 
 
 ### StravaCZ class
 
 | funkce              | parametry                                                 | return type | popis                                                                                                              |
 |---------------------|-----------------------------------------------------------|-------------|--------------------------------------------------------------------------------------------------------------------|
-| `__init__()` (=`StravaCZ()`)        | username=None, password=None, canteen_number=None         | None        | Inicializuje objekt StravaCZ a automaticky prihlasi uzivatele, pokud jsou vyplnene parametry username a password   |
-| `login()`           | username [str], password [str], canteen_number=None [str] | User        | Prihlasi uzivatele pomoci uzivatelskeho jmena a hesla; pokud neni vyplnene cislo jidelny, automaticky pouzije 3753 |
+| `__init__()` (=`StravaCZ()`)        | username=None, password=None, canteen_number=None         | None        | Inicializuje objekt StravaCZ a automaticky prihlasi uzivatele, pokud jsou vyplnene vsechny tri parametry           |
+| `login()`           | username [str], password [str], canteen_number [str]      | User        | Prihlasi uzivatele pomoci uzivatelskeho jmena, hesla a cisla jidelny (vsechny parametry jsou povinne)              |
 | `logout()`          | None                                                      | bool        | Odhlasi uzivatele                                                                                                  |
 
 

@@ -4,6 +4,8 @@
 ## Overview
 The menu functionality has been refactored into an independent `Menu` class that maintains a reference to the `StravaCZ` client. Users now interact directly with the `Menu` class instead of calling menu methods on `StravaCZ`.
 
+The new API provides two main methods with flexible filtering parameters instead of multiple specialized methods.
+
 ## Breaking Changes
 
 ### Old API (Deprecated)
@@ -28,12 +30,12 @@ strava.cancel_meals(3, 6)
 
 ### New API (Current)
 ```python
-from strava_cz import StravaCZ, MealType
+from strava_cz import StravaCZ, MealType, OrderType
 
 strava = StravaCZ(username="...", password="...")
 
-# Fetching menu
-strava.menu.fetch(include_soup=True)
+# Fetching menu (no parameters needed)
+strava.menu.fetch()
 
 # Printing menu
 strava.menu.print()
@@ -50,103 +52,106 @@ strava.menu.cancel_meals(3, 6)
 
 ## New Features
 
-### Direct Menu Access
+### Flexible Filtering System
+
+The new API uses two main methods with flexible parameters:
+
+**1. `get_days(meal_types=None, order_types=None, ordered=None)`** - Returns meals grouped by days
+**2. `get_meals(meal_types=None, order_types=None, ordered=None)`** - Returns flat list of meals
+
+**Parameters:**
+- `meal_types`: List of `MealType` values (e.g., `[MealType.SOUP, MealType.MAIN]`)
+  - `None` = all types
+- `order_types`: List of `OrderType` values (e.g., `[OrderType.NORMAL, OrderType.RESTRICTED]`)
+  - `None` = defaults to `[OrderType.NORMAL]` (orderable meals only)
+- `ordered`: Boolean filter for order status
+  - `True` = only ordered meals
+  - `False` = only unordered meals
+  - `None` = all meals
+
+**Examples:**
+
 ```python
-# Get all menu data
-all_meals = strava.menu.get_all()
+from strava_cz import StravaCZ, MealType, OrderType
 
-# Get menu for specific date
-today_menu = strava.menu.get_by_date("2025-11-04")
+strava = StravaCZ(username="...", password="...", canteen_number="...")
+strava.menu.fetch()
 
-# Get all ordered meals
-ordered = strava.menu.get_ordered_meals()
+# Get all orderable meals (default - grouped by days)
+days = strava.menu.get_days()
 
-# Get specific meal by ID
-meal = strava.menu.get_by_id(4)
-```
+# Get all orderable meals as flat list
+meals = strava.menu.get_meals()
 
-### Filtering Capabilities
-```python
-from strava_cz import MealType, OrderType
+# Get only soups
+soups = strava.menu.get_meals(meal_types=[MealType.SOUP])
 
-# Filter by meal type (now using enum)
-soups = strava.menu.filter_by_type(MealType.SOUP)
-main_dishes = strava.menu.filter_by_type(MealType.MAIN)
+# Get only main dishes
+mains = strava.menu.get_days(meal_types=[MealType.MAIN])
 
-# Note: meal["type"] is now a MealType enum, not a string
-for meal in soups:
-    print(meal["type"])  # Output: MealType.SOUP
-    print(meal["type"].value)  # Output: "Polévka"
+# Get all meals including restricted and optional
+all_meals = strava.menu.get_meals(
+    order_types=[OrderType.NORMAL, OrderType.RESTRICTED, OrderType.OPTIONAL]
+)
 
-# Each meal also has orderType field
-for meal in strava.menu.get_meals():
-    print(meal["orderType"])  # Output: OrderType.NORMAL, OrderType.RESTRICTED, or OrderType.OPTIONAL
-    if meal["orderType"] == OrderType.RESTRICTED:
-        print(f"Meal {meal['id']} can no longer be ordered")
-```
-
-### Multiple List Views
-```python
-# Default list (orderable meals: soups + mains)
-default = strava.menu.all
-
-# Only main dishes
-mains = strava.menu.main_only
-
-# Only soups
-soups = strava.menu.soup_only
-
-# Complete list including optional meals
-complete = strava.menu.complete
-
-# Meals that can no longer be ordered ("CO")
-restricted = strava.menu.restricted
-
-# Optional meals not usually ordered ("T")
-optional = strava.menu.optional
-
-# Flat lists with dates
-all_meals = strava.menu.get_meals()
-main_meals = strava.menu.get_main_meals()
-soup_meals = strava.menu.get_soup_meals()
-```
-
-### Controlling Restricted and Optional Inclusion
-```python
-# By default, list methods exclude restricted and optional
-meals = strava.menu.get_meals()  # Only normal meals
-
-# Include restricted meals
-meals = strava.menu.get_meals(include_restricted=True)
-
-# Include optional meals
-meals = strava.menu.get_meals(include_optional=True)
-
-# Include both
-meals = strava.menu.get_meals(include_restricted=True, include_optional=True)
-
-# Search methods include all by default
-meal = strava.menu.get_by_id(123)  # Searches all lists
-meal = strava.menu.get_by_id(123, include_restricted=False)  # Only searches normal lists
+# Get only ordered meals
+ordered = strava.menu.get_meals(ordered=True)
 
 # Get days with no orders
-unordered = strava.menu.get_unordered_days()  # Excludes restricted/optional
-unordered = strava.menu.get_unordered_days(include_restricted=True, include_optional=True)  # All days
+unordered_days = strava.menu.get_days(ordered=False)
+
+# Get restricted meals only
+restricted = strava.menu.get_days(order_types=[OrderType.RESTRICTED])
+
+# Complex filtering: ordered main dishes including optional ones
+ordered_mains = strava.menu.get_meals(
+    meal_types=[MealType.MAIN],
+    order_types=[OrderType.NORMAL, OrderType.OPTIONAL],
+    ordered=True
+)
+```
+
+### Direct Menu Access
+```python
+# Get menu for specific date (searches all order types)
+today_menu = strava.menu.get_by_date("2025-11-10")
+
+# Get specific meal by ID (searches all order types)
+meal = strava.menu.get_by_id(4)
+
+# Check order status (searches all order types)
+is_ordered = strava.menu.is_ordered(4)
+```
+
+### Type Safety with Enums
+```python
+# meal["type"] is a MealType enum
+for meal in strava.menu.get_meals():
+    print(meal["type"])  # Output: MealType.SOUP or MealType.MAIN
+    print(meal["type"].value)  # Output: "Polévka" or "Oběd"
+
+# meal["orderType"] indicates order restriction
+for meal in strava.menu.get_meals(order_types=[OrderType.NORMAL, OrderType.RESTRICTED, OrderType.OPTIONAL]):
+    if meal["orderType"] == OrderType.RESTRICTED:
+        print(f"Meal {meal['id']} can no longer be ordered")
+    elif meal["orderType"] == OrderType.OPTIONAL:
+        print(f"Meal {meal['id']} is optional")
 ```
 
 ### Menu Information
 ```python
-# Get number of days in menu
+# Get number of orderable days in menu
 num_days = len(strava.menu)
 
 # Get string representation
 print(strava.menu)  # Output: Menu(days=5, meals=25)
 
+# Iterate over orderable days
+for day in strava.menu:
+    print(f"{day['date']}: {len(day['meals'])} meals")
+
 # Access raw API data
 raw_data = strava.menu.raw_data
-
-# Access processed data
-processed = strava.menu.processed_data
 ```
 
 ## Method Mapping
