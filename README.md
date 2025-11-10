@@ -163,11 +163,11 @@ menu.get_days(order_types=[OrderType.NORMAL, OrderType.RESTRICTED, OrderType.OPT
 - [x] Lepsi datum format
 - [x] Moznost detailnejsi filtrace jidelnicku
 - [x] Kontrola stavu po objednani
+- [x] Filtrace dnu, ktere nejdou objednat
+- [x] Lepsi testing
 - [ ] Lepe zdokumentovat pouziti
 - [ ] Rate limiting
 - [ ] Balance check pred objednanim
-- [ ] Filtrace dnu, ktere nejdou objednat
-- [ ] Lepsi testing
 
 
 ## Known bugs

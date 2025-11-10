@@ -33,6 +33,18 @@ class AuthenticationError(StravaAPIError):
     pass
 
 
+class InsufficientBalanceError(StravaAPIError):
+    """Raised when user has insufficient balance to order a meal."""
+
+    pass
+
+
+class DuplicateMealError(StravaAPIError):
+    """Raised when trying to order multiple meals from the same day."""
+
+    pass
+
+
 class User:
     """User data container"""
 
@@ -321,6 +333,7 @@ class Menu:
 
         Raises:
             AuthenticationError: If user is not logged in
+            InsufficientBalanceError: If insufficient balance to order meal
             StravaAPIError: If changing meal order status fails
         """
         if not self.strava.user.is_logged_in:
@@ -340,8 +353,29 @@ class Menu:
         }
 
         response = self.strava._api_request("pridejJidloS5", payload)
+        
         if response["status_code"] != 200:
-            raise StravaAPIError("Failed to change meal order status")
+            # Check for specific error codes
+            response_data = response.get("response", {})
+            
+            # Error code 35 = insufficient balance
+            if response_data.get("number") == 35:
+                error_msg = response_data.get("message", "Insufficient balance")
+                raise InsufficientBalanceError(error_msg)
+            
+            raise StravaAPIError(
+                f"Failed to change meal order status: "
+                f"{response_data.get('message', 'Unknown error')}"
+            )
+        
+        # Update balance from response
+        response_data = response.get("response", {})
+        if "konto" in response_data:
+            try:
+                self.strava.user.balance = float(response_data["konto"])
+            except (ValueError, TypeError):
+                pass  # Keep old balance if parsing fails
+        
         return True
 
     def _save_order(self) -> bool:
@@ -372,41 +406,179 @@ class Menu:
             raise StravaAPIError("Failed to save order")
         return True
 
-    def order_meals(self, *meal_ids: int) -> None:
+    def _cancel_order(self) -> bool:
+        """Cancel current order changes (revert to previous state).
+
+        Returns:
+            True if order was canceled successfully
+
+        Raises:
+            AuthenticationError: If user is not logged in
+            StravaAPIError: If canceling order fails
+        """
+        if not self.strava.user.is_logged_in:
+            raise AuthenticationError("User not logged in")
+
+        payload = {
+            "sid": self.strava.user.sid,
+            "url": self.strava.user.s5url,
+            "cislo": self.strava.user.canteen_number,
+            "ignoreCert": "false",
+            "lang": "EN",
+            "getText": True,
+            "checkVersion": True,
+            "resetTables": True,
+            "frontendFunction": "refreshInformations",
+        }
+
+        response = self.strava._api_request("nactiVlastnostiPA", payload)
+
+        if response["status_code"] != 200:
+            raise StravaAPIError("Failed to cancel order changes")
+        
+        # Update balance from response
+        response_data = response.get("response", {})
+        if "konto" in response_data:
+            try:
+                self.strava.user.balance = float(response_data["konto"])
+            except (ValueError, TypeError):
+                pass
+        
+        return True
+
+    def order_meals(
+        self,
+        *meal_ids: int,
+        continue_on_error: bool = False,
+        strict_duplicates: bool = False,
+    ) -> None:
         """Order multiple meals in a single transaction.
 
         Args:
             *meal_ids: Variable number of meal identification numbers
+            continue_on_error: If True, continue ordering other meals if one fails
+                and collect errors. If False (default), stop on first error
+                and cancel all changes.
+            strict_duplicates: If True, raise DuplicateMealError when multiple
+                meals from the same day are being ordered. If False (default),
+                only order the first meal from each day and warn about skipped duplicates.
 
         Raises:
-            StravaAPIError: If ordering any meal fails
+            InsufficientBalanceError: If insufficient balance (only if continue_on_error=False)
+            DuplicateMealError: If ordering multiple meals from same day (only if strict_duplicates=True)
+            StravaAPIError: If ordering any meal fails (only if continue_on_error=False)
         """
+        import warnings
+        
+        # Detect duplicate days
+        seen_dates = {}
+        filtered_meal_ids = []
+        skipped_meals = []
+        
         for meal_id in meal_ids:
-            self._change_meal_order(meal_id, True)
+            meal = self.get_by_id(meal_id)
+            if not meal:
+                if continue_on_error:
+                    warnings.warn(f"Meal with ID {meal_id} not found, skipping")
+                    continue
+                else:
+                    raise StravaAPIError(f"Meal with ID {meal_id} not found")
+            
+            meal_date = meal["date"]
+            
+            if meal_date in seen_dates:
+                # Duplicate day detected
+                if strict_duplicates:
+                    raise DuplicateMealError(
+                        f"Cannot order multiple meals from the same day ({meal_date}). "
+                        f"Meal IDs {seen_dates[meal_date]} and {meal_id} are from the same day."
+                    )
+                else:
+                    skipped_meals.append((meal_id, meal_date, seen_dates[meal_date]))
+                    continue
+            
+            seen_dates[meal_date] = meal_id
+            filtered_meal_ids.append(meal_id)
+        
+        # Warn about skipped duplicates
+        if skipped_meals and not strict_duplicates:
+            for meal_id, meal_date, first_meal_id in skipped_meals:
+                warnings.warn(
+                    f"Skipping meal {meal_id} from {meal_date} because meal {first_meal_id} "
+                    f"from the same day is already being ordered"
+                )
+        
+        errors = []
+        
+        for meal_id in filtered_meal_ids:
+            try:
+                self._change_meal_order(meal_id, True)
+            except (InsufficientBalanceError, StravaAPIError) as e:
+                if continue_on_error:
+                    errors.append((meal_id, str(e)))
+                else:
+                    # Cancel all changes and re-raise
+                    self._cancel_order()
+                    raise
+        
         self._save_order()
         self.fetch()  # Refresh menu data
 
-        for meal_id in meal_ids:
+        # Verify orders
+        for meal_id in filtered_meal_ids:
             if not self.is_ordered(meal_id):
-                raise StravaAPIError(f"Failed to order meal with ID {meal_id}")
+                error_msg = f"Failed to order meal with ID {meal_id}"
+                if continue_on_error:
+                    errors.append((meal_id, error_msg))
+                else:
+                    raise StravaAPIError(error_msg)
+        
+        # If there were errors and continue_on_error is True, report them
+        if errors and continue_on_error:
+            error_details = "; ".join([f"Meal {mid}: {err}" for mid, err in errors])
+            raise StravaAPIError(f"Some meals failed to order: {error_details}")
 
-    def cancel_meals(self, *meal_ids: int) -> None:
+    def cancel_meals(self, *meal_ids: int, continue_on_error: bool = False) -> None:
         """Cancel multiple meal orders in a single transaction.
 
         Args:
             *meal_ids: Variable number of meal identification numbers
+            continue_on_error: If True, continue canceling other meals if one fails
+                and collect errors. If False (default), stop on first error
+                and cancel all changes.
 
         Raises:
-            StravaAPIError: If canceling any meal fails
+            StravaAPIError: If canceling any meal fails (only if continue_on_error=False)
         """
+        errors = []
+        
         for meal_id in meal_ids:
-            self._change_meal_order(meal_id, False)
+            try:
+                self._change_meal_order(meal_id, False)
+            except StravaAPIError as e:
+                if continue_on_error:
+                    errors.append((meal_id, str(e)))
+                else:
+                    # Cancel all changes and re-raise
+                    self._cancel_order()
+                    raise
+        
         self._save_order()
         self.fetch()  # Refresh menu data
 
+        # Verify cancellations
         for meal_id in meal_ids:
             if self.is_ordered(meal_id):
-                raise StravaAPIError(f"Failed to cancel meal with ID {meal_id}")
+                error_msg = f"Failed to cancel meal with ID {meal_id}"
+                if continue_on_error:
+                    errors.append((meal_id, error_msg))
+                else:
+                    raise StravaAPIError(error_msg)
+        
+        # If there were errors and continue_on_error is True, report them
+        if errors and continue_on_error:
+            error_details = "; ".join([f"Meal {mid}: {err}" for mid, err in errors])
+            raise StravaAPIError(f"Some meals failed to cancel: {error_details}")
 
     def print(self) -> None:
         """Print formatted menu (default: orderable meals only)."""
@@ -638,12 +810,6 @@ if __name__ == "__main__":
     days = strava.menu.get_days(
         order_types=[OrderType.NORMAL], ordered=False, meal_types=[MealType.MAIN]
     )
-    print(days)
-
-    meal_ids = []
-    for day in days:
-        meal_ids.append(day["meals"][1]["id"])
-
-    strava.menu.order_meals(*meal_ids)
-
+    
+    
     strava.logout()
