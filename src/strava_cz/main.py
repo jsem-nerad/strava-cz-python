@@ -7,6 +7,7 @@ import requests
 
 class MealType(Enum):
     """Enum for meal types."""
+
     SOUP = "Polévka"
     MAIN = "Hlavní jídlo"
     UNKNOWN = "Neznámý typ"
@@ -14,6 +15,7 @@ class MealType(Enum):
 
 class OrderType(Enum):
     """Enum for order restriction types."""
+
     NORMAL = "Objednatelne"  # Empty string - normal orderable
     RESTRICTED = "Nelze objednat"  # "CO" - too late to order
     OPTIONAL = "Volitelne"  # "T" - not usually ordered but can be
@@ -60,9 +62,9 @@ class User:
 class Menu:
     """Menu data container and processor"""
 
-    def __init__(self, strava_client: 'StravaCZ'):
+    def __init__(self, strava_client: "StravaCZ"):
         """Initialize Menu with reference to StravaCZ client.
-        
+
         Args:
             strava_client: Reference to the parent StravaCZ instance
         """
@@ -70,7 +72,7 @@ class Menu:
         self.raw_data: Dict[str, Any] = {}
         self._all_meals: List[Dict[str, Any]] = []  # Internal storage for all meals
 
-    def fetch(self) -> 'Menu':
+    def fetch(self) -> "Menu":
         """Fetch menu data from API and process it into various lists.
 
         Returns:
@@ -106,7 +108,7 @@ class Menu:
         """Parse raw menu response into internal storage."""
         # Single storage for all meals grouped by date
         meals_by_date: Dict[str, List[Dict]] = {}
-        
+
         # Process all table entries (table0, table1, etc.)
         for table_key, meals_list in self.raw_data.items():
             if not table_key.startswith("table"):
@@ -121,7 +123,7 @@ class Menu:
 
                 # Get restriction status
                 restriction = meal["omezeniObj"]["den"]
-                
+
                 # Skip "VP" (no school) completely
                 if "VP" in restriction:
                     continue
@@ -169,10 +171,13 @@ class Menu:
                 meals_by_date[date].append(meal_filtered)
 
         # Convert to day-grouped format and sort by date
-        self._all_meals = sorted([
-            {"date": date, "ordered": any(m["ordered"] for m in meals), "meals": meals}
-            for date, meals in meals_by_date.items()
-        ], key=lambda x: x["date"])
+        self._all_meals = sorted(
+            [
+                {"date": date, "ordered": any(m["ordered"] for m in meals), "meals": meals}
+                for date, meals in meals_by_date.items()
+            ],
+            key=lambda x: x["date"],
+        )
 
     def get_days(
         self,
@@ -184,11 +189,14 @@ class Menu:
 
         Args:
             meal_types: List of meal types to include (None = all types)
-            order_types: List of order types to include (None = [OrderType.NORMAL] only)
-            ordered: Filter by order status (True = ordered only, False = unordered only, None = all)
+            order_types: List of order types to include
+                (None = [OrderType.NORMAL] only)
+            ordered: Filter by order status
+                (True = ordered only, False = unordered only, None = all)
 
         Returns:
-            List of days with meals: [{"date": "YYYY-MM-DD", "ordered": bool, "meals": [...]}]
+            List of days with meals:
+                [{"date": "YYYY-MM-DD", "ordered": bool, "meals": [...]}]
         """
         # Default to NORMAL order type only
         if order_types is None:
@@ -198,7 +206,8 @@ class Menu:
         for day in self._all_meals:
             # Filter meals by type and order type
             filtered_meals = [
-                meal for meal in day["meals"]
+                meal
+                for meal in day["meals"]
                 if (meal_types is None or meal["type"] in meal_types)
                 and (meal["orderType"] in order_types)
             ]
@@ -216,11 +225,9 @@ class Menu:
                 if not ordered and day_has_orders:
                     continue
 
-            filtered_days.append({
-                "date": day["date"],
-                "ordered": day_has_orders,
-                "meals": filtered_meals
-            })
+            filtered_days.append(
+                {"date": day["date"], "ordered": day_has_orders, "meals": filtered_meals}
+            )
 
         return filtered_days
 
@@ -234,8 +241,10 @@ class Menu:
 
         Args:
             meal_types: List of meal types to include (None = all types)
-            order_types: List of order types to include (None = [OrderType.NORMAL] only)
-            ordered: Filter by order status (True = ordered only, False = unordered only, None = all)
+            order_types: List of order types to include
+                (None = [OrderType.NORMAL] only)
+            ordered: Filter by order status
+                (True = ordered only, False = unordered only, None = all)
 
         Returns:
             Flat list of meals with date: [{...meal, "date": "YYYY-MM-DD"}]
@@ -407,8 +416,14 @@ class Menu:
             for meal in day["meals"]:
                 meal_type_str = meal["type"].value
                 status = "Ordered" if meal["ordered"] else "Not ordered"
-                order_type_info = f" [{meal['orderType'].name}]" if meal["orderType"] != OrderType.NORMAL else ""
-                print(f"  - {meal['id']} {meal['name']} ({meal_type_str}){order_type_info} - [{status}]")
+                order_type_info = ""
+                if meal["orderType"] != OrderType.NORMAL:
+                    order_type_info = f" [{meal['orderType'].name}]"
+                meal_info = (
+                    f"  - {meal['id']} {meal['name']} "
+                    f"({meal_type_str}){order_type_info} - [{status}]"
+                )
+                print(meal_info)
             print()
 
     def __repr__(self) -> str:
@@ -618,9 +633,11 @@ if __name__ == "__main__":
 
     # Ziskani jidelnicku a vypsani
     strava.menu.fetch()
-    
+
     # Vsechna objednavatelna jidla
-    days = strava.menu.get_days(order_types=[OrderType.NORMAL], ordered=False, meal_types=[MealType.MAIN])
+    days = strava.menu.get_days(
+        order_types=[OrderType.NORMAL], ordered=False, meal_types=[MealType.MAIN]
+    )
     print(days)
 
     meal_ids = []
