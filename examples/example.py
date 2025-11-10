@@ -26,7 +26,7 @@ for day in strava.menu:
 
 # Pouze objednavatelna jidla (default)
 normal_days = strava.menu.get_days()
-print(f"\nObjednavatelne dny: {len(normal_days)}")
+print(f"\nObjednatelne dny: {len(normal_days)}")
 
 # Pouze polevky
 soup_days = strava.menu.get_days(meal_types=[MealType.SOUP])

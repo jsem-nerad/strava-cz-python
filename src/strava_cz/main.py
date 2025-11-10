@@ -14,7 +14,7 @@ class MealType(Enum):
 
 class OrderType(Enum):
     """Enum for order restriction types."""
-    NORMAL = "Objednavatelne"  # Empty string - normal orderable
+    NORMAL = "Objednatelne"  # Empty string - normal orderable
     RESTRICTED = "Nelze objednat"  # "CO" - too late to order
     OPTIONAL = "Volitelne"  # "T" - not usually ordered but can be
 
@@ -68,14 +68,7 @@ class Menu:
         """
         self.strava = strava_client
         self.raw_data: Dict[str, Any] = {}
-        
-        # Day-grouped lists (primary storage)
-        self.all: List[Dict[str, Any]] = []  # Default: soups + mains, orderable
-        self.main_only: List[Dict[str, Any]] = []  # Only main meals
-        self.soup_only: List[Dict[str, Any]] = []  # Only soups
-        self.restricted: List[Dict[str, Any]] = []  # "CO" - too late to order
-        self.optional: List[Dict[str, Any]] = []  # "T" - not usually ordered
-        self.complete: List[Dict[str, Any]] = []  # all + optional, sorted
+        self._all_meals: List[Dict[str, Any]] = []  # Internal storage for all meals
 
     def fetch(self) -> 'Menu':
         """Fetch menu data from API and process it into various lists.
