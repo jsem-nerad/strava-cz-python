@@ -1,3 +1,12 @@
+# !! NOTICE / UPOZORNENI !! 
+# ===========================
+# These tests were made mostly by an LLM,
+# but they have been reviewed by me.
+#  - - - - - - - - - - - - - 
+# Tyto testy byly vytvořeny převážně pomociLLM,
+# ale byly mnou zkontrolovany.
+# ===========================
+
 import pytest
 from unittest.mock import patch, MagicMock
 from strava_cz import StravaCZ, AuthenticationError, MealType, OrderType
@@ -431,3 +440,636 @@ class TestStravaCZ:
         with pytest.raises(ValueError):
             s = StravaCZ("user", "pass")
             s.login("user", "pass", None)
+    
+    @patch('strava_cz.main.requests.Session')
+    def test_invalid_meal_type_order_soup(self, mock_Session):
+        """Test that ordering a soup raises InvalidMealTypeError."""
+        from strava_cz import InvalidMealTypeError
+        
+        fake_session = MagicMock()
+        mock_Session.return_value = fake_session
+
+        login_response = MagicMock()
+        login_response.status_code = 200
+        login_response.json.return_value = {
+            "sid": "SID123",
+            "s5url": "https://fake.s5url",
+            "cislo": "1234",
+            "jmeno": "user",
+            "uzivatel": {
+                "id": "user",
+                "email": "u@e.cz",
+                "konto": "10.00",
+                "mena": "Kč",
+                "nazevJidelny": "Test Canteen"
+            },
+            "betatest": False,
+            "ignoreCert": False,
+            "zustatPrihlasen": False
+        }
+
+        menu_response = MagicMock()
+        menu_response.status_code = 200
+        menu_response.json.return_value = {
+            "table0": [
+                {
+                    "id": 0,
+                    "datum": "15-09.2025",
+                    "druh_popis": "Polévka",
+                    "delsiPopis": "Soup",
+                    "nazev": "Test Soup",
+                    "zakazaneAlergeny": None,
+                    "alergeny": [],
+                    "omezeniObj": {"den": ""},
+                    "pocet": 0,
+                    "veta": "75",
+                    "cena": "20.00"
+                }
+            ]
+        }
+
+        # Add response for cancel_order (nactiVlastnostiPA)
+        cancel_response = MagicMock()
+        cancel_response.status_code = 200
+        cancel_response.json.return_value = {"konto": "10.00"}
+
+        fake_session.post.side_effect = [login_response, menu_response, cancel_response]
+
+        s = StravaCZ("user", "pass", "1234")
+        s.menu.fetch()
+
+        # Test ordering a soup raises InvalidMealTypeError
+        with pytest.raises(InvalidMealTypeError) as exc_info:
+            s.menu.order_meals(75)
+        
+        assert "Polévka" in str(exc_info.value)
+        assert "MAIN" in str(exc_info.value)
+    
+    @patch('strava_cz.main.requests.Session')
+    def test_invalid_meal_type_cancel_soup(self, mock_Session):
+        """Test that canceling a soup raises InvalidMealTypeError."""
+        from strava_cz import InvalidMealTypeError
+        
+        fake_session = MagicMock()
+        mock_Session.return_value = fake_session
+
+        login_response = MagicMock()
+        login_response.status_code = 200
+        login_response.json.return_value = {
+            "sid": "SID123",
+            "s5url": "https://fake.s5url",
+            "cislo": "1234",
+            "jmeno": "user",
+            "uzivatel": {
+                "id": "user",
+                "email": "u@e.cz",
+                "konto": "10.00",
+                "mena": "Kč",
+                "nazevJidelny": "Test Canteen"
+            },
+            "betatest": False,
+            "ignoreCert": False,
+            "zustatPrihlasen": False
+        }
+
+        menu_response = MagicMock()
+        menu_response.status_code = 200
+        menu_response.json.return_value = {
+            "table0": [
+                {
+                    "id": 0,
+                    "datum": "15-09.2025",
+                    "druh_popis": "Polévka",
+                    "delsiPopis": "Soup",
+                    "nazev": "Test Soup",
+                    "zakazaneAlergeny": None,
+                    "alergeny": [],
+                    "omezeniObj": {"den": ""},
+                    "pocet": 1,  # Already ordered
+                    "veta": "75",
+                    "cena": "20.00"
+                }
+            ]
+        }
+
+        # Add response for cancel_order (nactiVlastnostiPA)
+        cancel_response = MagicMock()
+        cancel_response.status_code = 200
+        cancel_response.json.return_value = {"konto": "10.00"}
+
+        fake_session.post.side_effect = [login_response, menu_response, cancel_response]
+
+        s = StravaCZ("user", "pass", "1234")
+        s.menu.fetch()
+
+        # Test canceling a soup raises InvalidMealTypeError
+        with pytest.raises(InvalidMealTypeError) as exc_info:
+            s.menu.cancel_meals(75)
+        
+        assert "Polévka" in str(exc_info.value)
+    
+    @patch('strava_cz.main.requests.Session')
+    def test_duplicate_meal_error_strict_mode(self, mock_Session):
+        """Test that ordering multiple meals from same day raises DuplicateMealError in strict mode."""
+        from strava_cz import DuplicateMealError
+        
+        fake_session = MagicMock()
+        mock_Session.return_value = fake_session
+
+        login_response = MagicMock()
+        login_response.status_code = 200
+        login_response.json.return_value = {
+            "sid": "SID123",
+            "s5url": "https://fake.s5url",
+            "cislo": "1234",
+            "jmeno": "user",
+            "uzivatel": {
+                "id": "user",
+                "email": "u@e.cz",
+                "konto": "100.00",
+                "mena": "Kč",
+                "nazevJidelny": "Test Canteen"
+            },
+            "betatest": False,
+            "ignoreCert": False,
+            "zustatPrihlasen": False
+        }
+
+        menu_response = MagicMock()
+        menu_response.status_code = 200
+        menu_response.json.return_value = {
+            "table0": [
+                {
+                    "id": 0,
+                    "datum": "15-09.2025",
+                    "druh_popis": "Oběd1",
+                    "delsiPopis": "Meal 1",
+                    "nazev": "Meal 1",
+                    "zakazaneAlergeny": None,
+                    "alergeny": [],
+                    "omezeniObj": {"den": ""},
+                    "pocet": 0,
+                    "veta": "1",
+                    "cena": "40.00"
+                },
+                {
+                    "id": 1,
+                    "datum": "15-09.2025",
+                    "druh_popis": "Oběd2",
+                    "delsiPopis": "Meal 2",
+                    "nazev": "Meal 2",
+                    "zakazaneAlergeny": None,
+                    "alergeny": [],
+                    "omezeniObj": {"den": ""},
+                    "pocet": 0,
+                    "veta": "2",
+                    "cena": "45.00"
+                }
+            ]
+        }
+
+        fake_session.post.side_effect = [login_response, menu_response]
+
+        s = StravaCZ("user", "pass", "1234")
+        s.menu.fetch()
+
+        # Test ordering multiple meals from same day with strict_duplicates=True
+        with pytest.raises(DuplicateMealError) as exc_info:
+            s.menu.order_meals(1, 2, strict_duplicates=True)
+        
+        assert "2025-09-15" in str(exc_info.value)
+        assert "same day" in str(exc_info.value).lower()
+    
+    @patch('strava_cz.main.requests.Session')
+    def test_duplicate_meal_warning_default_mode(self, mock_Session):
+        """Test that ordering multiple meals from same day only orders first one and warns."""
+        fake_session = MagicMock()
+        mock_Session.return_value = fake_session
+
+        login_response = MagicMock()
+        login_response.status_code = 200
+        login_response.json.return_value = {
+            "sid": "SID123",
+            "s5url": "https://fake.s5url",
+            "cislo": "1234",
+            "jmeno": "user",
+            "uzivatel": {
+                "id": "user",
+                "email": "u@e.cz",
+                "konto": "100.00",
+                "mena": "Kč",
+                "nazevJidelny": "Test Canteen"
+            },
+            "betatest": False,
+            "ignoreCert": False,
+            "zustatPrihlasen": False
+        }
+
+        menu_response = MagicMock()
+        menu_response.status_code = 200
+        menu_response.json.return_value = {
+            "table0": [
+                {
+                    "id": 0,
+                    "datum": "15-09.2025",
+                    "druh_popis": "Oběd1",
+                    "delsiPopis": "Meal 1",
+                    "nazev": "Meal 1",
+                    "zakazaneAlergeny": None,
+                    "alergeny": [],
+                    "omezeniObj": {"den": ""},
+                    "pocet": 0,
+                    "veta": "1",
+                    "cena": "40.00"
+                },
+                {
+                    "id": 1,
+                    "datum": "15-09.2025",
+                    "druh_popis": "Oběd2",
+                    "delsiPopis": "Meal 2",
+                    "nazev": "Meal 2",
+                    "zakazaneAlergeny": None,
+                    "alergeny": [],
+                    "omezeniObj": {"den": ""},
+                    "pocet": 0,
+                    "veta": "2",
+                    "cena": "45.00"
+                }
+            ]
+        }
+
+        order_response = MagicMock()
+        order_response.status_code = 200
+        order_response.json.return_value = {"konto": "60.00"}
+
+        save_response = MagicMock()
+        save_response.status_code = 200
+        save_response.json.return_value = {}
+
+        # After save, fetch again to get updated menu
+        menu_response_after = MagicMock()
+        menu_response_after.status_code = 200
+        menu_response_after.json.return_value = {
+            "table0": [
+                {
+                    "id": 0,
+                    "datum": "15-09.2025",
+                    "druh_popis": "Oběd1",
+                    "delsiPopis": "Meal 1",
+                    "nazev": "Meal 1",
+                    "zakazaneAlergeny": None,
+                    "alergeny": [],
+                    "omezeniObj": {"den": ""},
+                    "pocet": 1,  # Now ordered
+                    "veta": "1",
+                    "cena": "40.00"
+                },
+                {
+                    "id": 1,
+                    "datum": "15-09.2025",
+                    "druh_popis": "Oběd2",
+                    "delsiPopis": "Meal 2",
+                    "nazev": "Meal 2",
+                    "zakazaneAlergeny": None,
+                    "alergeny": [],
+                    "omezeniObj": {"den": ""},
+                    "pocet": 0,  # Not ordered
+                    "veta": "2",
+                    "cena": "45.00"
+                }
+            ]
+        }
+
+        fake_session.post.side_effect = [
+            login_response,
+            menu_response,
+            order_response,  # pridejJidloS5 for meal 1
+            save_response,   # saveOrders
+            menu_response_after  # fetch after save
+        ]
+
+        s = StravaCZ("user", "pass", "1234")
+        s.menu.fetch()
+
+        # Test ordering multiple meals from same day without strict_duplicates
+        # Should only order first meal and warn about second
+        with pytest.warns(UserWarning, match="Skipping meal 2"):
+            s.menu.order_meals(1, 2, strict_duplicates=False)
+        
+        # Verify only meal 1 was ordered
+        assert s.menu.is_ordered(1) is True
+        assert s.menu.is_ordered(2) is False
+    
+    @patch('strava_cz.main.requests.Session')
+    def test_insufficient_balance_error(self, mock_Session):
+        """Test that insufficient balance raises InsufficientBalanceError."""
+        from strava_cz import InsufficientBalanceError
+        
+        fake_session = MagicMock()
+        mock_Session.return_value = fake_session
+
+        login_response = MagicMock()
+        login_response.status_code = 200
+        login_response.json.return_value = {
+            "sid": "SID123",
+            "s5url": "https://fake.s5url",
+            "cislo": "1234",
+            "jmeno": "user",
+            "uzivatel": {
+                "id": "user",
+                "email": "u@e.cz",
+                "konto": "5.00",  # Low balance
+                "mena": "Kč",
+                "nazevJidelny": "Test Canteen"
+            },
+            "betatest": False,
+            "ignoreCert": False,
+            "zustatPrihlasen": False
+        }
+
+        menu_response = MagicMock()
+        menu_response.status_code = 200
+        menu_response.json.return_value = {
+            "table0": [
+                {
+                    "id": 0,
+                    "datum": "15-09.2025",
+                    "druh_popis": "Oběd1",
+                    "delsiPopis": "Expensive meal",
+                    "nazev": "Expensive meal",
+                    "zakazaneAlergeny": None,
+                    "alergeny": [],
+                    "omezeniObj": {"den": ""},
+                    "pocet": 0,
+                    "veta": "1",
+                    "cena": "100.00"
+                }
+            ]
+        }
+
+        # API returns error code 35 for insufficient balance
+        order_response = MagicMock()
+        order_response.status_code = 400
+        order_response.json.return_value = {
+            "number": 35,
+            "message": "Insufficient balance to order this meal"
+        }
+
+        cancel_response = MagicMock()
+        cancel_response.status_code = 200
+        cancel_response.json.return_value = {"konto": "5.00"}
+
+        fake_session.post.side_effect = [
+            login_response,
+            menu_response,
+            order_response,  # pridejJidloS5 fails
+            cancel_response  # nactiVlastnostiPA to cancel
+        ]
+
+        s = StravaCZ("user", "pass", "1234")
+        s.menu.fetch()
+
+        # Test insufficient balance raises InsufficientBalanceError
+        with pytest.raises(InsufficientBalanceError) as exc_info:
+            s.menu.order_meals(1)
+        
+        assert "balance" in str(exc_info.value).lower()
+    
+    @patch('strava_cz.main.requests.Session')
+    def test_continue_on_error_collects_errors(self, mock_Session):
+        """Test that continue_on_error=True collects all errors."""
+        from strava_cz import StravaAPIError
+        
+        fake_session = MagicMock()
+        mock_Session.return_value = fake_session
+
+        login_response = MagicMock()
+        login_response.status_code = 200
+        login_response.json.return_value = {
+            "sid": "SID123",
+            "s5url": "https://fake.s5url",
+            "cislo": "1234",
+            "jmeno": "user",
+            "uzivatel": {
+                "id": "user",
+                "email": "u@e.cz",
+                "konto": "100.00",
+                "mena": "Kč",
+                "nazevJidelny": "Test Canteen"
+            },
+            "betatest": False,
+            "ignoreCert": False,
+            "zustatPrihlasen": False
+        }
+
+        menu_response = MagicMock()
+        menu_response.status_code = 200
+        menu_response.json.return_value = {
+            "table0": [
+                {
+                    "id": 0,
+                    "datum": "14-09.2025",
+                    "druh_popis": "Polévka",
+                    "delsiPopis": "Soup",
+                    "nazev": "Soup",
+                    "zakazaneAlergeny": None,
+                    "alergeny": [],
+                    "omezeniObj": {"den": ""},
+                    "pocet": 0,
+                    "veta": "75",
+                    "cena": "20.00"
+                },
+                {
+                    "id": 1,
+                    "datum": "15-09.2025",
+                    "druh_popis": "Oběd1",
+                    "delsiPopis": "Main meal",
+                    "nazev": "Main meal",
+                    "zakazaneAlergeny": None,
+                    "alergeny": [],
+                    "omezeniObj": {"den": ""},
+                    "pocet": 0,
+                    "veta": "1",
+                    "cena": "40.00"
+                },
+                {
+                    "id": 2,
+                    "datum": "16-09.2025",
+                    "druh_popis": "Polévka",
+                    "delsiPopis": "Another soup",
+                    "nazev": "Another soup",
+                    "zakazaneAlergeny": None,
+                    "alergeny": [],
+                    "omezeniObj": {"den": ""},
+                    "pocet": 0,
+                    "veta": "76",
+                    "cena": "20.00"
+                }
+            ]
+        }
+
+        order_response = MagicMock()
+        order_response.status_code = 200
+        order_response.json.return_value = {"konto": "60.00"}
+
+        save_response = MagicMock()
+        save_response.status_code = 200
+        save_response.json.return_value = {}
+
+        menu_response_after = MagicMock()
+        menu_response_after.status_code = 200
+        menu_response_after.json.return_value = {
+            "table0": [
+                {
+                    "id": 0,
+                    "datum": "14-09.2025",
+                    "druh_popis": "Polévka",
+                    "delsiPopis": "Soup",
+                    "nazev": "Soup",
+                    "zakazaneAlergeny": None,
+                    "alergeny": [],
+                    "omezeniObj": {"den": ""},
+                    "pocet": 0,
+                    "veta": "75",
+                    "cena": "20.00"
+                },
+                {
+                    "id": 1,
+                    "datum": "15-09.2025",
+                    "druh_popis": "Oběd1",
+                    "delsiPopis": "Main meal",
+                    "nazev": "Main meal",
+                    "zakazaneAlergeny": None,
+                    "alergeny": [],
+                    "omezeniObj": {"den": ""},
+                    "pocet": 1,  # Ordered
+                    "veta": "1",
+                    "cena": "40.00"
+                },
+                {
+                    "id": 2,
+                    "datum": "16-09.2025",
+                    "druh_popis": "Polévka",
+                    "delsiPopis": "Another soup",
+                    "nazev": "Another soup",
+                    "zakazaneAlergeny": None,
+                    "alergeny": [],
+                    "omezeniObj": {"den": ""},
+                    "pocet": 0,
+                    "veta": "76",
+                    "cena": "20.00"
+                }
+            ]
+        }
+
+        fake_session.post.side_effect = [
+            login_response,
+            menu_response,
+            order_response,  # pridejJidloS5 for meal 1 (main)
+            save_response,
+            menu_response_after
+        ]
+
+        s = StravaCZ("user", "pass", "1234")
+        s.menu.fetch()
+
+        # Test that continue_on_error=True collects errors for soups
+        with pytest.raises(StravaAPIError) as exc_info:
+            s.menu.order_meals(75, 1, 76, continue_on_error=True)
+        
+        error_msg = str(exc_info.value)
+        assert "75" in error_msg  # First soup
+        assert "76" in error_msg  # Second soup
+        assert "Polévka" in error_msg
+        # Main meal should have been ordered successfully
+        assert s.menu.is_ordered(1) is True
+    
+    @patch('strava_cz.main.requests.Session')
+    def test_balance_update_after_order(self, mock_Session):
+        """Test that user balance is updated after ordering."""
+        fake_session = MagicMock()
+        mock_Session.return_value = fake_session
+
+        login_response = MagicMock()
+        login_response.status_code = 200
+        login_response.json.return_value = {
+            "sid": "SID123",
+            "s5url": "https://fake.s5url",
+            "cislo": "1234",
+            "jmeno": "user",
+            "uzivatel": {
+                "id": "user",
+                "email": "u@e.cz",
+                "konto": "100.00",
+                "mena": "Kč",
+                "nazevJidelny": "Test Canteen"
+            },
+            "betatest": False,
+            "ignoreCert": False,
+            "zustatPrihlasen": False
+        }
+
+        menu_response = MagicMock()
+        menu_response.status_code = 200
+        menu_response.json.return_value = {
+            "table0": [
+                {
+                    "id": 0,
+                    "datum": "15-09.2025",
+                    "druh_popis": "Oběd1",
+                    "delsiPopis": "Meal",
+                    "nazev": "Meal",
+                    "zakazaneAlergeny": None,
+                    "alergeny": [],
+                    "omezeniObj": {"den": ""},
+                    "pocet": 0,
+                    "veta": "1",
+                    "cena": "40.00"
+                }
+            ]
+        }
+
+        order_response = MagicMock()
+        order_response.status_code = 200
+        order_response.json.return_value = {"konto": "60.00"}  # Balance after ordering
+
+        save_response = MagicMock()
+        save_response.status_code = 200
+        save_response.json.return_value = {}
+
+        menu_response_after = MagicMock()
+        menu_response_after.status_code = 200
+        menu_response_after.json.return_value = {
+            "table0": [
+                {
+                    "id": 0,
+                    "datum": "15-09.2025",
+                    "druh_popis": "Oběd1",
+                    "delsiPopis": "Meal",
+                    "nazev": "Meal",
+                    "zakazaneAlergeny": None,
+                    "alergeny": [],
+                    "omezeniObj": {"den": ""},
+                    "pocet": 1,
+                    "veta": "1",
+                    "cena": "40.00"
+                }
+            ]
+        }
+
+        fake_session.post.side_effect = [
+            login_response,
+            menu_response,
+            order_response,
+            save_response,
+            menu_response_after
+        ]
+
+        s = StravaCZ("user", "pass", "1234")
+        assert s.user.balance == "100.00"
+        
+        s.menu.fetch()
+        s.menu.order_meals(1)
+        
+        # Balance should be updated to 60.00
+        assert s.user.balance == 60.00  # Now it's a float after update

@@ -1,10 +1,19 @@
-# Migration Guide: Menu Class Refactoring
+# Migration Guide: Menu Class Refactoring & Advanced Error Handling
 ### Tento text byl vytvoren pomoci LLM / This text was made by an LLM
 
 ## Overview
+
+### Version 0.2.0 (Current)
 The menu functionality has been refactored into an independent `Menu` class that maintains a reference to the `StravaCZ` client. Users now interact directly with the `Menu` class instead of calling menu methods on `StravaCZ`.
 
 The new API provides two main methods with flexible filtering parameters instead of multiple specialized methods.
+
+**New in 0.2.0:**
+- Advanced error handling with `continue_on_error` parameter
+- Automatic duplicate meal detection with `strict_duplicates` parameter
+- Meal type validation (only MAIN meals can be ordered)
+- Balance tracking and insufficient balance detection
+- New exceptions: `InvalidMealTypeError`, `DuplicateMealError`, `InsufficientBalanceError`
 
 ## Breaking Changes
 
@@ -28,11 +37,18 @@ strava.order_meals(3, 6)
 strava.cancel_meals(3, 6)
 ```
 
-### New API (Current)
+### New API (v0.2.0 - Current)
 ```python
-from strava_cz import StravaCZ, MealType, OrderType
+from strava_cz import (
+    StravaCZ, 
+    MealType, 
+    OrderType,
+    InvalidMealTypeError,
+    DuplicateMealError,
+    InsufficientBalanceError
+)
 
-strava = StravaCZ(username="...", password="...")
+strava = StravaCZ(username="...", password="...", canteen_number="...")
 
 # Fetching menu (no parameters needed)
 strava.menu.fetch()
@@ -43,14 +59,111 @@ strava.menu.print()
 # Checking if ordered
 is_ordered = strava.menu.is_ordered(meal_id=4)
 
-# Ordering meals
-strava.menu.order_meals(3, 6)
+# Ordering meals with advanced error handling
+try:
+    strava.menu.order_meals(
+        3, 6,
+        continue_on_error=False,    # Stop on first error (default)
+        strict_duplicates=False      # Warn about duplicates (default)
+    )
+except InvalidMealTypeError as e:
+    print(f"Invalid meal type: {e}")
+except DuplicateMealError as e:
+    print(f"Duplicate meals: {e}")
+except InsufficientBalanceError as e:
+    print(f"Insufficient balance: {e}")
 
 # Canceling meals
-strava.menu.cancel_meals(3, 6)
+strava.menu.cancel_meals(3, 6, continue_on_error=False)
+
+# Check balance
+print(f"Balance: {strava.user.balance} Kč")
 ```
 
-## New Features
+## New Features in v0.2.0
+
+### 1. Duplicate Meal Detection
+
+The system now automatically detects when you try to order multiple meals from the same day:
+
+```python
+# Default behavior: warn and order only the first meal
+strava.menu.order_meals(meal_1, meal_2_same_day)
+# Warning: Skipping meal X from 2025-11-11 because meal Y from the same day is already being ordered
+
+# Strict mode: throw error
+try:
+    strava.menu.order_meals(meal_1, meal_2_same_day, strict_duplicates=True)
+except DuplicateMealError as e:
+    print(f"Error: {e}")
+```
+
+### 2. Meal Type Validation
+
+Only MAIN meals can be ordered or canceled. Soups are automatically served with main dishes:
+
+```python
+try:
+    strava.menu.order_meals(soup_id)  # Will raise InvalidMealTypeError
+except InvalidMealTypeError as e:
+    print(f"Cannot order soups: {e}")
+```
+
+### 3. Balance Tracking
+
+User balance is automatically updated after each operation:
+
+```python
+print(f"Before: {strava.user.balance} Kč")
+strava.menu.order_meals(meal_id)
+print(f"After: {strava.user.balance} Kč")  # Updated automatically
+
+try:
+    strava.menu.order_meals(expensive_meal)
+except InsufficientBalanceError as e:
+    print(f"Not enough money: {e}")
+    print(f"Current balance: {strava.user.balance} Kč")
+```
+
+### 4. Advanced Error Handling
+
+Control how errors are handled with `continue_on_error`:
+
+```python
+# Default: stop on first error and rollback all changes
+try:
+    strava.menu.order_meals(soup, main, another_main)
+except InvalidMealTypeError:
+    pass  # Nothing was ordered, all changes rolled back
+
+# Continue on error: collect all errors and report at the end
+from strava_cz import StravaAPIError
+
+try:
+    strava.menu.order_meals(
+        soup, main, another_main,
+        continue_on_error=True
+    )
+except StravaAPIError as e:
+    # e contains all errors that occurred
+    # main and another_main were still ordered successfully
+    print(f"Some errors occurred: {e}")
+```
+
+### 5. Automatic Rollback
+
+When an error occurs (and `continue_on_error=False`), all changes are automatically rolled back:
+
+```python
+try:
+    strava.menu.order_meals(meal_1, meal_2, invalid_meal)
+except InvalidMealTypeError:
+    # meal_1 and meal_2 were NOT ordered
+    # all changes were automatically rolled back
+    pass
+```
+
+## Menu Class Features (v0.2.0)
 
 ### Flexible Filtering System
 

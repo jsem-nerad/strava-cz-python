@@ -1,14 +1,23 @@
-from strava_cz import StravaCZ, MealType, OrderType
+from strava_cz import (
+    StravaCZ, 
+    MealType, 
+    OrderType,
+    InvalidMealTypeError,
+    DuplicateMealError,
+    InsufficientBalanceError,
+    StravaAPIError
+)
 
 # Vytvoreni objektu strava a prihlaseni uzivatele
 strava = StravaCZ(
     username="your.username", 
     password="YourPassword123", 
-    canteen_number="your canteen number"
+    canteen_number="your canteen number"  # POVINNY parametr!
     )
 
 # Vypsani informaci o uzivateli
 print(strava.user)
+print(f"Zustatok: {strava.user.balance} Kč")
 
 # Ziskani jidelnicku a vypsani
 strava.menu.fetch()
@@ -50,7 +59,7 @@ print(f"Dny s objednavkami: {len(ordered_days)}")
 unordered_days = strava.menu.get_days(ordered=False)
 print(f"Dny bez objednavek: {len(unordered_days)}")
 
-# ===== Ziskani jidel jako ploschy seznam =====
+# ===== Ziskani jidel jako flat seznam =====
 
 # Vsechna objednavatelna jidla
 meals = strava.menu.get_meals()
@@ -105,13 +114,52 @@ today_meals = strava.menu.get_by_date("2025-11-11")
 if today_meals:
     print(f"Jidla na 11.11: {len(today_meals['meals'])} jidel")
 
-# ===== Objednavani =====
+# ===== Objednavani s pokrocilym zpracovanim chyb =====
 
-# Objedna jidla s meal_id 3 a 6
-strava.menu.order_meals(3, 6)
+# Zakladni objednavka
+try:
+    print(f"\nZustatok pred objednanim: {strava.user.balance} Kč")
+    strava.menu.order_meals(3, 6)
+    print(f"Zustatok po objednani: {strava.user.balance} Kč")
+except InvalidMealTypeError as e:
+    print(f"Neplatny typ jidla: {e}")
+except InsufficientBalanceError as e:
+    print(f"Nedostatecny zustatok: {e}")
+except DuplicateMealError as e:
+    print(f"Duplicitni jidla: {e}")
+
+# Objednavka s parametry
+try:
+    strava.menu.order_meals(
+        3, 6, 7,
+        continue_on_error=True,      # Pokracuj i pri chybach
+        strict_duplicates=False       # Pouze varuj pri duplicitach
+    )
+except StravaAPIError as e:
+    print(f"Nektera jidla selhala: {e}")
+
+# Strict mode - vyhodi chybu pri duplikatech
+try:
+    strava.menu.order_meals(3, 4, strict_duplicates=True)  # Pokud jsou ze stejneho dne
+except DuplicateMealError as e:
+    print(f"Chyba duplicity: {e}")
 
 # Zrus objednavky
-strava.menu.cancel_meals(3, 6)
+try:
+    strava.menu.cancel_meals(3, 6, continue_on_error=False)
+    print("Objednavky zruseny")
+except StravaAPIError as e:
+    print(f"Chyba pri ruseni: {e}")
+
+# ===== Overeni stavu =====
+
+# Zkontroluj, co je objednano
+ordered_meals = strava.menu.get_meals(ordered=True)
+print(f"\nCelkem objednano: {len(ordered_meals)} jidel")
+for meal in ordered_meals:
+    print(f"  - {meal['name']} ({meal['date']}): {meal['price']} Kč")
+
+print(f"\nKonecny zustatok: {strava.user.balance} Kč")
 
 # Odhlasi uzivatele
 strava.logout()
