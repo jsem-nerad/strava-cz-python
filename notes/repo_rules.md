@@ -97,3 +97,10 @@ git branch -d feature/nazev-planovanych-funkci
 3. Vytvoreni git tagu: `git tag v0.1.0`
 
 4. Push na GitHub s tagem: `git push origin v0.1.0`
+
+
+## Pouzivani LLM
+
+Silne nepodporuji vibecoding v tomto projektu, ale pro jeho mene podstatne a mene rizikove casti jako je dokumentace, vytvareni komentaru, hledani chyb, tvorba testu k novym funkcim atd. je vporadku LLM pouzit, ale pouze pod podminkou manualni kontroly uprav. 
+
+Dekuji za pochopeni
