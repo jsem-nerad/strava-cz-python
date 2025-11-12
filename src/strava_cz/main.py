@@ -833,19 +833,8 @@ if __name__ == "__main__":
         canteen_number=STRAVA_CANTEEN_NUMBER,
     )
 
-    # Ziskani jidelnicku a vypsani
     strava.menu.fetch()
 
-    # Vsechna objednavatelna jidla
-    days = strava.menu.get_days(
-        order_types=[OrderType.NORMAL], ordered=False, meal_types=[MealType.SOUP]
-    )
-    print("".join(f"{day['date']}\n" for day in days))
-
-    meal_ids = []
-    for day in days:
-        meal_ids.append(day["meals"][0]["id"])
-
-    strava.menu.order_meals(64, *meal_ids[:5], continue_on_error=True, strict_duplicates=False)
+    strava.menu.print()
 
     strava.logout()

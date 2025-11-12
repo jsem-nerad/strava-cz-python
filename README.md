@@ -13,6 +13,9 @@ Ve slozce [notes](https://github.com/jsem-nerad/strava-cz-python/tree/main/notes
 - Ulozeni raw i zpracovanych dat z API
 - Sledovani zustatku na uctu
 
+## Dokumentace
+
+Kompletni prehlednou **dokumentaci** najdete na **[GitHub Wiki](https://github.com/jsem-nerad/strava-cz-python/wiki)** tohoto projektu.
 
 ## Usage
 
@@ -225,10 +228,10 @@ except InsufficientBalanceError as e:
 - [x] Balance check pred objednanim
 - [x] Detekce a prevence duplicitnich objednavek
 - [x] Kontrola typu jidla pri objednavani
-- [ ] Lepe zdokumentovat pouziti
-- [ ] Rate limiting
-- [ ] Zrychleni interakce
+- [x] Lepe zdokumentovat pouziti
+- [ ] Login rate limiting
 - [ ] Debug/Log mode
+- [ ] Zrychleni interakce s API
 
 
 ## Known bugs
@@ -239,26 +242,27 @@ except InsufficientBalanceError as e:
 
 Planuji udelat aplikaci, ktera bude uzivateli automaticky objednavat obedy podle jeho preferenci.
 
-Prosim, nepouzivejte tuto aplikaci k nekalym ucelum. Pouzivejte ji pouze s dobrymi zamery.
+Prosim, nepouzivejte tuto knihovnu k nekalym ucelum. Pouzivejte ji pouze s dobrymi zamery.
 
 
-## Pomoz mi pls
+## Jak mi pomoct
 
 Nasel jsi chybu nebo mas navrh na zlepseni? Skvele! Vytvor prosim [bug report](https://github.com/jsem-nerad/strava-cz-python/issues/new?labels=bug) nebo [feature request](https://github.com/jsem-nerad/strava-cz-python/issues/new?labels=enhancement), hodne mi tim muzes pomoct.
 
 Udelal jsi sam nejake zlepseni? Jeste lepsi! Kazdy pull request je vitan.
 
 
-### Pouziti AI
+## Pouziti AI
 
 Na tento projekt byly do jiste miry vyuzity modely LLM, primarne na formatovani a dokumentaci kodu. V projektu nebyl ani nebude tolerovan cisty vibecoding.
 
 Zaznamy konkretniho pouziti:
 
-- Kontrola syntaxe kodu a repetetivni upravy detailu
+- Kontrola syntaxe kodu, formatovani a komentare
 - Vytvoreni testu
-- Vytvoreni example.py
-- Uprava a ladeni README
-- Obcasny zapis do CHANGELOGu
+- Uprava example.py podle zmen kodu
+- Uprava a formatovani README podle zmen kodu
+- Zapis do CHANGELOGu podle zmen kodu
 - Vytvoreni MIGRATION GUIDE
+- Pomoc s tvorbou wiki
 
