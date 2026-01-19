@@ -35,7 +35,7 @@ strava = StravaCZ(
 
 # Vypsani informaci o uzivateli
 print(strava.user)
-print(f"Zustatok: {strava.user.balance} Kč")
+print(f"Zustatek: {strava.user.balance} Kč")
 
 # Ziskani jidelnicku
 strava.menu.fetch()
@@ -45,8 +45,8 @@ strava.menu.print()
 days = strava.menu.get_days()  # Default - vsechna objednavatelna jidla
 print(f"Vsechny jidla: {len(days)} dni")
 
-# Pristup k jidlum jako ploschy seznam
-meals = strava.menu.get_meals()  # Vsechna jidla jako ploschy seznam
+# Pristup k jidlum jako plochy seznam
+meals = strava.menu.get_meals()  # Vsechna jidla jako plochy seznam
 main_meals = strava.menu.get_meals(meal_types=[MealType.MAIN])  # Pouze hlavni jidla
 soup_meals = strava.menu.get_meals(meal_types=[MealType.SOUP])  # Pouze polevky
 
@@ -63,7 +63,7 @@ for day in strava.menu:
 print(strava.menu.is_ordered(4))
 
 # Objedna jidla s meal_id 3 a 6
-# Automaticky detekuje duplicity a kontroluje typ jidla
+# Automaticky detekuje duplikaty a kontroluje typ jidla
 strava.menu.order_meals(3, 6)
 
 # Objednani s pokrocilymi parametry
@@ -88,7 +88,7 @@ strava.logout()
 
 > meal_id je unikatni identifikacni cislo jidla v celem jidelnicku. neni ovsem stale vazane na konkretni jidlo a meni se se zmenami jidelnicku kazdy den
 
-> **Pozor!** Verze 0.2.0 obsahuje breaking changes. Prosim precti si [migration guide](MIGRATION_GUIDE.md) pro vice informaci o pruchodu na novou verzi.
+> **Pozor!** Verze 0.2.0 obsahuje breaking changes. Prosim precti si [migration guide](MIGRATION_GUIDE.md) pro vice informaci o prechodu na novou verzi.
 
 ### Struktura dat jidla
 
@@ -127,8 +127,8 @@ Kazde jidlo v menu obsahuje nasledujici polozky:
 | `fetch()`           | None                                                      | Menu        | Ziska jidelnicek z API a zpracuje ho; vraci sam sebe                                                              |
 | `print()`           | None                                                      | None        | Vypise zformatovane menu (default: pouze objednavatelna jidla)                                                    |
 | `get_days()`        | meal_types=None, order_types=None, ordered=None           | list        | Vrati jidla seskupena podle dni: `[{date, ordered, meals: [...]}]`                                                |
-| `get_meals()`       | meal_types=None, order_types=None, ordered=None           | list        | Vrati vsechna jidla jako ploschy seznam: `[{...meal}]`                                                            |
-| `order_meals()`     | *meal_ids, continue_on_error=False, strict_duplicates=False | None      | Objedna vice jidel; detekuje duplicity a kontroluje typy                                                          |
+| `get_meals()`       | meal_types=None, order_types=None, ordered=None           | list        | Vrati vsechna jidla jako plochy seznam: `[{...meal}]`                                                            |
+| `order_meals()`     | *meal_ids, continue_on_error=False, strict_duplicates=False | None      | Objedna vice jidel; detekuje duplikaty a kontroluje typy                                                          |
 | `cancel_meals()`    | *meal_ids, continue_on_error=False                        | None        | Zrusi objednavky vice jidel                                                                                        |
 
 **Parametry filtrovani:**
@@ -162,8 +162,8 @@ menu.get_days(order_types=[OrderType.NORMAL, OrderType.RESTRICTED, OrderType.OPT
 | `is_ordered()`      | meal_id [int]                                             | bool        | Zjisti, jestli je dane jidlo objednano (prohledava vsechny typy objednavek)                                       |
 
 #### Parametry objednavani
-- `continue_on_error` - Pokud True, pokracuje pri chybach a sbirá je; pokud False (default), zastavi pri prvni chybe
-- `strict_duplicates` - Pokud True, vyhodit chybu pri vice jidlech ze stejneho dne; pokud False (default), pouze varuje a objedna prvni
+- `continue_on_error` - Pokud True, pokracuje pri chybach a sbira je; pokud False (default), zastavi pri prvni chybe
+- `strict_duplicates` - Pokud True, vyhodi chybu pri vice jidlech ze stejneho dne; pokud False (default), pouze varuje a objedna prvni
 
 **Poznamka:** Menu objekt podporuje iteraci, indexovani a len() - vse pracuje s defaultnim seznamem objednatelnych jidel.
 
