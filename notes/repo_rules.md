@@ -1,48 +1,58 @@
 # Repo rules
 
-Toto je jednoduchy seznam na udrzovani funkcniho repozitare
+Jednoduchý seznam na udržování funkčního repozitáře.
 
-## Lokalni development
+## Lokální development
 
-### 1. Klonovani repozitare
+### 1. Klonování repozitáře
 
 ```bash
 git clone https://github.com/jsem-nerad/strava-cz-python.git
 cd strava-cz-python
 ```
 
-### 2. Setup Python Virtual Enviroment
+### 2. Virtuální prostředí
 
-Zkontrolujte verzi Pythonu a vytvorte virtualni prostredi.
-Tento krok se muze lisit v zavislosti na operacnim systemu.
+Knihovna vyžaduje Python 3.10 nebo novější.
 
-#### Linux
+#### Linux / macOS
 
 ```bash
 python3 --version
-python3 -m venv venv
-source venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 
 #### Windows
+
 ```bash
 python --version
 python -m venv .venv
 .venv\Scripts\activate
 ```
 
-### 3. Package instalace v develpement modu
+### 3. Instalace v development módu
 
 ```bash
-pip install -e .[dev]
+pip install -e ".[dev]"
 ```
 
-> Ujistete se ze je aktivni venv
+> Ujistěte se, že je aktivní venv.
 
+### 4. Wiki
 
-## Tvorba novych funkci
+Dokumentace žije ve wiki, což je samostatný git repozitář. Naklonujte si ji vedle
+kódu — složka `wiki/` je v `.gitignore`, takže se do hlavního repozitáře nedostane:
 
-### 1. Nova feature branch
+```bash
+git clone git@github.com:jsem-nerad/strava-cz-python.wiki.git wiki
+```
+
+Změny ve wiki se commitují a pushují zvlášť, z adresáře `wiki/`.
+
+## Tvorba nových funkcí
+
+### 1. Nová feature branch
 
 ```bash
 git checkout main
@@ -50,35 +60,39 @@ git pull origin main
 git checkout -b feature/nazev-planovanych-funkci
 ```
 
-### 2. Prace na novych funkcich
+### 2. Práce na nových funkcích
 
-- Delat commity jak uznate za vhodne
+- Dělat commity, jak uznáte za vhodné:
+
 ```bash
 git add .
-git commit -m "neco jsem pridal"
+git commit -m "něco jsem přidal"
 ```
 
-- Zapsat zmeny do CHANGELOG.md
-- Spusteni testu pomoci pytest a opravit pripadne chyby:
+- Zapsat změny do `CHANGELOG.md`.
+- Spustit testy a opravit případné chyby:
+
 ```bash
 pytest
 ```
-- Vycistit kod pomoci black, zkontrolovat pomoci flake8 a provest mypy type check, popripade opravit vsechny chyby:
+
+- Zkontrolovat a naformátovat kód a ověřit typy:
+
 ```bash
-black src/strava_cz/
-flake8 src/strava_cz --max-line-length=100
-mypy src/strava_cz/
+ruff check src tests
+ruff format src tests
+mypy
 ```
 
-### 3. Vytvoreni pull requestu
+### 3. Vytvoření pull requestu
 
 ```bash
 git push origin feature/nazev-planovanych-funkci
 ```
 
-### 4. Spravce repozitare zkontroluje a schvali pull request, merge s main branch
+### 4. Správce repozitáře zkontroluje a schválí pull request, merge s main branch
 
-### 5. Prepnuti zpet na main branch
+### 5. Přepnutí zpět na main branch
 
 ```bash
 git checkout main
@@ -86,21 +100,23 @@ git pull origin main
 git branch -d feature/nazev-planovanych-funkci
 ```
 
+## Testování
 
+Testy běží proti nahraným odpovědím z API ve složce `tests/fixtures/`, takže
+**nesahají na síť**. Zajišťuje to autouse fixture v `tests/conftest.py`, která
+jakýkoliv pokus o otevření socketu shodí s chybou. Nikdy tuhle pojistku neobcházejte —
+dřív testy při každém běhu CI posílaly skutečné požadavky na app.strava.cz.
 
+Když potřebujete otestovat něco, co ve fixtures ještě není, nahrajte si vlastní
+odpověď pomocí `examples/capture_api.py` a uložte ji jako nový soubor v
+`tests/fixtures/`. Skript odstraní osobní údaje, ale stejně si výsledek před
+commitem projděte.
 
-## Tag nove verze a nahrani na PyPi
+## Tag nové verze a nahrání na PyPI
 
-1. Aktualizace tagu verze v souborech `src/strava_cz/__init__.py`, `pyproject.toml`.
-2. Kontrola verze v `CHANGELOG.md`
+1. Aktualizace verze v `src/strava_cz/__init__.py` a `pyproject.toml`.
+2. Kontrola verze v `CHANGELOG.md`.
+3. Vytvoření git tagu: `git tag v0.3.0`
+4. Push na GitHub s tagem: `git push origin v0.3.0`
 
-3. Vytvoreni git tagu: `git tag v0.1.0`
-
-4. Push na GitHub s tagem: `git push origin v0.1.0`
-
-
-## Pouzivani LLM
-
-Silne nepodporuji vibecoding v tomto projektu, ale pro jeho mene podstatne a mene rizikove casti jako je dokumentace, vytvareni komentaru, hledani chyb, tvorba testu k novym funkcim atd. je vporadku LLM pouzit, ale pouze pod podminkou manualni kontroly uprav. 
-
-Dekuji za pochopeni
+GitHub Actions pak samy spustí testy, sestaví balíček a publikují ho na PyPI.

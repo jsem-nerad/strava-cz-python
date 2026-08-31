@@ -1,9 +1,88 @@
 # Changelog
 
-Vsechny vyznamne zmeny v tomto projektu budou dokumentovany v tomto souboru.
+Všechny významné změny v tomto projektu budou dokumentovány v tomto souboru.
 
 
 ## [unreleased]
+
+## [0.3.0] 2026-08-31
+
+Velká oprava a přepis. Verze 0.3.0 obsahuje breaking changes: jídla a dny jsou nově
+plnohodnotné objekty místo slovníků a filtrování má jiné výchozí chování.
+
+### Fixed
+- **Objednatelnost se určuje ze správných polí.** Knihovna četla jen denní kód
+  `omezeniObj.den` a ignorovala `obj` a `zm`, která platí pro konkrétní jídlo.
+  Kvůli tomu se dny s kódem `"T"` tvářily jako neobjednatelné a mizely z výpisu
+  (na ověřovacím účtu 4 z 20 použitelných dnů), a u jídelníčku, kde měl `den`
+  hodnotu na každém jídle, vracelo `get_days()` prázdný seznam.
+- Polévky se hlásily jako běžně objednatelné, přestože je API označuje `obj: "I"`.
+  Objednání blokovalo jen natvrdo zadané pravidlo „jde objednat pouze hlavní jídlo“,
+  které je v jídelnách s objednatelnou polévkou špatně.
+- `user.balance` byl po přihlášení `str` a až po objednávce `float`, takže s ním
+  nešlo počítat. Nově je to vždy `float`.
+- `cancel_meals()` s neznámým ID hlásilo úspěch, a přesto odesílalo `saveOrders`.
+  Nyní vyhodí `MealNotFoundError`.
+- `order_meals()` a `cancel_meals()` odesílaly `saveOrders`, i když nebylo co měnit.
+- S `continue_on_error=True` se chyby posbíraly, ale výjimka stejně vyletěla.
+  Nově se vrací `OrderResult` a nevyhazuje se nic.
+- Chybějící pole v odpovědi API shodilo celý `fetch()` s `KeyError`.
+- Požadavky neměly žádný timeout, takže zaseknuté spojení viselo donekonečna.
+- Vytvoření klienta sahalo na síť už v `__init__`.
+- Odpověď, která nebyla JSON, skončila výjimkou `json.JSONDecodeError` místo chyby
+  knihovny.
+- Ručně nastavená hlavička `Accept-Encoding` slibovala kodeky, které klient nemusí
+  umět rozbalit.
+- `logout()` nahrazoval objekty `user` a `menu`, takže dřív získané reference
+  zůstaly viset na starém stavu. Nyní se resetují na místě.
+- Jídla jiného typu než polévka a oběd se tiše zahazovala.
+- Při každém běhu CI posílaly tři testy skutečné HTTP požadavky na app.strava.cz.
+
+### Added
+- Datové třídy `Meal`, `Day`, `Allergen` a `OrderResult` s typovými anotacemi
+- Enum `Restriction`, který vysvětluje, proč jídlo nelze objednat
+- Enum `DayStatus` a `Day.auto_ordered` pro dny, na které jídelna neobjednává
+  automaticky (kód `den: "T"`). Takový den jde objednat ručně jako každý jiný, jen se
+  neobjedná sám. Ověřeno na živém účtu: `"T"` se za 32 dnů objevilo jen na pátcích a
+  právě ty jako jediné zůstaly v období automatického objednávání prázdné.
+- Filtr `auto_ordered` v `get_days()` a `get_meals()`
+- `Meal.can_order`, `Meal.can_cancel`, `Meal.deadline`, `Meal.raw`
+- `Day.no_school`, `Day.orderable`, `Day.ordered`
+- Filtry `orderable`, `date_from`, `date_to` a `include_no_school`
+- `StravaCZ` je context manager a má metodu `close()`
+- Nastavitelný `timeout`, `retries`, `base_url`, `language` a vlastní `httpx.Client`
+- Nové výjimky `StravaError`, `NotLoggedInError`, `MealNotFoundError`,
+  `MealNotOrderableError` a `MenuNotFetchedError`
+- `StravaAPIError` nese `.code`, `.status_code` a `.payload`; chybové kódy API
+  se mapují na konkrétní výjimky
+- `Menu.parse_warnings` se záznamy o řádcích, které nešlo zpracovat
+- Soubor `py.typed`, takže typy vidí i uživatelé knihovny
+- 143 testů nad nahranými odpověďmi z reálného API (95 % pokrytí); testy mají
+  zakázaný přístup k síti
+
+### Changed
+- **Přechod z `requests` na `httpx`** kvůli výchozím timeoutům a opakování spojení
+- Jídla a dny jsou objekty s atributy místo slovníků: `meal.name` místo `meal["name"]`
+- `meal.date` je `datetime.date` místo řetězce
+- Přejmenováno: `alergens` → `allergens`, `forbiddenAlergens` odstraněno,
+  `orderType` → `order_restriction` a `can_order`
+- `OrderType` nahrazen enumem `Restriction`
+- `get_days()` a `get_meals()` mají nově pojmenované parametry a **nic neskrývají**;
+  dřívější výchozí chování vracelo jen `OrderType.NORMAL`
+- Práce s jídelníčkem před `fetch()` vyhodí `MenuNotFetchedError` místo prázdného seznamu
+- `is_ordered()` vyhodí `MealNotFoundError` místo `False` u neznámého ID
+- `order_meals()` a `cancel_meals()` vracejí `OrderResult` místo `None`
+- Detekce duplicit rozlišuje den *a* typ jídla, ne jen den
+- `InvalidMealTypeError` nahrazen `MealNotOrderableError`
+- Heslo se po přihlášení neuchovává
+- Minimální verze Pythonu je 3.10
+- `black` a `flake8` nahrazeny nástrojem `ruff`
+
+### Removed
+- `MIGRATION_GUIDE.md` a migrační poznámky k verzi 0.2.0
+- `strava_cz.main` — kód je rozdělený do `client`, `menu`, `models`, `parser`
+  a `exceptions`
+- `OrderType`, `InvalidMealTypeError`, `User.password`
 
 ## [0.2.0] 2025-11-11
 ### Added
@@ -39,7 +118,7 @@ Vsechny vyznamne zmeny v tomto projektu budou dokumentovany v tomto souboru.
 - Automaticke sledovani zustatku na uctu po kazde operaci
 - Automaticke ruseni zmen pri chybe pri objednavani (rollback pomoci `nactiVlastnostiPA` endpointu)
 - Prevence duplicitnich chybovych hlaseni - kazde jidlo je ohlaseno pouze jednou
-- Kompletni testovaci pokryti pro vsechny nove funkce (16 testu, 75% coverage, !! TESTY BYLY VYTVORENY POMOCI LLM !!)
+- Kompletni testovaci pokryti pro vsechny nove funkce (16 testu, 75% coverage)
 
 ### Changed
 - Menu je nyni samostatny objekt pristupny pres `strava.menu`

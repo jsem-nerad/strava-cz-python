@@ -1,0 +1,6035 @@
+{
+ "table0": [
+  {
+   "id": 0,
+   "datum": "01.09.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Nevaří se",
+   "popis": "Oběd 1",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "1",
+   "vetaDieta": "1",
+   "omezeniObj": {
+    "den": "VP",
+    "obj": "V",
+    "zm": "C",
+    "bur": "V"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NNevaří seCO1",
+   "version": 5,
+   "casKonec": "2026-06-29T15:00:00",
+   "casOdhlaseni": "2026-06-29T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "01.09.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Nevaří se",
+   "popis": "Oběd 2",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "2",
+   "vetaDieta": "2",
+   "omezeniObj": {
+    "den": "VP",
+    "obj": "V",
+    "zm": "C",
+    "bur": "V"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NNevaří seCO2",
+   "version": 5,
+   "casKonec": "2026-06-29T15:00:00",
+   "casOdhlaseni": "2026-06-29T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table1": [
+  {
+   "id": 0,
+   "datum": "02.09.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Hovězí vývar s kapáním",
+   "popis": "",
+   "delsiPopis": "Hovězí vývar s kapáním",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|06 -Sójové boby (sója)|07 -Mléko|09 -Celer|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "06",
+     "Sójové boby"
+    ],
+    [
+     "07",
+     "Mléko"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "85",
+   "vetaDieta": "3",
+   "omezeniObj": {
+    "den": "",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1AHovězí vývar s kapánímCPO",
+   "version": 5,
+   "casKonec": "2026-06-29T15:00:00",
+   "casOdhlaseni": "2026-06-29T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "02.09.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Rizoto s vepřovým masem a zeleninou, sýr, salát, ovoce,čaj, pv",
+   "popis": "Oběd 1",
+   "delsiPopis": "Rizoto s vepřovým masem a zeleninou, sýr, salát, ovoce,čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "07 -Mléko|09 -Celer|",
+   "alergeny": [
+    [
+     "07",
+     "Mléko"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "3",
+   "vetaDieta": "4",
+   "omezeniObj": {
+    "den": "",
+    "obj": "C",
+    "zm": "C",
+    "bur": "!"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NRizoto s vepřovým masem a zeleninou, sýr, salát, ovoce,čaj, pvCO1",
+   "version": 5,
+   "casKonec": "2026-06-29T15:00:00",
+   "casOdhlaseni": "2026-06-29T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "02.09.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 2",
+   "popis": "Oběd 2",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "4",
+   "vetaDieta": "5",
+   "omezeniObj": {
+    "den": "",
+    "obj": "C",
+    "zm": "C",
+    "bur": "!"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 2CO2",
+   "version": 5,
+   "casKonec": "2026-06-29T15:00:00",
+   "casOdhlaseni": "2026-06-29T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table2": [
+  {
+   "id": 0,
+   "datum": "03.09.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Bramborová",
+   "popis": "",
+   "delsiPopis": "Bramborová",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|06 -Sójové boby (sója)|07 -Mléko|09 -Celer|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "06",
+     "Sójové boby"
+    ],
+    [
+     "07",
+     "Mléko"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "86",
+   "vetaDieta": "6",
+   "omezeniObj": {
+    "den": "",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1ABramborováCPO",
+   "version": 5,
+   "casKonec": "2026-09-02T15:00:00",
+   "casOdhlaseni": "2026-09-02T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "03.09.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Kuřecí kostky na paprice, těstoviny, čaj, pv",
+   "popis": "Oběd 1",
+   "delsiPopis": "Kuřecí kostky na paprice, těstoviny, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|07 -Mléko|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "07",
+     "Mléko"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "5",
+   "vetaDieta": "7",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NKuřecí kostky na paprice, těstoviny, čaj, pvCO1",
+   "version": 5,
+   "casKonec": "2026-09-02T15:00:00",
+   "casOdhlaseni": "2026-09-02T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "03.09.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 2",
+   "popis": "Oběd 2",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "6",
+   "vetaDieta": "8",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 2CO2",
+   "version": 5,
+   "casKonec": "2026-09-02T15:00:00",
+   "casOdhlaseni": "2026-09-02T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table3": [
+  {
+   "id": 0,
+   "datum": "04.09.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Zeleninová",
+   "popis": "",
+   "delsiPopis": "Zeleninová",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|06 -Sójové boby (sója)|07 -Mléko|09 -Celer|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "06",
+     "Sójové boby"
+    ],
+    [
+     "07",
+     "Mléko"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "87",
+   "vetaDieta": "9",
+   "omezeniObj": {
+    "den": "T",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1AZeleninováCPO",
+   "version": 5,
+   "casKonec": "2026-09-03T15:00:00",
+   "casOdhlaseni": "2026-09-03T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "04.09.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Sekaný řízek, bramborová kaše, salát, čaj, pv",
+   "popis": "Oběd 1",
+   "delsiPopis": "Sekaný řízek, bramborová kaše, salát, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "03 -Vejce|07 -Mléko|",
+   "alergeny": [
+    [
+     "03",
+     "Vejce"
+    ],
+    [
+     "07",
+     "Mléko"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "7",
+   "vetaDieta": "10",
+   "omezeniObj": {
+    "den": "T",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NSekaný řízek, bramborová kaše, salát, čaj, pvCO1",
+   "version": 5,
+   "casKonec": "2026-09-03T15:00:00",
+   "casOdhlaseni": "2026-09-03T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "04.09.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 2",
+   "popis": "Oběd 2",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "8",
+   "vetaDieta": "11",
+   "omezeniObj": {
+    "den": "T",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 2CO2",
+   "version": 5,
+   "casKonec": "2026-09-03T15:00:00",
+   "casOdhlaseni": "2026-09-03T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table4": [
+  {
+   "id": 0,
+   "datum": "07.09.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Krupicová s vejcem",
+   "popis": "",
+   "delsiPopis": "Krupicová s vejcem",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|03 -Vejce|06 -Sójové boby (sója)|07 -Mléko|09 -Celer|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "03",
+     "Vejce"
+    ],
+    [
+     "06",
+     "Sójové boby"
+    ],
+    [
+     "07",
+     "Mléko"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "88",
+   "vetaDieta": "12",
+   "omezeniObj": {
+    "den": "",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1AKrupicová s vejcemCPO",
+   "version": 5,
+   "casKonec": "2026-09-04T15:00:00",
+   "casOdhlaseni": "2026-09-04T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "07.09.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Hovězí mexický guláš, rýže, ovoce,čaj, pv",
+   "popis": "Oběd 1",
+   "delsiPopis": "Hovězí mexický guláš, rýže, ovoce,čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|06 -Sójové boby (sója)|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "06",
+     "Sójové boby"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "9",
+   "vetaDieta": "13",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NHovězí mexický guláš, rýže, ovoce,čaj, pvCO1",
+   "version": 5,
+   "casKonec": "2026-09-04T15:00:00",
+   "casOdhlaseni": "2026-09-04T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "07.09.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Bretaňské fazole, chléb, ovoce, čaj, pv",
+   "popis": "Oběd 2",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 Obiloviny obsahující lepek",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "10",
+   "vetaDieta": "14",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NBretaňské fazole, chléb, ovoce, čaj, pvCO2",
+   "version": 5,
+   "casKonec": "2026-09-04T15:00:00",
+   "casOdhlaseni": "2026-09-04T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 3,
+   "datum": "07.09.2026",
+   "druh_popis": "Oběd 1 Rad",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 1 Rad",
+   "popis": "Oběd 1 Rad",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O3",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "11",
+   "vetaDieta": "15",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O3",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 1 RadCO3",
+   "version": 5,
+   "casKonec": "2026-09-04T15:00:00",
+   "casOdhlaseni": "2026-09-04T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 4,
+   "datum": "07.09.2026",
+   "druh_popis": "Oběd 2 Rad",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 2 Rad",
+   "popis": "Oběd 2 Rad, Děti HČ, Jídelna",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O4",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "12",
+   "vetaDieta": "16",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O4",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 2 RadCO4",
+   "version": 5,
+   "casKonec": "2026-09-04T15:00:00",
+   "casOdhlaseni": "2026-09-04T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table5": [
+  {
+   "id": 0,
+   "datum": "08.09.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Pórková",
+   "popis": "",
+   "delsiPopis": "Pórková",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "03 -Vejce|06 -Sójové boby (sója)|07 -Mléko|09 -Celer|",
+   "alergeny": [
+    [
+     "03",
+     "Vejce"
+    ],
+    [
+     "06",
+     "Sójové boby"
+    ],
+    [
+     "07",
+     "Mléko"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "89",
+   "vetaDieta": "17",
+   "omezeniObj": {
+    "den": "",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1APórkováCPO",
+   "version": 5,
+   "casKonec": "2026-09-07T15:00:00",
+   "casOdhlaseni": "2026-09-07T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "08.09.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Treska po mlynářsku, brambory, salát, čaj, pv",
+   "popis": "Oběd 1",
+   "delsiPopis": "Treska po mlynářsku, brambory, salát, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|04 -Ryby|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "04",
+     "Ryby"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "13",
+   "vetaDieta": "18",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NTreska po mlynářsku, brambory, salát, čaj, pvCO1",
+   "version": 5,
+   "casKonec": "2026-09-07T15:00:00",
+   "casOdhlaseni": "2026-09-07T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "08.09.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Fazolky na smetaně, vařené vejce, brambory, čaj, pv",
+   "popis": "Oběd 2",
+   "delsiPopis": "Fazolky na smetaně, vařené vejce, brambory, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|03 -Vejce|07 -Mléko|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "03",
+     "Vejce"
+    ],
+    [
+     "07",
+     "Mléko"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "14",
+   "vetaDieta": "19",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NFazolky na smetaně, vařené vejce, brambory, čaj, pvCO2",
+   "version": 5,
+   "casKonec": "2026-09-07T15:00:00",
+   "casOdhlaseni": "2026-09-07T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 3,
+   "datum": "08.09.2026",
+   "druh_popis": "Oběd 1 Rad",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 3",
+   "popis": "Oběd 1 Rad",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O3",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "15",
+   "vetaDieta": "20",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O3",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 3CO3",
+   "version": 5,
+   "casKonec": "2026-09-07T15:00:00",
+   "casOdhlaseni": "2026-09-07T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 4,
+   "datum": "08.09.2026",
+   "druh_popis": "Oběd 2 Rad",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 2 Rad",
+   "popis": "Oběd 2 Rad, Děti HČ, Jídelna",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O4",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "16",
+   "vetaDieta": "21",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O4",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 2 RadCO4",
+   "version": 5,
+   "casKonec": "2026-09-07T15:00:00",
+   "casOdhlaseni": "2026-09-07T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table6": [
+  {
+   "id": 0,
+   "datum": "09.09.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Drožďová",
+   "popis": "",
+   "delsiPopis": "Drožďová",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|03 -Vejce|06 -Sójové boby (sója)|07 -Mléko|09 -Celer|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "03",
+     "Vejce"
+    ],
+    [
+     "06",
+     "Sójové boby"
+    ],
+    [
+     "07",
+     "Mléko"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "90",
+   "vetaDieta": "22",
+   "omezeniObj": {
+    "den": "",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1ADrožďováCPO",
+   "version": 5,
+   "casKonec": "2026-09-08T15:00:00",
+   "casOdhlaseni": "2026-09-08T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "09.09.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Kuřecí soté, těstoviny, ovoce, čaj, pv",
+   "popis": "Oběd 1",
+   "delsiPopis": "Kuřecí soté, těstoviny, ovoce, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "17",
+   "vetaDieta": "23",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NKuřecí soté, těstoviny, ovoce, čaj, pvCO1",
+   "version": 5,
+   "casKonec": "2026-09-08T15:00:00",
+   "casOdhlaseni": "2026-09-08T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "09.09.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Květákový mozeček, brambory, ovoce, čaj, pv",
+   "popis": "Oběd 2",
+   "delsiPopis": "Květákový mozeček, brambory, ovoce, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "03 -Vejce|07 -Mléko|",
+   "alergeny": [
+    [
+     "03",
+     "Vejce"
+    ],
+    [
+     "07",
+     "Mléko"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "18",
+   "vetaDieta": "24",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NKvětákový mozeček, brambory, ovoce, čaj, pvCO2",
+   "version": 5,
+   "casKonec": "2026-09-08T15:00:00",
+   "casOdhlaseni": "2026-09-08T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table7": [
+  {
+   "id": 0,
+   "datum": "10.09.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Hovězí s nudlemi",
+   "popis": "",
+   "delsiPopis": "Hovězí s nudlemi",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|06 -Sójové boby (sója)|07 -Mléko|09 -Celer|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "06",
+     "Sójové boby"
+    ],
+    [
+     "07",
+     "Mléko"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "91",
+   "vetaDieta": "25",
+   "omezeniObj": {
+    "den": "",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1AHovězí s nudlemiCPO",
+   "version": 5,
+   "casKonec": "2026-09-09T15:00:00",
+   "casOdhlaseni": "2026-09-09T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "10.09.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Segedínský guláš, houskový knedlík, čaj, pv",
+   "popis": "Oběd 1",
+   "delsiPopis": "Segedínský guláš, houskový knedlík, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|03 -Vejce|07 -Mléko|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "03",
+     "Vejce"
+    ],
+    [
+     "07",
+     "Mléko"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "19",
+   "vetaDieta": "26",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NSegedínský guláš, houskový knedlík, čaj, pvCO1",
+   "version": 5,
+   "casKonec": "2026-09-09T15:00:00",
+   "casOdhlaseni": "2026-09-09T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "10.09.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Zeleninový salát s tvarohovou pomazánkou, pečivo, ovoce, čaj, pv",
+   "popis": "Oběd 2",
+   "delsiPopis": "Zeleninový salát s tvarohovou pomazánkou, pečivo, ovoce, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|07 -Mléko|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "07",
+     "Mléko"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "20",
+   "vetaDieta": "27",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NZeleninový salát s tvarohovou pomazánkou, pečivo, ovoce, čaj, pvCO2",
+   "version": 5,
+   "casKonec": "2026-09-09T15:00:00",
+   "casOdhlaseni": "2026-09-09T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table8": [
+  {
+   "id": 0,
+   "datum": "11.09.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Bramborová",
+   "popis": "",
+   "delsiPopis": "Bramborová",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|06 -Sójové boby (sója)|07 -Mléko|09 -Celer|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "06",
+     "Sójové boby"
+    ],
+    [
+     "07",
+     "Mléko"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "92",
+   "vetaDieta": "28",
+   "omezeniObj": {
+    "den": "T",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1ABramborováCPO",
+   "version": 5,
+   "casKonec": "2026-09-10T15:00:00",
+   "casOdhlaseni": "2026-09-10T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "11.09.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Kuřecí plátek na zelenině, rýže, čaj, pv",
+   "popis": "Oběd 1",
+   "delsiPopis": "Kuřecí plátek na zelenině, rýže, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|06 -Sójové boby (sója)|09 -Celer|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "06",
+     "Sójové boby"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "21",
+   "vetaDieta": "29",
+   "omezeniObj": {
+    "den": "T",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NKuřecí plátek na zelenině, rýže, čaj, pvCO1",
+   "version": 5,
+   "casKonec": "2026-09-10T15:00:00",
+   "casOdhlaseni": "2026-09-10T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "11.09.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Sojové kostky na čínský způsob, rýže, čaj, pv",
+   "popis": "Oběd 2",
+   "delsiPopis": "Sojové kostky na čínský způsob, rýže, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|06 -Sójové boby (sója)|09 -Celer|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "06",
+     "Sójové boby"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "22",
+   "vetaDieta": "30",
+   "omezeniObj": {
+    "den": "T",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NSojové kostky na čínský způsob, rýže, čaj, pvCO2",
+   "version": 5,
+   "casKonec": "2026-09-10T15:00:00",
+   "casOdhlaseni": "2026-09-10T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table9": [
+  {
+   "id": 0,
+   "datum": "14.09.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Hráškový krém",
+   "popis": "",
+   "delsiPopis": "Hráškový krém",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|06 -Sójové boby (sója)|07 -Mléko|09 -Celer|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "06",
+     "Sójové boby"
+    ],
+    [
+     "07",
+     "Mléko"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "93",
+   "vetaDieta": "31",
+   "omezeniObj": {
+    "den": "",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1AHráškový krémCPO",
+   "version": 5,
+   "casKonec": "2026-09-11T15:00:00",
+   "casOdhlaseni": "2026-09-11T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "14.09.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Sekaná pečeně, brambory, č. řepa, ovoce, čaj, pv",
+   "popis": "Oběd 1",
+   "delsiPopis": "Sekaná pečeně, brambory, č. řepa, ovoce, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|03 -Vejce|07 -Mléko|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "03",
+     "Vejce"
+    ],
+    [
+     "07",
+     "Mléko"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "23",
+   "vetaDieta": "32",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NSekaná pečeně, brambory, č. řepa, ovoce, čaj, pvCO1",
+   "version": 5,
+   "casKonec": "2026-09-11T15:00:00",
+   "casOdhlaseni": "2026-09-11T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "14.09.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Těstovinový salát se zeleninou a kuřecím masem, ovoce, pv",
+   "popis": "Oběd 2",
+   "delsiPopis": "Těstovinový salát se zeleninou a kuřecím masem, ovoce, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|07 -Mléko|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "07",
+     "Mléko"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "24",
+   "vetaDieta": "33",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NTěstovinový salát se zeleninou a kuřecím masem, ovoce, pvCO2",
+   "version": 5,
+   "casKonec": "2026-09-11T15:00:00",
+   "casOdhlaseni": "2026-09-11T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 3,
+   "datum": "14.09.2026",
+   "druh_popis": "Oběd 1 Rad",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 1 Rad",
+   "popis": "Oběd 1 Rad",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O3",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "25",
+   "vetaDieta": "34",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O3",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 1 RadCO3",
+   "version": 5,
+   "casKonec": "2026-09-11T15:00:00",
+   "casOdhlaseni": "2026-09-11T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 4,
+   "datum": "14.09.2026",
+   "druh_popis": "Oběd 2 Rad",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 2 Rad",
+   "popis": "Oběd 2 Rad, Děti HČ, Jídelna",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O4",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "26",
+   "vetaDieta": "35",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O4",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 2 RadCO4",
+   "version": 5,
+   "casKonec": "2026-09-11T15:00:00",
+   "casOdhlaseni": "2026-09-11T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table10": [
+  {
+   "id": 0,
+   "datum": "15.09.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Vývar s kuskusem",
+   "popis": "",
+   "delsiPopis": "Vývar s kuskusem",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|06 -Sójové boby (sója)|07 -Mléko|09 -Celer|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "06",
+     "Sójové boby"
+    ],
+    [
+     "07",
+     "Mléko"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "94",
+   "vetaDieta": "36",
+   "omezeniObj": {
+    "den": "",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1AVývar s kuskusemCPO",
+   "version": 5,
+   "casKonec": "2026-09-14T15:00:00",
+   "casOdhlaseni": "2026-09-14T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "15.09.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Čočka s rybím párkem, kysané zelí, čaj, pv",
+   "popis": "Oběd 1",
+   "delsiPopis": "Čočka s rybím párkem, kysané zelí, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|04 -Ryby|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "04",
+     "Ryby"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "27",
+   "vetaDieta": "37",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NČočka s rybím párkem, kysané zelí, čaj, pvCO1",
+   "version": 5,
+   "casKonec": "2026-09-14T15:00:00",
+   "casOdhlaseni": "2026-09-14T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "15.09.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Čočka s vejce, cibulka, okurka, čaj, pv",
+   "popis": "Oběd 2",
+   "delsiPopis": "Čočka s vejce, cibulka, okurka, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|03 -Vejce|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "03",
+     "Vejce"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "28",
+   "vetaDieta": "38",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NČočka s vejce, cibulka, okurka, čaj, pvCO2",
+   "version": 5,
+   "casKonec": "2026-09-14T15:00:00",
+   "casOdhlaseni": "2026-09-14T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 3,
+   "datum": "15.09.2026",
+   "druh_popis": "Oběd 1 Rad",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 3",
+   "popis": "Oběd 1 Rad",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O3",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "29",
+   "vetaDieta": "39",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O3",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 3CO3",
+   "version": 5,
+   "casKonec": "2026-09-14T15:00:00",
+   "casOdhlaseni": "2026-09-14T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 4,
+   "datum": "15.09.2026",
+   "druh_popis": "Oběd 2 Rad",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 2 Rad",
+   "popis": "Oběd 2 Rad, Děti HČ, Jídelna",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O4",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "30",
+   "vetaDieta": "40",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O4",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 2 RadCO4",
+   "version": 5,
+   "casKonec": "2026-09-14T15:00:00",
+   "casOdhlaseni": "2026-09-14T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table11": [
+  {
+   "id": 0,
+   "datum": "16.09.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Rybí s krutony",
+   "popis": "",
+   "delsiPopis": "Rybí s krutony",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "04 -Ryby|06 -Sójové boby (sója)|07 -Mléko|09 -Celer|",
+   "alergeny": [
+    [
+     "04",
+     "Ryby"
+    ],
+    [
+     "06",
+     "Sójové boby"
+    ],
+    [
+     "07",
+     "Mléko"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "95",
+   "vetaDieta": "41",
+   "omezeniObj": {
+    "den": "",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1ARybí s krutonyCPO",
+   "version": 5,
+   "casKonec": "2026-09-15T15:00:00",
+   "casOdhlaseni": "2026-09-15T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "16.09.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Vepřové nudličky na houbách, těstoviny, salát, čaj, pv",
+   "popis": "Oběd 1",
+   "delsiPopis": "Vepřové nudličky na houbách, těstoviny, salát, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "31",
+   "vetaDieta": "42",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NVepřové nudličky na houbách, těstoviny, salát, čaj, pvCO1",
+   "version": 5,
+   "casKonec": "2026-09-15T15:00:00",
+   "casOdhlaseni": "2026-09-15T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "16.09.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Italské rizoto, ovoce, čaj, pv",
+   "popis": "Oběd 2",
+   "delsiPopis": "Italské rizoto, ovoce, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|07 -Mléko|09 -Celer|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "07",
+     "Mléko"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "32",
+   "vetaDieta": "43",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NItalské rizoto, ovoce, čaj, pvCO2",
+   "version": 5,
+   "casKonec": "2026-09-15T15:00:00",
+   "casOdhlaseni": "2026-09-15T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table12": [
+  {
+   "id": 0,
+   "datum": "17.09.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Kuřecí vývar s noky",
+   "popis": "",
+   "delsiPopis": "Kuřecí vývar s noky",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|03 -Vejce|06 -Sójové boby (sója)|07 -Mléko|09 -Celer|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "03",
+     "Vejce"
+    ],
+    [
+     "06",
+     "Sójové boby"
+    ],
+    [
+     "07",
+     "Mléko"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "96",
+   "vetaDieta": "44",
+   "omezeniObj": {
+    "den": "",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1AKuřecí vývar s nokyCPO",
+   "version": 5,
+   "casKonec": "2026-09-16T15:00:00",
+   "casOdhlaseni": "2026-09-16T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "17.09.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Hovězí vařené, rajská omáčka, houskový knedlík, čaj, pv",
+   "popis": "Oběd 1",
+   "delsiPopis": "Hovězí vařené, rajská omáčka, houskový knedlík, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|03 -Vejce|07 -Mléko|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "03",
+     "Vejce"
+    ],
+    [
+     "07",
+     "Mléko"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "33",
+   "vetaDieta": "45",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NHovězí vařené, rajská omáčka, houskový knedlík, čaj, pvCO1",
+   "version": 5,
+   "casKonec": "2026-09-16T15:00:00",
+   "casOdhlaseni": "2026-09-16T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "17.09.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Tuňáková pomazánka, pečivo, zeleninový salát, čaj, pv",
+   "popis": "Oběd 2",
+   "delsiPopis": "Tuňáková pomazánka, pečivo, zeleninový salát, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|04 -Ryby|07 -Mléko|09 -Celer|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "04",
+     "Ryby"
+    ],
+    [
+     "07",
+     "Mléko"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "34",
+   "vetaDieta": "46",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NTuňáková pomazánka, pečivo, zeleninový salát, čaj, pvCO2",
+   "version": 5,
+   "casKonec": "2026-09-16T15:00:00",
+   "casOdhlaseni": "2026-09-16T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table13": [
+  {
+   "id": 0,
+   "datum": "18.09.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Brokolicová",
+   "popis": "",
+   "delsiPopis": "Brokolicová",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|06 -Sójové boby (sója)|07 -Mléko|09 -Celer|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "06",
+     "Sójové boby"
+    ],
+    [
+     "07",
+     "Mléko"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "97",
+   "vetaDieta": "47",
+   "omezeniObj": {
+    "den": "T",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1ABrokolicováCPO",
+   "version": 5,
+   "casKonec": "2026-09-17T15:00:00",
+   "casOdhlaseni": "2026-09-17T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "18.09.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Boloňské špagety, sýr, čaj, pv",
+   "popis": "Oběd 1",
+   "delsiPopis": "Boloňské špagety, sýr, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|06 -Sójové boby (sója)|07 -Mléko|09 -Celer|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "06",
+     "Sójové boby"
+    ],
+    [
+     "07",
+     "Mléko"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "35",
+   "vetaDieta": "48",
+   "omezeniObj": {
+    "den": "T",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NBoloňské špagety, sýr, čaj, pvCO1",
+   "version": 5,
+   "casKonec": "2026-09-17T15:00:00",
+   "casOdhlaseni": "2026-09-17T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "18.09.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Špagety s bazalkovým pestem, sýr, rajčatový salát, čaj, pv",
+   "popis": "Oběd 2",
+   "delsiPopis": "Špagety s bazalkovým pestem, sýr, rajčatový salát, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|05 -Arašídy (podzemnice olejná)|06 -Sójové boby (sója)|07 -Mléko|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "05",
+     "Jádra podzemnice olejné"
+    ],
+    [
+     "06",
+     "Sójové boby"
+    ],
+    [
+     "07",
+     "Mléko"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "36",
+   "vetaDieta": "49",
+   "omezeniObj": {
+    "den": "T",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NŠpagety s bazalkovým pestem, sýr, rajčatový salát, čaj, pvCO2",
+   "version": 5,
+   "casKonec": "2026-09-17T15:00:00",
+   "casOdhlaseni": "2026-09-17T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table14": [
+  {
+   "id": 0,
+   "datum": "21.09.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Zeleninová",
+   "popis": "",
+   "delsiPopis": "Zeleninová",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|06 -Sójové boby (sója)|07 -Mléko|09 -Celer|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "06",
+     "Sójové boby"
+    ],
+    [
+     "07",
+     "Mléko"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "98",
+   "vetaDieta": "50",
+   "omezeniObj": {
+    "den": "",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1AZeleninováCPO",
+   "version": 5,
+   "casKonec": "2026-09-18T15:00:00",
+   "casOdhlaseni": "2026-09-18T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "21.09.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Bramborové knedlíky s kuřecím masem a špenátem, čaj, pv",
+   "popis": "Oběd 1",
+   "delsiPopis": "Bramborové knedlíky s kuřecím masem a špenátem, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|03 -Vejce|07 -Mléko|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "03",
+     "Vejce"
+    ],
+    [
+     "07",
+     "Mléko"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "37",
+   "vetaDieta": "51",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NBramborové knedlíky s kuřecím masem a špenátem, čaj, pvCO1",
+   "version": 5,
+   "casKonec": "2026-09-18T15:00:00",
+   "casOdhlaseni": "2026-09-18T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "21.09.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Bramborové špalíky sypané cibulkou, kysané zelí, čaj, pv",
+   "popis": "Oběd 2",
+   "delsiPopis": "Bramborové špalíky sypané cibulkou, kysané zelí, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|03 -Vejce|07 -Mléko|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "03",
+     "Vejce"
+    ],
+    [
+     "07",
+     "Mléko"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "38",
+   "vetaDieta": "52",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NBramborové špalíky sypané cibulkou, kysané zelí, čaj, pvCO2",
+   "version": 5,
+   "casKonec": "2026-09-18T15:00:00",
+   "casOdhlaseni": "2026-09-18T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 3,
+   "datum": "21.09.2026",
+   "druh_popis": "Oběd 1 Rad",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 1 Rad",
+   "popis": "Oběd 1 Rad",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O3",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "39",
+   "vetaDieta": "53",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O3",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 1 RadCO3",
+   "version": 5,
+   "casKonec": "2026-09-18T15:00:00",
+   "casOdhlaseni": "2026-09-18T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 4,
+   "datum": "21.09.2026",
+   "druh_popis": "Oběd 2 Rad",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 2 Rad",
+   "popis": "Oběd 2 Rad, Děti HČ, Jídelna",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O4",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "40",
+   "vetaDieta": "54",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O4",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 2 RadCO4",
+   "version": 5,
+   "casKonec": "2026-09-18T15:00:00",
+   "casOdhlaseni": "2026-09-18T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table15": [
+  {
+   "id": 0,
+   "datum": "22.09.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Vločková",
+   "popis": "",
+   "delsiPopis": "Vločková",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|03 -Vejce|06 -Sójové boby (sója)|07 -Mléko|09 -Celer|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "03",
+     "Vejce"
+    ],
+    [
+     "06",
+     "Sójové boby"
+    ],
+    [
+     "07",
+     "Mléko"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "99",
+   "vetaDieta": "55",
+   "omezeniObj": {
+    "den": "",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1AVločkováCPO",
+   "version": 5,
+   "casKonec": "2026-09-21T15:00:00",
+   "casOdhlaseni": "2026-09-21T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "22.09.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Vepřové maso v mrkvi, brambory, čaj, pv",
+   "popis": "Oběd 1",
+   "delsiPopis": "Vepřové maso v mrkvi, brambory, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "41",
+   "vetaDieta": "56",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NVepřové maso v mrkvi, brambory, čaj, pvCO1",
+   "version": 5,
+   "casKonec": "2026-09-21T15:00:00",
+   "casOdhlaseni": "2026-09-21T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "22.09.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Zapečený květák, brambory, mrkvový salát, čaj, pv",
+   "popis": "Oběd 2",
+   "delsiPopis": "Zapečený květák, brambory, mrkvový salát, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|03 -Vejce|07 -Mléko|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "03",
+     "Vejce"
+    ],
+    [
+     "07",
+     "Mléko"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "42",
+   "vetaDieta": "57",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NZapečený květák, brambory, mrkvový salát, čaj, pvCO2",
+   "version": 5,
+   "casKonec": "2026-09-21T15:00:00",
+   "casOdhlaseni": "2026-09-21T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 3,
+   "datum": "22.09.2026",
+   "druh_popis": "Oběd 1 Rad",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 3",
+   "popis": "Oběd 1 Rad",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O3",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "43",
+   "vetaDieta": "58",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O3",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 3CO3",
+   "version": 5,
+   "casKonec": "2026-09-21T15:00:00",
+   "casOdhlaseni": "2026-09-21T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 4,
+   "datum": "22.09.2026",
+   "druh_popis": "Oběd 2 Rad",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 2 Rad",
+   "popis": "Oběd 2 Rad, Děti HČ, Jídelna",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O4",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "44",
+   "vetaDieta": "59",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O4",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 2 RadCO4",
+   "version": 5,
+   "casKonec": "2026-09-21T15:00:00",
+   "casOdhlaseni": "2026-09-21T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table16": [
+  {
+   "id": 0,
+   "datum": "23.09.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Vývar s bulgurem",
+   "popis": "",
+   "delsiPopis": "Vývar s bulgurem",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|06 -Sójové boby (sója)|07 -Mléko|09 -Celer|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "06",
+     "Sójové boby"
+    ],
+    [
+     "07",
+     "Mléko"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "100",
+   "vetaDieta": "60",
+   "omezeniObj": {
+    "den": "",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1AVývar s bulguremCPO",
+   "version": 5,
+   "casKonec": "2026-09-22T15:00:00",
+   "casOdhlaseni": "2026-09-22T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "23.09.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Hovězí frankfutská pečeně, rýže, čaj, pv",
+   "popis": "Oběd 1",
+   "delsiPopis": "Hovězí frankfutská pečeně, rýže, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|06 -Sójové boby (sója)|07 -Mléko|09 -Celer|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "06",
+     "Sójové boby"
+    ],
+    [
+     "07",
+     "Mléko"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "45",
+   "vetaDieta": "61",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NHovězí frankfutská pečeně, rýže, čaj, pvCO1",
+   "version": 5,
+   "casKonec": "2026-09-22T15:00:00",
+   "casOdhlaseni": "2026-09-22T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "23.09.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Špecle se sýrovou omáčkou, ovoce, čaj, pv",
+   "popis": "Oběd 2",
+   "delsiPopis": "Špecle se sýrovou omáčkou, ovoce, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|03 -Vejce|07 -Mléko|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "03",
+     "Vejce"
+    ],
+    [
+     "07",
+     "Mléko"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "46",
+   "vetaDieta": "62",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NŠpecle se sýrovou omáčkou, ovoce, čaj, pvCO2",
+   "version": 5,
+   "casKonec": "2026-09-22T15:00:00",
+   "casOdhlaseni": "2026-09-22T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table17": [
+  {
+   "id": 0,
+   "datum": "24.09.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Z vaječné jíšky",
+   "popis": "",
+   "delsiPopis": "Z vaječné jíšky",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|03 -Vejce|06 -Sójové boby (sója)|07 -Mléko|09 -Celer|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "03",
+     "Vejce"
+    ],
+    [
+     "06",
+     "Sójové boby"
+    ],
+    [
+     "07",
+     "Mléko"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "101",
+   "vetaDieta": "63",
+   "omezeniObj": {
+    "den": "",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1AZ vaječné jíškyCPO",
+   "version": 5,
+   "casKonec": "2026-09-23T15:00:00",
+   "casOdhlaseni": "2026-09-23T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "24.09.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Holandský řízek, brambory, salát, čaj, pv",
+   "popis": "Oběd 1",
+   "delsiPopis": "Holandský řízek, brambory, salát, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|03 -Vejce|07 -Mléko|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "03",
+     "Vejce"
+    ],
+    [
+     "07",
+     "Mléko"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "47",
+   "vetaDieta": "64",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NHolandský řízek, brambory, salát, čaj, pvCO1",
+   "version": 5,
+   "casKonec": "2026-09-23T15:00:00",
+   "casOdhlaseni": "2026-09-23T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "24.09.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Těstovinový salát s fazolemi a sýrem, jogurt, čaj, pv",
+   "popis": "Oběd 2",
+   "delsiPopis": "Těstovinový salát s fazolemi a sýrem, jogurt, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|07 -Mléko|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "07",
+     "Mléko"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "48",
+   "vetaDieta": "65",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NTěstovinový salát s fazolemi a sýrem, jogurt, čaj, pvCO2",
+   "version": 5,
+   "casKonec": "2026-09-23T15:00:00",
+   "casOdhlaseni": "2026-09-23T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table18": [
+  {
+   "id": 0,
+   "datum": "25.09.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Hovězí s nudlemi",
+   "popis": "",
+   "delsiPopis": "Hovězí s nudlemi",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|06 -Sójové boby (sója)|07 -Mléko|09 -Celer|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "06",
+     "Sójové boby"
+    ],
+    [
+     "07",
+     "Mléko"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "102",
+   "vetaDieta": "66",
+   "omezeniObj": {
+    "den": "T",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1AHovězí s nudlemiCPO",
+   "version": 5,
+   "casKonec": "2026-09-24T15:00:00",
+   "casOdhlaseni": "2026-09-24T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "25.09.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Kuřecí asijská pánev, kari rýže, tvaroháček,čaj, pv",
+   "popis": "Oběd 1",
+   "delsiPopis": "Kuřecí asijská pánev, kari rýže, tvaroháček,čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|06 -Sójové boby (sója)|07 -Mléko|09 -Celer|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "06",
+     "Sójové boby"
+    ],
+    [
+     "07",
+     "Mléko"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "49",
+   "vetaDieta": "67",
+   "omezeniObj": {
+    "den": "T",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NKuřecí asijská pánev, kari rýže, tvaroháček,čaj, pvCO1",
+   "version": 5,
+   "casKonec": "2026-09-24T15:00:00",
+   "casOdhlaseni": "2026-09-24T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "25.09.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Houbové rizoto, salát, tvaroháček,čaj, pv",
+   "popis": "Oběd 2",
+   "delsiPopis": "Houbové rizoto, salát, tvaroháček,čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|07 -Mléko|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "07",
+     "Mléko"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "50",
+   "vetaDieta": "68",
+   "omezeniObj": {
+    "den": "T",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NHoubové rizoto, salát, tvaroháček,čaj, pvCO2",
+   "version": 5,
+   "casKonec": "2026-09-24T15:00:00",
+   "casOdhlaseni": "2026-09-24T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table19": [
+  {
+   "id": 0,
+   "datum": "28.09.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Státní svátek",
+   "popis": "Oběd 1",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "51",
+   "vetaDieta": "69",
+   "omezeniObj": {
+    "den": "VP",
+    "obj": "V",
+    "zm": "",
+    "bur": "V"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NStátní svátekCO1",
+   "version": 5,
+   "casKonec": "2026-09-25T15:00:00",
+   "casOdhlaseni": "2026-09-25T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "28.09.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Státní svátek",
+   "popis": "Oběd 2",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "52",
+   "vetaDieta": "70",
+   "omezeniObj": {
+    "den": "VP",
+    "obj": "V",
+    "zm": "",
+    "bur": "V"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NStátní svátekCO2",
+   "version": 5,
+   "casKonec": "2026-09-25T15:00:00",
+   "casOdhlaseni": "2026-09-25T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "28.09.2026",
+   "druh_popis": "Oběd 1 Rad",
+   "druh_chod": "Oběd",
+   "nazev": "Státní svátek",
+   "popis": "Oběd 1 Rad",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O3",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "53",
+   "vetaDieta": "71",
+   "omezeniObj": {
+    "den": "VP",
+    "obj": "V",
+    "zm": "",
+    "bur": "V"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O3",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NStátní svátekCO3",
+   "version": 5,
+   "casKonec": "2026-09-25T15:00:00",
+   "casOdhlaseni": "2026-09-25T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 3,
+   "datum": "28.09.2026",
+   "druh_popis": "Oběd 2 Rad",
+   "druh_chod": "Oběd",
+   "nazev": "Státní svátek",
+   "popis": "Oběd 2 Rad, Děti HČ, Jídelna",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O4",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "54",
+   "vetaDieta": "72",
+   "omezeniObj": {
+    "den": "VP",
+    "obj": "V",
+    "zm": "",
+    "bur": "V"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O4",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NStátní svátekCO4",
+   "version": 5,
+   "casKonec": "2026-09-25T15:00:00",
+   "casOdhlaseni": "2026-09-25T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table20": [
+  {
+   "id": 0,
+   "datum": "29.09.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Vývar s vejcem",
+   "popis": "",
+   "delsiPopis": "Vývar s vejcem",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|06 -Sójové boby (sója)|07 -Mléko|09 -Celer|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "06",
+     "Sójové boby"
+    ],
+    [
+     "07",
+     "Mléko"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "103",
+   "vetaDieta": "73",
+   "omezeniObj": {
+    "den": "",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1AVývar s vejcemCPO",
+   "version": 5,
+   "casKonec": "2026-09-25T15:00:00",
+   "casOdhlaseni": "2026-09-25T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "29.09.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Kuřecí na, kari rýže, ovoce, čaj, pv",
+   "popis": "Oběd 1",
+   "delsiPopis": "Kuřecí na, kari rýže, ovoce, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|06 -Sójové boby (sója)|07 -Mléko|09 -Celer|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "06",
+     "Sójové boby"
+    ],
+    [
+     "07",
+     "Mléko"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "55",
+   "vetaDieta": "74",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NKuřecí na, kari rýže, ovoce, čaj, pvCO1",
+   "version": 5,
+   "casKonec": "2026-09-25T15:00:00",
+   "casOdhlaseni": "2026-09-25T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "29.09.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Vločková kaše se skořicí, ovoce, mléko, pv",
+   "popis": "Oběd 2",
+   "delsiPopis": "Vločková kaše se skořicí, ovoce, mléko, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|07 -Mléko|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "07",
+     "Mléko"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "56",
+   "vetaDieta": "75",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NVločková kaše se skořicí, ovoce, mléko, pvCO2",
+   "version": 5,
+   "casKonec": "2026-09-25T15:00:00",
+   "casOdhlaseni": "2026-09-25T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 3,
+   "datum": "29.09.2026",
+   "druh_popis": "Oběd 1 Rad",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 3",
+   "popis": "Oběd 1 Rad",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O3",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "57",
+   "vetaDieta": "76",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O3",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 3CO3",
+   "version": 5,
+   "casKonec": "2026-09-25T15:00:00",
+   "casOdhlaseni": "2026-09-25T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 4,
+   "datum": "29.09.2026",
+   "druh_popis": "Oběd 2 Rad",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 2 Rad",
+   "popis": "Oběd 2 Rad, Děti HČ, Jídelna",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O4",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "58",
+   "vetaDieta": "77",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O4",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 2 RadCO4",
+   "version": 5,
+   "casKonec": "2026-09-25T15:00:00",
+   "casOdhlaseni": "2026-09-25T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table21": [
+  {
+   "id": 0,
+   "datum": "30.09.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Hrachová",
+   "popis": "",
+   "delsiPopis": "Hrachová",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|06 -Sójové boby (sója)|07 -Mléko|09 -Celer|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "06",
+     "Sójové boby"
+    ],
+    [
+     "07",
+     "Mléko"
+    ],
+    [
+     "09",
+     "Celer"
+    ]
+   ],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "104",
+   "vetaDieta": "78",
+   "omezeniObj": {
+    "den": "",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1AHrachováCPO",
+   "version": 5,
+   "casKonec": "2026-09-29T15:00:00",
+   "casOdhlaseni": "2026-09-29T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "30.09.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Vepřový plátek na kmínu, bramborová kaše, salát, čaj, pv",
+   "popis": "Oběd 1",
+   "delsiPopis": "Vepřový plátek na kmínu, bramborová kaše, salát, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "01 -Obiloviny obsahující lepek|07 -Mléko|",
+   "alergeny": [
+    [
+     "01",
+     "Obiloviny obsahující lepek"
+    ],
+    [
+     "07",
+     "Mléko"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "59",
+   "vetaDieta": "79",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NVepřový plátek na kmínu, bramborová kaše, salát, čaj, pvCO1",
+   "version": 5,
+   "casKonec": "2026-09-29T15:00:00",
+   "casOdhlaseni": "2026-09-29T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "30.09.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Treska s kus kusem se zeleninou, salát, čaj, pv",
+   "popis": "Oběd 2",
+   "delsiPopis": "Treska s kus kusem se zeleninou, salát, čaj, pv",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "03 -Vejce|04 -Ryby|",
+   "alergeny": [
+    [
+     "03",
+     "Vejce"
+    ],
+    [
+     "04",
+     "Ryby"
+    ]
+   ],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "60",
+   "vetaDieta": "80",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NTreska s kus kusem se zeleninou, salát, čaj, pvCO2",
+   "version": 5,
+   "casKonec": "2026-09-29T15:00:00",
+   "casOdhlaseni": "2026-09-29T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table22": [
+  {
+   "id": 0,
+   "datum": "01.10.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Polévka",
+   "popis": "",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "105",
+   "vetaDieta": "81",
+   "omezeniObj": {
+    "den": "",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1APolévkaCPO",
+   "version": 5,
+   "casKonec": "2026-09-30T15:00:00",
+   "casOdhlaseni": "2026-09-30T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "01.10.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 1",
+   "popis": "Oběd 1",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "61",
+   "vetaDieta": "82",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 1CO1",
+   "version": 5,
+   "casKonec": "2026-09-30T15:00:00",
+   "casOdhlaseni": "2026-09-30T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "01.10.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 2",
+   "popis": "Oběd 2",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "62",
+   "vetaDieta": "83",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 2CO2",
+   "version": 5,
+   "casKonec": "2026-09-30T15:00:00",
+   "casOdhlaseni": "2026-09-30T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 3,
+   "datum": "01.10.2026",
+   "druh_popis": "Oběd 1 Rad",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 3",
+   "popis": "Oběd 1 Rad",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O3",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "63",
+   "vetaDieta": "84",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O3",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 3CO3",
+   "version": 5,
+   "casKonec": "2026-09-30T15:00:00",
+   "casOdhlaseni": "2026-09-30T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 4,
+   "datum": "01.10.2026",
+   "druh_popis": "Oběd 2 Rad",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 2 Rad 1",
+   "popis": "Oběd 2 Rad, Děti HČ, Jídelna",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O4",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "64",
+   "vetaDieta": "85",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O4",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 2 Rad 1CO4",
+   "version": 5,
+   "casKonec": "2026-09-30T15:00:00",
+   "casOdhlaseni": "2026-09-30T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table23": [
+  {
+   "id": 0,
+   "datum": "02.10.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Polévka",
+   "popis": "",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "106",
+   "vetaDieta": "86",
+   "omezeniObj": {
+    "den": "T",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1APolévkaCPO",
+   "version": 5,
+   "casKonec": "2026-10-01T15:00:00",
+   "casOdhlaseni": "2026-10-01T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "02.10.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 1",
+   "popis": "Oběd 1",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "65",
+   "vetaDieta": "87",
+   "omezeniObj": {
+    "den": "T",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 1CO1",
+   "version": 5,
+   "casKonec": "2026-10-01T15:00:00",
+   "casOdhlaseni": "2026-10-01T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "02.10.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 2",
+   "popis": "Oběd 2",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "66",
+   "vetaDieta": "88",
+   "omezeniObj": {
+    "den": "T",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 2CO2",
+   "version": 5,
+   "casKonec": "2026-10-01T15:00:00",
+   "casOdhlaseni": "2026-10-01T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table24": [
+  {
+   "id": 0,
+   "datum": "05.10.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Polévka",
+   "popis": "",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "107",
+   "vetaDieta": "89",
+   "omezeniObj": {
+    "den": "",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1APolévkaCPO",
+   "version": 5,
+   "casKonec": "2026-10-02T15:00:00",
+   "casOdhlaseni": "2026-10-02T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "05.10.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 1",
+   "popis": "Oběd 1",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "67",
+   "vetaDieta": "90",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 1CO1",
+   "version": 5,
+   "casKonec": "2026-10-02T15:00:00",
+   "casOdhlaseni": "2026-10-02T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "05.10.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 2",
+   "popis": "Oběd 2",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "68",
+   "vetaDieta": "91",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 2CO2",
+   "version": 5,
+   "casKonec": "2026-10-02T15:00:00",
+   "casOdhlaseni": "2026-10-02T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table25": [
+  {
+   "id": 0,
+   "datum": "06.10.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Polévka",
+   "popis": "",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "108",
+   "vetaDieta": "92",
+   "omezeniObj": {
+    "den": "",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1APolévkaCPO",
+   "version": 5,
+   "casKonec": "2026-10-05T15:00:00",
+   "casOdhlaseni": "2026-10-05T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "06.10.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 1",
+   "popis": "Oběd 1",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "69",
+   "vetaDieta": "93",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 1CO1",
+   "version": 5,
+   "casKonec": "2026-10-05T15:00:00",
+   "casOdhlaseni": "2026-10-05T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "06.10.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 2",
+   "popis": "Oběd 2",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "70",
+   "vetaDieta": "94",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 2CO2",
+   "version": 5,
+   "casKonec": "2026-10-05T15:00:00",
+   "casOdhlaseni": "2026-10-05T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table26": [
+  {
+   "id": 0,
+   "datum": "07.10.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Polévka",
+   "popis": "",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "109",
+   "vetaDieta": "95",
+   "omezeniObj": {
+    "den": "",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1APolévkaCPO",
+   "version": 5,
+   "casKonec": "2026-10-06T15:00:00",
+   "casOdhlaseni": "2026-10-06T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "07.10.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 1",
+   "popis": "Oběd 1",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "71",
+   "vetaDieta": "96",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 1CO1",
+   "version": 5,
+   "casKonec": "2026-10-06T15:00:00",
+   "casOdhlaseni": "2026-10-06T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "07.10.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 2",
+   "popis": "Oběd 2",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "72",
+   "vetaDieta": "97",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 2CO2",
+   "version": 5,
+   "casKonec": "2026-10-06T15:00:00",
+   "casOdhlaseni": "2026-10-06T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 3,
+   "datum": "07.10.2026",
+   "druh_popis": "Oběd 1 Rad",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 1 Rad",
+   "popis": "Oběd 1 Rad",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O3",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "74",
+   "vetaDieta": "98",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O3",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 1 RadCO3",
+   "version": 5,
+   "casKonec": "2026-10-06T15:00:00",
+   "casOdhlaseni": "2026-10-06T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 4,
+   "datum": "07.10.2026",
+   "druh_popis": "Oběd 2 Rad",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 2 Rad 1",
+   "popis": "Oběd 2 Rad, Děti HČ, Jídelna",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O4",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "73",
+   "vetaDieta": "99",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O4",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 2 Rad 1CO4",
+   "version": 5,
+   "casKonec": "2026-10-06T15:00:00",
+   "casOdhlaseni": "2026-10-06T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table27": [
+  {
+   "id": 0,
+   "datum": "08.10.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Polévka",
+   "popis": "",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "110",
+   "vetaDieta": "100",
+   "omezeniObj": {
+    "den": "",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1APolévkaCPO",
+   "version": 5,
+   "casKonec": "2026-10-07T15:00:00",
+   "casOdhlaseni": "2026-10-07T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "08.10.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 1",
+   "popis": "Oběd 1",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "75",
+   "vetaDieta": "101",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 1CO1",
+   "version": 5,
+   "casKonec": "2026-10-07T15:00:00",
+   "casOdhlaseni": "2026-10-07T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "08.10.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 2",
+   "popis": "Oběd 2",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "76",
+   "vetaDieta": "102",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 2CO2",
+   "version": 5,
+   "casKonec": "2026-10-07T15:00:00",
+   "casOdhlaseni": "2026-10-07T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 3,
+   "datum": "08.10.2026",
+   "druh_popis": "Oběd 1 Rad",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 3",
+   "popis": "Oběd 1 Rad",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O3",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "77",
+   "vetaDieta": "103",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O3",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 3CO3",
+   "version": 5,
+   "casKonec": "2026-10-07T15:00:00",
+   "casOdhlaseni": "2026-10-07T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 4,
+   "datum": "08.10.2026",
+   "druh_popis": "Oběd 2 Rad",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 2 Rad 1",
+   "popis": "Oběd 2 Rad, Děti HČ, Jídelna",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O4",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "78",
+   "vetaDieta": "104",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O4",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 2 Rad 1CO4",
+   "version": 5,
+   "casKonec": "2026-10-07T15:00:00",
+   "casOdhlaseni": "2026-10-07T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table28": [
+  {
+   "id": 0,
+   "datum": "09.10.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Polévka",
+   "popis": "",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "111",
+   "vetaDieta": "105",
+   "omezeniObj": {
+    "den": "T",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1APolévkaCPO",
+   "version": 5,
+   "casKonec": "2026-10-08T15:00:00",
+   "casOdhlaseni": "2026-10-08T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "09.10.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 1",
+   "popis": "Oběd 1",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "79",
+   "vetaDieta": "106",
+   "omezeniObj": {
+    "den": "T",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 1CO1",
+   "version": 5,
+   "casKonec": "2026-10-08T15:00:00",
+   "casOdhlaseni": "2026-10-08T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "09.10.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 2",
+   "popis": "Oběd 2",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "80",
+   "vetaDieta": "107",
+   "omezeniObj": {
+    "den": "T",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 2CO2",
+   "version": 5,
+   "casKonec": "2026-10-08T15:00:00",
+   "casOdhlaseni": "2026-10-08T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table29": [
+  {
+   "id": 0,
+   "datum": "12.10.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Polévka",
+   "popis": "",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "112",
+   "vetaDieta": "108",
+   "omezeniObj": {
+    "den": "",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1APolévkaCPO",
+   "version": 5,
+   "casKonec": "2026-10-09T15:00:00",
+   "casOdhlaseni": "2026-10-09T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "12.10.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 1",
+   "popis": "Oběd 1",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "81",
+   "vetaDieta": "109",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 1CO1",
+   "version": 5,
+   "casKonec": "2026-10-09T15:00:00",
+   "casOdhlaseni": "2026-10-09T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "12.10.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 2",
+   "popis": "Oběd 2",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "82",
+   "vetaDieta": "110",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 2CO2",
+   "version": 5,
+   "casKonec": "2026-10-09T15:00:00",
+   "casOdhlaseni": "2026-10-09T15:00:00",
+   "obrazky": []
+  }
+ ],
+ "table30": [
+  {
+   "id": 0,
+   "datum": "13.10.2026",
+   "druh_popis": "Polévka",
+   "druh_chod": "Oběd",
+   "nazev": "Polévka",
+   "popis": "",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "PO",
+   "cena": "0",
+   "polevka": "A",
+   "pocet": 0,
+   "veta": "113",
+   "vetaDieta": "111",
+   "omezeniObj": {
+    "den": "",
+    "obj": "I",
+    "zm": "I",
+    "bur": "I"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1APolévkaCPO",
+   "version": 5,
+   "casKonec": "2026-10-12T15:00:00",
+   "casOdhlaseni": "2026-10-12T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 1,
+   "datum": "13.10.2026",
+   "druh_popis": "Oběd 1",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 1",
+   "popis": "Oběd 1",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O1",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "83",
+   "vetaDieta": "112",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O1",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 1CO1",
+   "version": 5,
+   "casKonec": "2026-10-12T15:00:00",
+   "casOdhlaseni": "2026-10-12T15:00:00",
+   "obrazky": []
+  },
+  {
+   "id": 2,
+   "datum": "13.10.2026",
+   "druh_popis": "Oběd 2",
+   "druh_chod": "Oběd",
+   "nazev": "Oběd 2",
+   "popis": "Oběd 2",
+   "delsiPopis": "",
+   "zakazaneAlergeny": null,
+   "alergeny_text": "",
+   "alergeny": [],
+   "chod": "C",
+   "druh": "O2",
+   "cena": "50.00",
+   "polevka": "N",
+   "pocet": 0,
+   "veta": "84",
+   "vetaDieta": "113",
+   "omezeniObj": {
+    "den": "",
+    "obj": "",
+    "zm": "",
+    "bur": "C"
+   },
+   "burza": {
+    "zmena": "0",
+    "ostatni": "0",
+    "nabidka": "0",
+    "poptavka": "0"
+   },
+   "vydejniMisto": {
+    "misto": "",
+    "mista": ""
+   },
+   "diety": {
+    "dieta": "",
+    "diety": ""
+   },
+   "zkratkaProduktu": "O2",
+   "cisloJidelnicku": "1",
+   "multipleNazev": "1NOběd 2CO2",
+   "version": 5,
+   "casKonec": "2026-10-12T15:00:00",
+   "casOdhlaseni": "2026-10-12T15:00:00",
+   "obrazky": []
+  }
+ ]
+}

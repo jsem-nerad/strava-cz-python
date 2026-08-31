@@ -1,0 +1,27 @@
+{
+ "sid": "01C6FCF02A7146159BC5F245A57AF29F",
+ "s5url": "https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc",
+ "cislo": "1234",
+ "jmeno": "test.user",
+ "uzivatel": {
+  "konto": "512.50",
+  "kontoAll": "[{\"nazev\":\"Stravné\",\"hodnota\":\"512.50\"}]",
+  "vydej": "1",
+  "pocetJidel": "0",
+  "jmeno": "Testovací Uživatel",
+  "email": "test@example.com",
+  "zprava": "",
+  "slabeHeslo": false,
+  "id": "test.user",
+  "mena": "Kč",
+  "blokace": false,
+  "cislo": "1234",
+  "trida": "1.",
+  "nazevJidelny": "Testovací školní jídelna",
+  "pasivni": false,
+  "verze": "5.13"
+ },
+ "betatest": false,
+ "ignoreCert": false,
+ "zustatPrihlasen": true
+}

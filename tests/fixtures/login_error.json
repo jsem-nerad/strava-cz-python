@@ -1,0 +1,12 @@
+{
+ "state": "error",
+ "number": 20,
+ "message": "The client was not found in the client register or the wrong nickname or password was entered or the client is canceled or blocked",
+ "backend": {
+  "WSOPrihlaseniUzivateleKomplet2Result": 20,
+  "aSID": "",
+  "xmlUzivatel": "",
+  "xmlKonto": "",
+  "xmlVydejniMista": ""
+ }
+}

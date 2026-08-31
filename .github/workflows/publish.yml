@@ -16,52 +16,54 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        python: ['3.9', '3.10', '3.11', '3.12']
-    
+        python: ['3.10', '3.11', '3.12', '3.13', '3.14']
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      
-      - uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ matrix.python }}-${{ hashFiles('pyproject.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-${{ matrix.python }}-
-            ${{ runner.os }}-pip-
-      
-      - run: |
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install
+        run: |
           python -m pip install --upgrade pip
-          pip install -e .[dev]
-      
-      - run: pytest -v --cov=strava_cz --cov-report=xml
-      
-      - run: flake8 src/strava_cz --max-line-length=100
-      
-      - run: black --check src/strava_cz
-      
-      - run: mypy src/strava_cz --ignore-missing-imports
+          pip install -e ".[dev]"
+
+      # The suite runs entirely against recorded fixtures and blocks real sockets,
+      # so CI never sends traffic to a school canteen's server.
+      - name: Test
+        run: pytest --cov=strava_cz --cov-report=term-missing --cov-report=xml
+
+      - name: Lint
+        run: ruff check src tests examples
+
+      - name: Format
+        run: ruff format --check src tests examples
+
+      - name: Type check
+        run: mypy
 
   build:
     needs: test
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-      
+          python-version: '3.12'
+
       - run: |
           python -m pip install --upgrade pip build
           python -m build
-      
+
       - name: Store the distribution packages
         uses: actions/upload-artifact@v4
         with:
@@ -85,6 +87,6 @@ jobs:
       with:
         name: python-package-distributions
         path: dist/
-    
+
     - name: Publish distribution to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1

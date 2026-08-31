@@ -1,165 +1,122 @@
+"""Ukázka použití knihovny strava-cz.
+
+Přihlašovací údaje se berou z proměnných prostředí, aby se heslo nedostalo do kódu:
+
+    export STRAVA_USERNAME="vase.jmeno"
+    export STRAVA_PASSWORD="VaseHeslo123"
+    export STRAVA_CANTEEN="3753"
+    python examples/example.py
+"""
+
+import os
+
 from strava_cz import (
-    StravaCZ, 
-    MealType, 
-    OrderType,
-    InvalidMealTypeError,
     DuplicateMealError,
     InsufficientBalanceError,
-    StravaAPIError
+    MealNotFoundError,
+    MealNotOrderableError,
+    MealType,
+    StravaCZ,
+    StravaError,
 )
 
-# Vytvoreni objektu strava a prihlaseni uzivatele
-strava = StravaCZ(
-    username="your.username", 
-    password="YourPassword123", 
-    canteen_number="your canteen number"  # POVINNY parametr!
-    )
+USERNAME = os.environ["STRAVA_USERNAME"]
+PASSWORD = os.environ["STRAVA_PASSWORD"]
+CANTEEN = os.environ["STRAVA_CANTEEN"]
 
-# Vypsani informaci o uzivateli
-print(strava.user)
-print(f"Zustatok: {strava.user.balance} Kč")
 
-# Ziskani jidelnicku a vypsani
-strava.menu.fetch()
-strava.menu.print()
+def main() -> None:
+    # Context manager se sám postará o odhlášení a uzavření spojení.
+    with StravaCZ(USERNAME, PASSWORD, CANTEEN) as strava:
+        # ---------------------------------------------------------- uživatel
+        print(strava.user)
+        print(f"\nZůstatek: {strava.user.balance:.2f} {strava.user.currency}")
 
-# Informace o menu
-print(f"\nMenu: {strava.menu}")
-print(f"Pocet objednatelnych dni: {len(strava.menu)}")
+        # ------------------------------------------------------- jídelníček
+        strava.menu.fetch()
+        print(f"\n{strava.menu!r}\n")
+        strava.menu.print()
 
-# Iterace pres objednavatelna jidla (default)
-for day in strava.menu:
-    print(f"Datum: {day['date']}, Pocet jidel: {len(day['meals'])}")
+        if strava.menu.parse_warnings:
+            print("Části odpovědi se nepodařilo zpracovat:")
+            for warning in strava.menu.parse_warnings:
+                print(f"  - {warning}")
 
-# ===== Ziskani jidel podle dni =====
+        # ---------------------------------------------------------- filtry
+        # Ve výchozím stavu se nic neskrývá; filtruje se explicitně.
+        objednatelne = strava.menu.get_meals(orderable=True)
+        obedy = strava.menu.get_meals(meal_types=[MealType.MAIN], orderable=True)
+        polevky = strava.menu.get_meals(meal_types=[MealType.SOUP])
+        objednane = strava.menu.get_meals(ordered=True)
 
-# Pouze objednavatelna jidla (default)
-normal_days = strava.menu.get_days()
-print(f"\nObjednatelne dny: {len(normal_days)}")
+        print(f"\nObjednatelných jídel: {len(objednatelne)}")
+        print(f"  z toho hlavních jídel: {len(obedy)}")
+        print(f"Polévek v jídelníčku:   {len(polevky)}")
+        print(f"Už objednáno:           {len(objednane)}")
 
-# Pouze polevky
-soup_days = strava.menu.get_days(meal_types=[MealType.SOUP])
-print(f"Dny s polevkami: {len(soup_days)}")
+        # Filtrování podle data
+        tento_tyden = strava.menu.get_days(date_from="2026-09-07", date_to="2026-09-11")
+        print(f"Dnů v zadaném rozsahu:  {len(tento_tyden)}")
 
-# Pouze hlavni jidla
-main_days = strava.menu.get_days(meal_types=[MealType.MAIN])
-print(f"Dny s hlavnimi jidly: {len(main_days)}")
+        # Dny, kdy se nevaří, se musí vyžádat výslovně
+        volno = [d for d in strava.menu.get_days(include_no_school=True) if d.no_school]
+        print(f"Dnů, kdy se nevaří:     {len(volno)}")
 
-# Vsechna jidla (vcetne omezenych a volitelnych)
-all_days = strava.menu.get_days(
-    order_types=[OrderType.NORMAL, OrderType.RESTRICTED, OrderType.OPTIONAL]
-)
-print(f"Vsechny dny: {len(all_days)}")
+        # -------------------------------------------------- proč to nejde
+        print("\nJídla, která teď objednat nejde:")
+        for meal in strava.menu.get_meals(orderable=False)[:5]:
+            print(f"  {meal.date} {meal.name[:32]:<34} {meal.order_restriction.description}")
 
-# Pouze dny s objednavkami
-ordered_days = strava.menu.get_days(ordered=True)
-print(f"Dny s objednavkami: {len(ordered_days)}")
+        # ------------------------------------------------------ iterace
+        print("\nPrvní tři dny:")
+        for day in list(strava.menu)[:3]:
+            znacka = "objednáno" if day.ordered else "nic neobjednáno"
+            print(f"  {day.date:%a %d.%m.} - {len(day.meals)} jídel, {znacka}")
+            for meal in day.orderable:
+                print(f"      [{meal.id}] {meal.name}  ({meal.price:g} Kč)")
 
-# Pouze dny bez objednavek
-unordered_days = strava.menu.get_days(ordered=False)
-print(f"Dny bez objednavek: {len(unordered_days)}")
+        # -------------------------------------------------- objednávání
+        if not obedy:
+            print("\nNení co objednat, končím.")
+            return
 
-# ===== Ziskani jidel jako flat seznam =====
+        prvni = obedy[0]
+        print(f"\nObjednávám [{prvni.id}] {prvni.name} na {prvni.date}")
 
-# Vsechna objednavatelna jidla
-meals = strava.menu.get_meals()
-print(f"\nCelkem objednatelnych jidel: {len(meals)}")
+        try:
+            vysledek = strava.menu.order_meals(prvni.id)
+            print(f"  {vysledek}")
+            print(f"  změněno: {vysledek.changed}")
+            print(f"  zůstatek po objednání: {strava.user.balance:.2f} Kč")
+        except MealNotOrderableError as exc:
+            print(f"  Tohle jídlo objednat nejde: {exc}")
+        except InsufficientBalanceError as exc:
+            print(f"  Nedostatečný zůstatek: {exc}")
+        except MealNotFoundError as exc:
+            print(f"  Neznámé ID jídla: {exc}")
+        except DuplicateMealError as exc:
+            print(f"  Duplicitní jídla: {exc}")
 
-# Pouze polevky
-soups = strava.menu.get_meals(meal_types=[MealType.SOUP])
-print(f"Polevky: {len(soups)}")
+        # Když nechcete výjimky, nechte si vrátit přehled toho, co se povedlo.
+        vysledek = strava.menu.order_meals(
+            *[m.id for m in obedy[:3]],
+            continue_on_error=True,
+        )
+        print(f"\nHromadná objednávka: {vysledek}")
+        for meal_id, chyba in vysledek.failed:
+            print(f"  jídlo {meal_id}: {chyba}")
 
-# Pouze hlavni jidla
-mains = strava.menu.get_meals(meal_types=[MealType.MAIN])
-print(f"Hlavni jidla: {len(mains)}")
+        # ------------------------------------------------------- zrušení
+        objednane = strava.menu.get_meals(ordered=True)
+        if objednane:
+            print(f"\nRuším {len(objednane)} objednávek")
+            strava.menu.cancel_meals(*[m.id for m in objednane], continue_on_error=True)
 
-# Pouze objednana jidla
-ordered = strava.menu.get_meals(ordered=True)
-print(f"Objednana jidla: {len(ordered)}")
+        print(f"\nKonečný zůstatek: {strava.user.balance:.2f} {strava.user.currency}")
 
-# Vcetne omezenych jidel
-with_restricted = strava.menu.get_meals(
-    order_types=[OrderType.NORMAL, OrderType.RESTRICTED]
-)
-print(f"S omezenymi: {len(with_restricted)}")
 
-# Vsechna jidla (vcetne omezenych a volitelnych)
-all_meals = strava.menu.get_meals(
-    order_types=[OrderType.NORMAL, OrderType.RESTRICTED, OrderType.OPTIONAL]
-)
-print(f"Vsechna jidla: {len(all_meals)}")
-
-# ===== Priklady kontroly typu objednavky =====
-
-for meal in all_meals[:5]:  # Prvnich 5 jidel
-    if meal['orderType'] == OrderType.RESTRICTED:
-        print(f"  {meal['name']} - NELZE OBJEDNAT")
-    elif meal['orderType'] == OrderType.OPTIONAL:
-        print(f"  {meal['name']} - VOLITELNE")
-    else:
-        print(f"  {meal['name']} - NORMALNI")
-
-# ===== Vyhledavani =====
-
-# Zjisti, jestli je jidlo s meal_id 4 objednano (True/False)
-print(f"\nJidlo 4 je objednano: {strava.menu.is_ordered(4)}")
-
-# Ziskej jidlo podle ID
-meal = strava.menu.get_by_id(4)
-if meal:
-    print(f"Jidlo 4: {meal['name']} ({meal['type'].value})")
-
-# Ziskej jidla pro konkretni datum
-today_meals = strava.menu.get_by_date("2025-11-11")
-if today_meals:
-    print(f"Jidla na 11.11: {len(today_meals['meals'])} jidel")
-
-# ===== Objednavani s pokrocilym zpracovanim chyb =====
-
-# Zakladni objednavka
-try:
-    print(f"\nZustatok pred objednanim: {strava.user.balance} Kč")
-    strava.menu.order_meals(3, 6)
-    print(f"Zustatok po objednani: {strava.user.balance} Kč")
-except InvalidMealTypeError as e:
-    print(f"Neplatny typ jidla: {e}")
-except InsufficientBalanceError as e:
-    print(f"Nedostatecny zustatok: {e}")
-except DuplicateMealError as e:
-    print(f"Duplicitni jidla: {e}")
-
-# Objednavka s parametry
-try:
-    strava.menu.order_meals(
-        3, 6, 7,
-        continue_on_error=True,      # Pokracuj i pri chybach
-        strict_duplicates=False       # Pouze varuj pri duplicitach
-    )
-except StravaAPIError as e:
-    print(f"Nektera jidla selhala: {e}")
-
-# Strict mode - vyhodi chybu pri duplikatech
-try:
-    strava.menu.order_meals(3, 4, strict_duplicates=True)  # Pokud jsou ze stejneho dne
-except DuplicateMealError as e:
-    print(f"Chyba duplicity: {e}")
-
-# Zrus objednavky
-try:
-    strava.menu.cancel_meals(3, 6, continue_on_error=False)
-    print("Objednavky zruseny")
-except StravaAPIError as e:
-    print(f"Chyba pri ruseni: {e}")
-
-# ===== Overeni stavu =====
-
-# Zkontroluj, co je objednano
-ordered_meals = strava.menu.get_meals(ordered=True)
-print(f"\nCelkem objednano: {len(ordered_meals)} jidel")
-for meal in ordered_meals:
-    print(f"  - {meal['name']} ({meal['date']}): {meal['price']} Kč")
-
-print(f"\nKonecny zustatok: {strava.user.balance} Kč")
-
-# Odhlasi uzivatele
-strava.logout()
+if __name__ == "__main__":
+    try:
+        main()
+    except StravaError as exc:
+        raise SystemExit(f"Chyba: {exc}") from exc
