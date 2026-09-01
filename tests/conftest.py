@@ -100,7 +100,7 @@ def store_path(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """An isolated profile store, so no test can touch the real ~/.config."""
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "config"))
     for var in list(os.environ):
-        if var.startswith("STRAVA_CZ_PASSWORD"):
+        if var.startswith(("STRAVA_CZ_PASSWORD", "STRAVA_CZ_PASSPHRASE")):
             monkeypatch.delenv(var, raising=False)
     return tmp_path / "config" / "strava-cz" / "profiles.json"
 
@@ -137,6 +137,26 @@ def fake_keyring(monkeypatch: pytest.MonkeyPatch) -> FakeKeyring:
     backend = FakeKeyring()
     monkeypatch.setattr(profiles, "_keyring", lambda: backend)
     return backend
+
+
+@pytest.fixture
+def passphrase(monkeypatch: pytest.MonkeyPatch) -> str:
+    """A passphrase in the environment, so encrypted profiles never prompt."""
+    value = "test-passphrase"
+    monkeypatch.setenv("STRAVA_CZ_PASSPHRASE", value)
+    return value
+
+
+@pytest.fixture
+def no_crypto(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Simulate a machine where `cryptography` is not installed."""
+    from strava_cz import profiles
+    from strava_cz.exceptions import EncryptionUnavailableError
+
+    def fail() -> Any:
+        raise EncryptionUnavailableError()
+
+    monkeypatch.setattr(profiles, "_crypto", fail)
 
 
 @pytest.fixture

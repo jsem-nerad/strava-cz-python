@@ -460,9 +460,19 @@ class TestProfileCommands:
         )
         assert "password" not in json.loads(store_path.read_text())["profiles"]["s"]
 
-    def test_keyring_missing_explains_the_alternatives(self, store_path, no_keyring, capsys):
-        assert run("profile", "add", "s", "--username", "u", "--canteen", "1") == EXIT["profile"]
-        assert "--secret env" in capsys.readouterr().err
+    def test_explicit_keyring_refuses_and_points_at_the_alternatives(
+        self, store_path, no_keyring, monkeypatch, capsys
+    ):
+        """--secret keyring means keyring; it must not quietly become something else."""
+        monkeypatch.setenv("STRAVA_CZ_PASSWORD", "secret")
+        assert (
+            run("profile", "add", "s", "--username", "u", "--canteen", "1", "--secret", "keyring")
+            == EXIT["profile"]
+        )
+        err = capsys.readouterr().err
+        assert "--secret encrypted" in err, "the option that still remembers the password"
+        assert "--secret env" in err
+        assert store_path.exists() is False, "nothing may be written when it refuses"
 
     def test_verify_logs_in_before_storing(
         self, api, login_route, store_path, fake_keyring, monkeypatch, capsys
@@ -537,3 +547,103 @@ def test_python_dash_m_runs_the_cli():
     )
     assert result.returncode == 0
     assert result.stdout.startswith("strava-cz ")
+
+
+class TestSecretAuto:
+    """`--secret auto` is what makes a headless machine able to store a password."""
+
+    def test_auto_uses_the_keyring_when_there_is_one(
+        self, store_path, fake_keyring, monkeypatch, capsys
+    ):
+        monkeypatch.setenv("STRAVA_CZ_PASSWORD", "secret")
+        assert run("--json", "profile", "add", "s", "--username", "u", "--canteen", "1") == 0
+        assert out_json(capsys)["secret"] == "keyring"
+
+    def test_auto_falls_back_to_encryption(self, store_path, no_keyring, monkeypatch, capsys):
+        monkeypatch.setenv("STRAVA_CZ_PASSWORD", "secret")
+        monkeypatch.setenv("STRAVA_CZ_PASSPHRASE", "unlock-me")
+        assert run("--json", "profile", "add", "s", "--username", "u", "--canteen", "1") == 0
+        assert out_json(capsys)["secret"] == "encrypted"
+
+    def test_the_fallback_is_announced_not_silent(
+        self, store_path, no_keyring, monkeypatch, capsys
+    ):
+        monkeypatch.setenv("STRAVA_CZ_PASSWORD", "secret")
+        monkeypatch.setenv("STRAVA_CZ_PASSPHRASE", "unlock-me")
+        run("profile", "add", "s", "--username", "u", "--canteen", "1")
+        err = capsys.readouterr().err
+        assert "no OS keyring" in err
+        assert "encrypted" in err
+
+    def test_the_profile_records_what_was_chosen_not_auto(
+        self, store_path, no_keyring, monkeypatch, capsys
+    ):
+        monkeypatch.setenv("STRAVA_CZ_PASSWORD", "secret")
+        monkeypatch.setenv("STRAVA_CZ_PASSPHRASE", "unlock-me")
+        run("profile", "add", "s", "--username", "u", "--canteen", "1")
+        assert json.loads(store_path.read_text())["profiles"]["s"]["secret"] == "encrypted"
+
+
+class TestEncryptedProfileEndToEnd:
+    @pytest.fixture
+    def encrypted_cli(self, api, login_route, store_path: Path, no_keyring, monkeypatch):
+        """A stored, encrypted profile plus a stubbed menu — the headless setup."""
+        monkeypatch.setenv("STRAVA_CZ_PASSWORD", "test-password")
+        monkeypatch.setenv("STRAVA_CZ_PASSPHRASE", "unlock-me")
+        assert run("profile", "add", "test", "--username", "test.user", "--canteen", "1234") == 0
+        monkeypatch.delenv("STRAVA_CZ_PASSWORD")  # only the passphrase remains
+        api.post(f"{BASE_URL}/api/objednavky").mock(
+            return_value=httpx.Response(200, json=load("menu_live"))
+        )
+        return api
+
+    def test_the_stored_password_decrypts_and_logs_in(
+        self, encrypted_cli, login_route, capsys, store_path
+    ):
+        capsys.readouterr()
+        assert run("--json", "menu") == EXIT["ok"]
+        assert out_json(capsys)["ok"] is True
+        # The canteen password came out of the file, not the environment.
+        assert json.loads(login_route.calls.last.request.content)["heslo"] == "test-password"
+        assert "test-password" not in store_path.read_text()
+
+    def test_a_wrong_passphrase_fails_cleanly(self, encrypted_cli, monkeypatch, capsys):
+        capsys.readouterr()
+        monkeypatch.setenv("STRAVA_CZ_PASSPHRASE", "not-it")
+        assert run("--json", "balance") == EXIT["profile"]
+        error = out_json(capsys)["error"]
+        assert error["type"] == "ProfileError"
+        assert "Wrong passphrase" in error["message"]
+
+    def test_no_passphrase_at_all_says_which_variable_to_set(
+        self, encrypted_cli, monkeypatch, capsys
+    ):
+        capsys.readouterr()
+        monkeypatch.delenv("STRAVA_CZ_PASSPHRASE")
+        monkeypatch.setattr("sys.stdin.isatty", lambda: False)
+        assert run("balance") == EXIT["profile"]
+        assert "STRAVA_CZ_PASSPHRASE_TEST" in capsys.readouterr().err
+
+    def test_the_password_environment_still_overrides_everything(
+        self, encrypted_cli, login_route, monkeypatch, capsys
+    ):
+        capsys.readouterr()
+        monkeypatch.delenv("STRAVA_CZ_PASSPHRASE")
+        monkeypatch.setenv("STRAVA_CZ_PASSWORD_TEST", "test-password")
+        assert run("balance") == EXIT["ok"], "no passphrase needed when the password is given"
+
+    def test_profile_show_names_the_passphrase_variable(self, encrypted_cli, capsys):
+        capsys.readouterr()
+        assert run("--json", "profile", "show", "test") == EXIT["ok"]
+        data = out_json(capsys)
+        assert data["secret"] == "encrypted"
+        assert data["passphrase_env"] == "STRAVA_CZ_PASSPHRASE_TEST"
+
+    def test_profile_show_omits_the_passphrase_variable_for_other_sources(self, store_path, capsys):
+        assert (
+            run("profile", "add", "e", "--username", "u", "--canteen", "1", "--secret", "env")
+            == EXIT["ok"]
+        )
+        capsys.readouterr()
+        run("--json", "profile", "show", "e")
+        assert out_json(capsys)["passphrase_env"] is None

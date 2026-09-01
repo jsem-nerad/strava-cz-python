@@ -285,19 +285,50 @@ Přepínač `--secret` říká, odkud se heslo bere:
 
 | hodnota | kam se heslo uloží |
 |---|---|
-| `keyring` | Klíčenka systému. Výchozí, do souboru se nedostane nic. |
+| `auto` | **Výchozí.** Klíčenka, když na stroji nějaká je; jinak `encrypted`. |
+| `keyring` | Klíčenka systému. Do souboru se nedostane nic. |
+| `encrypted` | **Zašifrované** do souboru s profily, pod heslovou frází. |
 | `env` | Nikam. Čte se z `$STRAVA_CZ_PASSWORD` při každém spuštění. |
 | `prompt` | Nikam. Zeptá se pokaždé na terminálu. |
 | `file` | **Otevřeným textem** do souboru s profily. Jen když si o to řeknete. |
+
+`auto` vždycky vypíše, kterou z obou cest zvolilo, a do profilu zapíše konkrétní
+výsledek — `profile show` tedy nikdy neuhýbá.
 
 Profily leží v `$XDG_CONFIG_HOME/strava-cz/profiles.json` (soubor `0600`, složka `0700`).
 Prostředí má vždycky přednost před uloženým heslem, takže cron může použít existující
 profil, aniž by se do něj sahalo: `$STRAVA_CZ_PASSWORD_<JMENO_PROFILU>` přebije
 `$STRAVA_CZ_PASSWORD` a obojí přebije klíčenku.
 
-> Na serveru bez grafického prostředí klíčenka většinou nefunguje. `strava-cz profile add`
-> to pozná a rovnou poradí `--secret env` nebo `--secret prompt` — nic nikam potichu
-> neuloží.
+### Server bez klíčenky
+
+Na serveru bez grafického prostředí klíčenka většinou nefunguje. `strava-cz profile add`
+to pozná dopředu a přepne na `encrypted`: heslo se zašifruje algoritmem **AES-256-GCM**
+klíčem, který z vaší heslové fráze odvodí **scrypt** (n=2^15, r=8, p=1). Parametry se
+ukládají do záznamu, takže i po jejich pozdější změně půjdou starší profily otevřít.
+
+```json
+"encrypted": {
+  "cipher": "aes-256-gcm",
+  "kdf": { "name": "scrypt", "n": 32768, "r": 8, "p": 1, "salt": "…" },
+  "nonce": "…",
+  "ciphertext": "…"
+}
+```
+
+Heslová fráze se hledá stejně jako heslo: `$STRAVA_CZ_PASSPHRASE_<JMENO_PROFILU>`, pak
+`$STRAVA_CZ_PASSPHRASE`, pak se na ni program zeptá na terminálu. Pro cron tedy stačí
+nastavit proměnnou.
+
+> **Co to řeší a co ne.** Šifrování chrání **soubor v klidu** — zálohu, kopii domovského
+> adresáře, složku, která se omylem odsynchronizuje jinam. Kdo umí přečíst jen
+> `profiles.json`, s ním nic nesvede. **Nechrání** vás před někým, kdo už čte vaše
+> prostředí nebo paměť běžícího procesu. V cronu je heslová fráze v proměnné podobně,
+> jako by tam bylo heslo — rozdíl je v tom, že samotný soubor s profily je pak bezpečné
+> zálohovat a synchronizovat.
+
+Zašifrovaný záznam je navíc **ověřený** (GCM), takže poškozený nebo pozměněný soubor
+skončí srozumitelnou chybou, ne tichým nesmyslem.
 
 Profily jdou použít i z Pythonu:
 
@@ -327,6 +358,7 @@ Všechny výjimky knihovny dědí ze `StravaError`, takže je lze odchytit najed
 | `ProfileError` | Něco je špatně s profilem nebo se souborem profilů |
 | `ProfileNotFoundError` | Profil daného jména není uložený |
 | `KeyringUnavailableError` | Na tomhle stroji není použitelná klíčenka |
+| `EncryptionUnavailableError` | Chybí balíček `cryptography`, nelze šifrovat |
 
 ## Nastavení klienta
 
@@ -354,6 +386,7 @@ Parametrem `client=` můžete také předat vlastní `httpx.Client`.
 - [x] Lépe zdokumentovat použití
 - [x] Nástroj pro příkazovou řádku
 - [x] Profily s bezpečně uloženým heslem
+- [x] Uložení hesla i na stroji bez klíčenky
 - [ ] Login rate limiting
 - [ ] Debug/log mód
 - [ ] Asynchronní klient

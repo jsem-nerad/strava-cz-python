@@ -24,13 +24,26 @@ s 0.3.0.
   `--include-no-school` a `--allergens`.
 - **Profily**: `strava-cz profile add|list|show|default|remove`. Uživatelské jméno
   a číslo jídelny se ukládají do `$XDG_CONFIG_HOME/strava-cz/profiles.json` (soubor
-  `0600`, složka `0700`, zápis atomický). **Heslo se do souboru nezapisuje** — jde do
-  klíčenky systému, nebo se čte z prostředí či se na něj program ptá. Otevřeným textem
-  se uloží jen po výslovném `--secret file`, a i tak s varováním.
+  `0600`, složka `0700`, zápis atomický). **Heslo se do souboru nezapisuje otevřeným
+  textem** — jde do klíčenky systému, nebo se zašifruje, nebo se čte z prostředí či se
+  na něj program ptá. Otevřeným textem se uloží jen po výslovném `--secret file`, a i
+  tak s varováním.
+- **`--secret encrypted`** pro stroje bez klíčenky, typicky servery. Heslo se zašifruje
+  algoritmem AES-256-GCM klíčem, který z heslové fráze odvodí scrypt (n=2^15, r=8, p=1);
+  sůl, nonce i parametry se ukládají do záznamu, takže pozdější zvýšení náročnosti
+  starší profily nezneplatní. GCM záznam ověřuje, takže poškozený soubor skončí
+  srozumitelnou chybou. Heslová fráze se bere z `$STRAVA_CZ_PASSPHRASE_<JMENO>`,
+  `$STRAVA_CZ_PASSPHRASE`, nebo se na ni program zeptá.
+- **`--secret auto` jako výchozí**: klíčenka, když nějaká funguje, jinak `encrypted`.
+  Heslo si tedy zapamatuje i server bez grafického prostředí, aniž by se kamkoliv
+  ukládalo otevřeným textem. Zvolená cesta se vypíše a zapíše do profilu.
+- Nepovinná závislost `cryptography` v extra `[cli]`. Na Linuxu ji stejně už instaluje
+  `keyring` přes `SecretStorage`.
 - `StravaCZ.from_profile()`, `Profile`, `ProfileStore` a `SecretSource` pro použití
   profilů přímo z Pythonu.
-- Výjimky `ProfileError`, `ProfileNotFoundError` a `KeyringUnavailableError`.
-- Nepovinný extra `[cli]` s balíčkem `keyring`.
+- Výjimky `ProfileError`, `ProfileNotFoundError`, `KeyringUnavailableError`
+  a `EncryptionUnavailableError`.
+- Nepovinný extra `[cli]` s balíčky `keyring` a `cryptography`.
 
 ### Changed
 - Barvy se vypisují jen na terminál. V rouře, v souboru, v cronu a při nastavené

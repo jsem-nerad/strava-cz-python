@@ -41,8 +41,10 @@ examples:
   strava-cz order 5 9 --dry-run
   strava-cz --format json ordered | jq '.total_price'
 
-The password is read from the profile's keyring entry, from $STRAVA_CZ_PASSWORD (or
-$STRAVA_CZ_PASSWORD_<PROFILE>), or asked for on the terminal - in that order.
+The password is read from $STRAVA_CZ_PASSWORD_<PROFILE>, then $STRAVA_CZ_PASSWORD, and
+only then from wherever the profile keeps it - the OS keyring, an encrypted profile
+file, or a prompt. An encrypted profile takes its passphrase from
+$STRAVA_CZ_PASSPHRASE_<PROFILE> or $STRAVA_CZ_PASSPHRASE, or asks for it.
 """
 
 
@@ -291,11 +293,14 @@ def build_parser() -> argparse.ArgumentParser:
     add.add_argument("--canteen", required=True, metavar="NUMBER", help="canteen number")
     add.add_argument(
         "--secret",
-        choices=[s.value for s in SecretSource],
-        default="keyring",
-        help="where the password lives: keyring (default, the OS keyring), "
-        "env ($STRAVA_CZ_PASSWORD), prompt (asked every time), or "
-        "file (PLAINTEXT in the profile file)",
+        choices=["auto", *(s.value for s in SecretSource)],
+        default="auto",
+        help="where the password lives. auto (default) uses the OS keyring when this "
+        "machine has one and an encrypted profile file when it does not, so it "
+        "always remembers the password. keyring insists on the OS keyring; "
+        "encrypted stores it in the profile file under a passphrase; env reads "
+        "$STRAVA_CZ_PASSWORD every run; prompt asks every run; file writes it in "
+        "PLAINTEXT",
     )
     add.add_argument(
         "--password-stdin",

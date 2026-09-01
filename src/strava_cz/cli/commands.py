@@ -27,6 +27,7 @@ from ..exceptions import (
 )
 from ..models import Meal, MealType
 from ..profiles import (
+    PASSPHRASE_ENV,
     PASSWORD_ENV,
     Profile,
     ProfileStore,
@@ -418,14 +419,26 @@ def cmd_profile_list(args: argparse.Namespace, out: Output) -> int:
 def cmd_profile_add(args: argparse.Namespace, out: Output) -> int:
     """Store a profile, putting the password wherever ``--secret`` says."""
     store = _store(args)
-    secret = SecretSource(args.secret)
+    secret = SecretSource.resolve(args.secret)
 
-    if secret is SecretSource.KEYRING and not keyring_available():
+    if args.secret == "auto":
+        # Say which way "auto" went, so nobody has to guess where their password is.
+        if secret is SecretSource.KEYRING:
+            out.note("using the OS keyring")
+        else:
+            out.note(
+                "no OS keyring on this machine, so the password will be encrypted "
+                "into the profile file with a passphrase you choose "
+                "(--secret keyring to insist on a keyring, --secret env to store "
+                "nothing at all)"
+            )
+    elif secret is SecretSource.KEYRING and not keyring_available():
         raise ProfileError(
             "No usable OS keyring on this machine, so --secret keyring cannot store "
-            'the password. Install one with: pip install "strava-cz[cli]" - or use '
-            "--secret env (reads $STRAVA_CZ_PASSWORD), --secret prompt (asks every "
-            "time), or --secret file to accept a plaintext file."
+            "the password. Use --secret encrypted to keep it in an encrypted profile "
+            "file instead, which needs no desktop session - or --secret env (reads "
+            "$STRAVA_CZ_PASSWORD) or --secret prompt (asks every time) to store no "
+            "password at all."
         )
 
     password: str | None = None
@@ -441,7 +454,8 @@ def cmd_profile_add(args: argparse.Namespace, out: Output) -> int:
         out.warn(
             f"--secret file writes the password in PLAINTEXT to {store.path}. The file "
             f"is chmod 0600, which stops other users but not anyone who can read your "
-            f"home directory or a backup of it."
+            f"home directory or a backup of it. --secret encrypted stores it under a "
+            f"passphrase instead, and works just as well without a keyring."
         )
 
     profile = Profile(
@@ -470,6 +484,11 @@ def cmd_profile_add(args: argparse.Namespace, out: Output) -> int:
             f"password in {stored.secret.description}"
         ),
     )
+    if stored.secret is SecretSource.ENCRYPTED:
+        out.note(
+            f"unlock it without being asked by setting ${stored.passphrase_env_var} "
+            f"(or ${PASSPHRASE_ENV}) - useful in cron"
+        )
     return EXIT["ok"]
 
 
@@ -527,6 +546,7 @@ def cmd_profile_show(args: argparse.Namespace, out: Output) -> int:
         "language": profile.language,
         "secret": profile.secret.value,
         "password_env": profile.env_var,
+        "passphrase_env": (profile.passphrase_env_var if profile.secret.needs_passphrase else None),
         "default": profile.name == store.default_name,
         "store": str(store.path),
     }
@@ -544,6 +564,8 @@ def cmd_profile_show(args: argparse.Namespace, out: Output) -> int:
         )
         for label, value in rows:
             out.line(f"{out.c.dim(label + ':'):<22} {value}")
+        if profile.secret.needs_passphrase:
+            out.line(f"{out.c.dim('Passphrase env:'):<22} ${profile.passphrase_env_var}")
 
     out.emit("profile show", data, render)
     return EXIT["ok"]

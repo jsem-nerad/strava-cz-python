@@ -37,8 +37,9 @@ python -m venv .venv
 pip install -e ".[dev,cli]"
 ```
 
-Extra `cli` přidá balíček `keyring`. Testy si klíčenku podstrkují vlastní, ale bez něj
-by se neověřilo, že se skutečný import chová, jak má.
+Extra `cli` přidá balíčky `keyring` a `cryptography`. Testy si klíčenku podstrkují
+vlastní, ale bez extra by se neověřilo, že se skutečné importy chovají, jak mají,
+a šifrované profily by nešlo otestovat vůbec.
 
 > Ujistěte se, že je aktivní venv.
 

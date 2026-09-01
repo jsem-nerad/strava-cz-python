@@ -12,6 +12,7 @@ from .client import DEFAULT_BASE_URL, StravaCZ
 from .exceptions import (
     AuthenticationError,
     DuplicateMealError,
+    EncryptionUnavailableError,
     InsufficientBalanceError,
     KeyringUnavailableError,
     MealNotFoundError,
@@ -71,5 +72,6 @@ __all__ = [
     "ProfileError",
     "ProfileNotFoundError",
     "KeyringUnavailableError",
+    "EncryptionUnavailableError",
     "__version__",
 ]

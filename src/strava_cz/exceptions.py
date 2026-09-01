@@ -10,6 +10,7 @@ from typing import Any
 __all__ = [
     "AuthenticationError",
     "DuplicateMealError",
+    "EncryptionUnavailableError",
     "InsufficientBalanceError",
     "KeyringUnavailableError",
     "MealNotFoundError",
@@ -135,17 +136,38 @@ class ProfileNotFoundError(ProfileError):
 class KeyringUnavailableError(ProfileError):
     """No usable OS keyring, so a password can be neither stored nor read.
 
-    Headless machines usually have no Secret Service running. The message names the
-    ways out, because this is the one error a first-time user is most likely to hit.
+    Headless machines usually have no Secret Service running. The message leads with
+    the encrypted profile file, because that is the only alternative that still
+    *remembers* the password, and this is the error a first-time user on a server is
+    most likely to hit.
     """
 
     def __init__(self, detail: str = "") -> None:
         super().__init__(
             "No usable OS keyring is available"
             + (f" ({detail})" if detail else "")
-            + '. Install one with: pip install "strava-cz[cli]" - or store the '
-            "profile with --secret env (reads $STRAVA_CZ_PASSWORD) or --secret prompt "
-            "(asks every time)."
+            + '. If the keyring package is missing, pip install "strava-cz[cli]"; if '
+            "this machine simply has no credential store, use --secret encrypted to "
+            "keep the password in an encrypted profile file instead, which needs no "
+            "desktop session - or --secret env (reads $STRAVA_CZ_PASSWORD) or "
+            "--secret prompt (asks every time) to store no password at all."
+        )
+
+
+class EncryptionUnavailableError(ProfileError):
+    """The profile store cannot encrypt, because ``cryptography`` is not installed.
+
+    Kept separate from :class:`KeyringUnavailableError` because the fix is different:
+    one is a missing library, the other a machine with no credential store running.
+    """
+
+    def __init__(self, detail: str = "") -> None:
+        super().__init__(
+            "Cannot encrypt the stored password"
+            + (f" ({detail})" if detail else "")
+            + ': the "cryptography" package is not installed. Install it with: '
+            'pip install "strava-cz[cli]" - or store the profile with --secret env '
+            "(reads $STRAVA_CZ_PASSWORD) or --secret prompt (asks every time)."
         )
 
 

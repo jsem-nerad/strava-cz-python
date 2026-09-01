@@ -236,6 +236,7 @@ class TestKeyringUnavailable:
             store.save(Profile("skola", "u", "1"), PASSWORD)
         message = str(excinfo.value)
         assert "strava-cz[cli]" in message
+        assert "--secret encrypted" in message, "the option that still remembers it"
         assert "--secret env" in message
 
     def test_keyring_available_reports_false_instead_of_raising(self, no_keyring):
@@ -302,3 +303,199 @@ class TestFromProfile:
 def test_the_real_environment_is_not_consulted_by_these_tests(store_path):
     """The store_path fixture must clear inherited STRAVA_CZ_PASSWORD* variables."""
     assert not [v for v in os.environ if v.startswith("STRAVA_CZ_PASSWORD")]
+
+
+class TestEncryptedStorage:
+    """`--secret encrypted`: the option that lets a headless box remember a password."""
+
+    def test_round_trip(self, store, passphrase):
+        store.save(Profile("skola", "u", "3753", secret=SecretSource.ENCRYPTED), PASSWORD)
+        assert store.resolve_password(store.get("skola")) == PASSWORD
+
+    def test_the_password_is_nowhere_in_the_file(self, store, passphrase):
+        store.save(Profile("skola", "u", "3753", secret=SecretSource.ENCRYPTED), PASSWORD)
+        raw = store.path.read_text()
+        assert PASSWORD not in raw
+        assert passphrase not in raw, "the passphrase must not be stored either"
+        record = json.loads(raw)["profiles"]["skola"]["encrypted"]
+        assert set(record) == {"kdf", "cipher", "nonce", "ciphertext"}
+        assert record["cipher"] == "aes-256-gcm"
+        assert record["kdf"]["name"] == "scrypt"
+
+    def test_the_stored_kdf_parameters_are_the_ones_used(self, store, passphrase):
+        from strava_cz.profiles import KDF_PARAMS
+
+        store.save(Profile("skola", "u", "1", secret=SecretSource.ENCRYPTED), PASSWORD)
+        kdf = json.loads(store.path.read_text())["profiles"]["skola"]["encrypted"]["kdf"]
+        for key, value in KDF_PARAMS.items():
+            assert kdf[key] == value
+
+    def test_a_record_is_read_with_its_own_parameters_not_todays(self, monkeypatch):
+        """Raising the work factor later must not lock people out of old profiles."""
+        from strava_cz import profiles
+
+        monkeypatch.setattr(
+            profiles, "KDF_PARAMS", {"n": 2**14, "r": 8, "p": 1, "dklen": 32, "maxmem": 0}
+        )
+        old_record = profiles.encrypt_password(PASSWORD, "pass")
+        assert old_record["kdf"]["n"] == 2**14
+
+        monkeypatch.undo()  # today's stronger parameters are back
+        assert profiles.KDF_PARAMS["n"] == 2**15
+        assert profiles.decrypt_password(old_record, "pass") == PASSWORD
+
+    def test_the_same_passphrase_and_salt_give_the_same_key(self):
+        from strava_cz.profiles import _derive_key
+
+        params = {"n": 2**14, "r": 8, "p": 1, "dklen": 32, "maxmem": 0}
+        assert _derive_key("p", b"s" * 16, params) == _derive_key("p", b"s" * 16, params)
+        assert _derive_key("p", b"s" * 16, params) != _derive_key("q", b"s" * 16, params)
+        assert _derive_key("p", b"s" * 16, params) != _derive_key("p", b"t" * 16, params)
+
+    def test_two_saves_of_one_password_look_nothing_alike(self, store, passphrase):
+        from strava_cz.profiles import encrypt_password
+
+        first, second = encrypt_password(PASSWORD, "p"), encrypt_password(PASSWORD, "p")
+        assert first["kdf"]["salt"] != second["kdf"]["salt"]
+        assert first["nonce"] != second["nonce"]
+        assert first["ciphertext"] != second["ciphertext"]
+
+    def test_a_wrong_passphrase_is_refused_not_guessed_at(self, store, monkeypatch):
+        monkeypatch.setenv("STRAVA_CZ_PASSPHRASE", "right")
+        store.save(Profile("skola", "u", "1", secret=SecretSource.ENCRYPTED), PASSWORD)
+        monkeypatch.setenv("STRAVA_CZ_PASSPHRASE", "wrong")
+        with pytest.raises(ProfileError, match="Wrong passphrase"):
+            store.resolve_password(store.get("skola"))
+
+    @pytest.mark.parametrize("field", ["ciphertext", "nonce"])
+    def test_a_tampered_record_is_rejected(self, store, passphrase, field):
+        """AES-GCM authenticates, so damage is caught instead of decrypting to junk."""
+        store.save(Profile("skola", "u", "1", secret=SecretSource.ENCRYPTED), PASSWORD)
+        data = json.loads(store.path.read_text())
+        blob = data["profiles"]["skola"]["encrypted"]
+        flipped = "B" if blob[field][0] != "B" else "C"
+        blob[field] = flipped + blob[field][1:]
+        store.path.write_text(json.dumps(data))
+        with pytest.raises(ProfileError):
+            store.resolve_password(store.get("skola"))
+
+    def test_a_tampered_salt_is_rejected(self, store, passphrase):
+        store.save(Profile("skola", "u", "1", secret=SecretSource.ENCRYPTED), PASSWORD)
+        data = json.loads(store.path.read_text())
+        salt = data["profiles"]["skola"]["encrypted"]["kdf"]["salt"]
+        data["profiles"]["skola"]["encrypted"]["kdf"]["salt"] = (
+            "B" if salt[0] != "B" else "C"
+        ) + salt[1:]
+        store.path.write_text(json.dumps(data))
+        with pytest.raises(ProfileError, match="Wrong passphrase"):
+            store.resolve_password(store.get("skola"))
+
+    @pytest.mark.parametrize("field", ["kdf", "nonce", "ciphertext"])
+    def test_a_truncated_record_blames_the_missing_field(self, store, passphrase, field):
+        store.save(Profile("skola", "u", "1", secret=SecretSource.ENCRYPTED), PASSWORD)
+        data = json.loads(store.path.read_text())
+        del data["profiles"]["skola"]["encrypted"][field]
+        store.path.write_text(json.dumps(data))
+        with pytest.raises(ProfileError):
+            store.resolve_password(store.get("skola"))
+
+    def test_an_unknown_cipher_is_refused(self, store, passphrase):
+        from strava_cz.profiles import decrypt_password, encrypt_password
+
+        record = encrypt_password(PASSWORD, "p")
+        record["cipher"] = "rot13"
+        with pytest.raises(ProfileError, match="Unsupported cipher"):
+            decrypt_password(record, "p")
+
+    def test_a_profile_marked_encrypted_with_no_record(self, store):
+        store.path.parent.mkdir(parents=True)
+        store.path.write_text(
+            json.dumps(
+                {
+                    "default": "skola",
+                    "profiles": {
+                        "skola": {"username": "u", "canteen_number": "1", "secret": "encrypted"}
+                    },
+                }
+            )
+        )
+        with pytest.raises(ProfileError, match="holds no"):
+            store.resolve_password(store.get("skola"))
+
+    def test_the_password_environment_skips_the_passphrase_entirely(self, store, monkeypatch):
+        """A cron job with the real password set must not be asked to unlock anything."""
+        monkeypatch.setenv("STRAVA_CZ_PASSPHRASE", "right")
+        store.save(Profile("skola", "u", "1", secret=SecretSource.ENCRYPTED), PASSWORD)
+        monkeypatch.delenv("STRAVA_CZ_PASSPHRASE")
+        monkeypatch.setenv("STRAVA_CZ_PASSWORD_SKOLA", "straight-from-env")
+        assert store.resolve_password(store.get("skola")) == "straight-from-env"
+
+    def test_saving_without_cryptography_says_how_to_fix_it(self, store, passphrase, no_crypto):
+        with pytest.raises(KeyringUnavailableError.__mro__[1]) as excinfo:  # ProfileError
+            store.save(Profile("skola", "u", "1", secret=SecretSource.ENCRYPTED), PASSWORD)
+        assert "strava-cz[cli]" in str(excinfo.value)
+
+    def test_encryption_available_reports_without_raising(self, no_crypto):
+        from strava_cz.profiles import encryption_available
+
+        assert encryption_available() is False
+
+
+class TestPassphraseLookup:
+    def test_the_profile_specific_variable_wins(self, store, monkeypatch):
+        monkeypatch.setenv("STRAVA_CZ_PASSPHRASE", "shared")
+        store.save(Profile("skola", "u", "1", secret=SecretSource.ENCRYPTED), PASSWORD)
+        monkeypatch.setenv("STRAVA_CZ_PASSPHRASE_SKOLA", "specific")
+        # Saved under "shared", so the specific one must fail to open it.
+        with pytest.raises(ProfileError, match="Wrong passphrase"):
+            store.resolve_password(store.get("skola"))
+
+        monkeypatch.setenv("STRAVA_CZ_PASSPHRASE_SKOLA", "shared")
+        assert store.resolve_password(store.get("skola")) == PASSWORD
+
+    def test_no_passphrase_and_no_terminal_fails_rather_than_hanging(self, store, passphrase):
+        store.save(Profile("skola", "u", "1", secret=SecretSource.ENCRYPTED), PASSWORD)
+        profile = store.get("skola")
+        for var in ("STRAVA_CZ_PASSPHRASE", "STRAVA_CZ_PASSPHRASE_SKOLA"):
+            os.environ.pop(var, None)
+        with pytest.raises(ProfileError, match="no terminal"):
+            store.resolve_password(profile, allow_prompt=False)
+
+    def test_it_asks_and_confirms_when_saving(self, store, monkeypatch):
+        typed = iter(["chosen", "chosen"])
+        monkeypatch.setattr("sys.stdin.isatty", lambda: True)
+        monkeypatch.setattr("strava_cz.profiles.getpass.getpass", lambda prompt="": next(typed))
+        store.save(Profile("skola", "u", "1", secret=SecretSource.ENCRYPTED), PASSWORD)
+
+        monkeypatch.setenv("STRAVA_CZ_PASSPHRASE", "chosen")
+        assert store.resolve_password(store.get("skola")) == PASSWORD
+
+    def test_a_mistyped_confirmation_saves_nothing(self, store, monkeypatch):
+        typed = iter(["chosen", "mistyped"])
+        monkeypatch.setattr("sys.stdin.isatty", lambda: True)
+        monkeypatch.setattr("strava_cz.profiles.getpass.getpass", lambda prompt="": next(typed))
+        with pytest.raises(ProfileError, match="do not match"):
+            store.save(Profile("skola", "u", "1", secret=SecretSource.ENCRYPTED), PASSWORD)
+        assert store.names() == (), "nothing may be written when the passphrase is unclear"
+
+
+class TestAutoSource:
+    def test_auto_prefers_a_working_keyring(self, fake_keyring):
+        assert SecretSource.resolve("auto") is SecretSource.KEYRING
+
+    def test_auto_falls_back_to_encryption(self, no_keyring):
+        assert SecretSource.resolve("auto") is SecretSource.ENCRYPTED
+
+    def test_an_explicit_choice_is_never_second_guessed(self, no_keyring):
+        assert SecretSource.resolve("env") is SecretSource.ENV
+        assert SecretSource.resolve("keyring") is SecretSource.KEYRING
+
+
+class TestFromProfileEncrypted:
+    def test_from_profile_opens_an_encrypted_profile(self, api, login_route, store, passphrase):
+        from strava_cz import StravaCZ
+
+        store.save(Profile("skola", "vojtech", "3753", secret=SecretSource.ENCRYPTED), PASSWORD)
+        with StravaCZ.from_profile("skola", store=store) as strava:
+            assert strava.user.is_logged_in
+        assert json.loads(login_route.calls.last.request.content)["heslo"] == PASSWORD
