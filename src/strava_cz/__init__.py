@@ -13,10 +13,13 @@ from .exceptions import (
     AuthenticationError,
     DuplicateMealError,
     InsufficientBalanceError,
+    KeyringUnavailableError,
     MealNotFoundError,
     MealNotOrderableError,
     MenuNotFetchedError,
     NotLoggedInError,
+    ProfileError,
+    ProfileNotFoundError,
     StravaAPIError,
     StravaError,
 )
@@ -31,8 +34,9 @@ from .models import (
     Restriction,
     User,
 )
+from .profiles import Profile, ProfileStore, SecretSource
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 __author__ = "Vojtěch Nerad"
 __email__ = "ja@jsem-nerad.cz"
 
@@ -50,6 +54,10 @@ __all__ = [
     "DayStatus",
     "Restriction",
     "OrderResult",
+    # profiles
+    "Profile",
+    "ProfileStore",
+    "SecretSource",
     # exceptions
     "StravaError",
     "StravaAPIError",
@@ -60,5 +68,8 @@ __all__ = [
     "MealNotOrderableError",
     "DuplicateMealError",
     "MenuNotFetchedError",
+    "ProfileError",
+    "ProfileNotFoundError",
+    "KeyringUnavailableError",
     "__version__",
 ]

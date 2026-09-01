@@ -11,10 +11,13 @@ __all__ = [
     "AuthenticationError",
     "DuplicateMealError",
     "InsufficientBalanceError",
+    "KeyringUnavailableError",
     "MealNotFoundError",
     "MealNotOrderableError",
     "MenuNotFetchedError",
     "NotLoggedInError",
+    "ProfileError",
+    "ProfileNotFoundError",
     "StravaAPIError",
     "StravaError",
 ]
@@ -109,6 +112,41 @@ class MenuNotFetchedError(StravaError):
 
     def __init__(self, message: str = "Menu has not been fetched yet - call menu.fetch()") -> None:
         super().__init__(message)
+
+
+class ProfileError(StravaError):
+    """Something is wrong with a stored profile or the profile store."""
+
+
+class ProfileNotFoundError(ProfileError):
+    """No profile with this name is stored."""
+
+    def __init__(self, name: str | None, known: tuple[str, ...] = ()) -> None:
+        if name is None:
+            message = "No default profile is set - run 'strava-cz profile add' first"
+        else:
+            message = f"No profile named {name!r}"
+            if known:
+                message += f". Stored profiles: {', '.join(known)}"
+        super().__init__(message)
+        self.name = name
+
+
+class KeyringUnavailableError(ProfileError):
+    """No usable OS keyring, so a password can be neither stored nor read.
+
+    Headless machines usually have no Secret Service running. The message names the
+    ways out, because this is the one error a first-time user is most likely to hit.
+    """
+
+    def __init__(self, detail: str = "") -> None:
+        super().__init__(
+            "No usable OS keyring is available"
+            + (f" ({detail})" if detail else "")
+            + '. Install one with: pip install "strava-cz[cli]" - or store the '
+            "profile with --secret env (reads $STRAVA_CZ_PASSWORD) or --secret prompt "
+            "(asks every time)."
+        )
 
 
 #: Maps the API's ``number`` field onto a specific exception class.

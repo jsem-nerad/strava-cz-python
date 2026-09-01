@@ -5,7 +5,8 @@ Python knihovna pro objednávání jídel ve školních jídelnách, které pou�
 aplikace, takže nepotřebuje prohlížeč ani parsování HTML.
 
 ```bash
-pip install strava-cz
+pip install strava-cz          # knihovna
+pip install "strava-cz[cli]"   # + bezpečné uložení hesla pro příkaz strava-cz
 ```
 
 Ve složce [notes](notes/) najdete všechny moje poznatky o vnitřním fungování API
@@ -19,6 +20,9 @@ Strava.cz. Kompletní **dokumentace** je na
 - Objednávání a rušení jídel v jedné transakci, s ověřením výsledku
 - Rozpoznání, proč konkrétní jídlo objednat nelze (uzávěrka, prázdniny, ...)
 - Sledování zůstatku na účtu
+- Rozlišení dnů, na které jídelna neobjednává automaticky
+- Příkaz `strava-cz` pro práci z terminálu, s výpisem pro lidi i s JSON pro skripty
+- Profily, takže se přihlašovací údaje nezadávají znovu a heslo leží v klíčence
 - Plné typové anotace (`py.typed`), takže vám editor napovídá
 
 ## Rychlý start
@@ -193,6 +197,118 @@ print(vysledek.failed)     # ((85, MealNotOrderableError(...)), (999, MealNotFou
 print(vysledek.ok)         # False
 ```
 
+## Příkazová řádka
+
+Balíček instaluje příkaz `strava-cz`. Umí všechno, co knihovna, a ve výchozím stavu
+vypisuje čitelnou tabulku; pro skripty je tu `--format json`.
+
+```bash
+# jednou uložit přihlášení (heslo jde do klíčenky operačního systému)
+strava-cz profile add skola --username vase.jmeno --canteen 3753
+
+strava-cz menu --week                  # jídelníček na tento týden
+strava-cz menu --orderable --type main # jen hlavní jídla, která jdou objednat
+strava-cz order 5 9                    # objednat
+strava-cz order 5 9 --dry-run          # jen říct, co by se stalo
+strava-cz cancel 5                     # zrušit
+strava-cz ordered                      # co mám objednáno
+strava-cz balance                      # 512.50 Kč
+```
+
+```
+Mon 21.09.2026
+  ·   102  Polévka    Zeleninová            this item cannot be ordered separately
+  ○    37  Oběd 1     Bramborové knedlíky s kuřecím masem a špenátem          50 Kč
+  ○    38  Oběd 2     Bramborové špalíky sypané cibulkou, kysané zelí         50 Kč
+
+Fri 25.09.2026  not ordered automatically
+  ○    49  Oběd 1     Kuřecí asijská pánev, kari rýže, tvaroháček             50 Kč
+
+5 days · 15 meals · 10 orderable · 0 ordered · balance 0.00 Kč
+```
+
+Barvy se zapínají jen na terminálu — v rouře, v souboru nebo v cronu se nevypisují,
+stejně jako když je nastavená proměnná `NO_COLOR`. Vynutit je jde přes `--color always`.
+
+### Pro skripty
+
+S `--format json` (nebo zkratkou `--json`) vypadne na standardní výstup **jeden JSON
+objekt** a všechna hlášení jdou na chybový výstup, takže výstup zůstane zpracovatelný.
+Chyba se hlásí taky JSONem, ne textem:
+
+```bash
+strava-cz --json menu --orderable | jq '.days[].meals[] | select(.type=="main") | .id'
+strava-cz --json ordered | jq '.total_price'
+```
+
+```json
+{ "ok": false,
+  "command": "order",
+  "error": { "type": "MealNotOrderableError", "meal_id": 85, "reason": "unavailable",
+             "message": "Cannot order meal 85: this item cannot be ordered separately" } }
+```
+
+**Návratové kódy** — aby se šlo v shellu rozhodnout, co se pokazilo:
+
+| kód | význam |
+|---|---|
+| 0 | Hotovo |
+| 1 | Selhala jídelna nebo síť |
+| 2 | Špatně zadaný příkaz |
+| 3 | Přihlášení odmítnuto |
+| 4 | Jídlo nelze objednat, zrušit, nebo neexistuje |
+| 5 | Nedostatečný zůstatek |
+| 6 | Problém s profilem nebo klíčenkou |
+
+`--dry-run` u `order` a `cancel` **neodešle vůbec nic** — jen spočítá, co by se změnilo,
+včetně jídel, která už jsou objednaná, a dvou jídel, která by soupeřila o stejné místo.
+
+Úplný seznam přepínačů vypíše `strava-cz --help` a `strava-cz menu --help`.
+
+## Profily
+
+Profil si pamatuje uživatelské jméno a číslo jídelny; **heslo se do souboru nezapisuje**.
+Ve výchozím stavu putuje do klíčenky operačního systému (GNOME Keyring, KWallet, macOS
+Keychain, Windows Credential Locker) přes balíček `keyring`.
+
+```bash
+strava-cz profile add skola --username vase.jmeno --canteen 3753 --verify
+strava-cz profile list
+strava-cz profile show skola
+strava-cz profile default doma
+strava-cz profile remove doma
+
+strava-cz --profile doma menu   # jednorázově jiný profil
+```
+
+Přepínač `--secret` říká, odkud se heslo bere:
+
+| hodnota | kam se heslo uloží |
+|---|---|
+| `keyring` | Klíčenka systému. Výchozí, do souboru se nedostane nic. |
+| `env` | Nikam. Čte se z `$STRAVA_CZ_PASSWORD` při každém spuštění. |
+| `prompt` | Nikam. Zeptá se pokaždé na terminálu. |
+| `file` | **Otevřeným textem** do souboru s profily. Jen když si o to řeknete. |
+
+Profily leží v `$XDG_CONFIG_HOME/strava-cz/profiles.json` (soubor `0600`, složka `0700`).
+Prostředí má vždycky přednost před uloženým heslem, takže cron může použít existující
+profil, aniž by se do něj sahalo: `$STRAVA_CZ_PASSWORD_<JMENO_PROFILU>` přebije
+`$STRAVA_CZ_PASSWORD` a obojí přebije klíčenku.
+
+> Na serveru bez grafického prostředí klíčenka většinou nefunguje. `strava-cz profile add`
+> to pozná a rovnou poradí `--secret env` nebo `--secret prompt` — nic nikam potichu
+> neuloží.
+
+Profily jdou použít i z Pythonu:
+
+```python
+from strava_cz import StravaCZ
+
+with StravaCZ.from_profile("skola") as strava:   # bez profilu se vezme výchozí
+    strava.menu.fetch()
+    strava.menu.print()
+```
+
 ## Výjimky
 
 Všechny výjimky knihovny dědí ze `StravaError`, takže je lze odchytit najednou.
@@ -208,6 +324,9 @@ Všechny výjimky knihovny dědí ze `StravaError`, takže je lze odchytit najed
 | `MealNotOrderableError` | Jídelna objednávku či zrušení nedovolí; nese `.reason` |
 | `DuplicateMealError` | Dvě jídla soupeří o stejné místo a je zapnuté `strict_duplicates` |
 | `MenuNotFetchedError` | Přístup k jídelníčku dřív, než se zavolá `fetch()` |
+| `ProfileError` | Něco je špatně s profilem nebo se souborem profilů |
+| `ProfileNotFoundError` | Profil daného jména není uložený |
+| `KeyringUnavailableError` | Na tomhle stroji není použitelná klíčenka |
 
 ## Nastavení klienta
 
@@ -233,6 +352,8 @@ Parametrem `client=` můžete také předat vlastní `httpx.Client`.
 - [x] Detekce a prevence duplicitních objednávek
 - [x] Rozpoznání důvodu, proč jídlo nelze objednat
 - [x] Lépe zdokumentovat použití
+- [x] Nástroj pro příkazovou řádku
+- [x] Profily s bezpečně uloženým heslem
 - [ ] Login rate limiting
 - [ ] Debug/log mód
 - [ ] Asynchronní klient

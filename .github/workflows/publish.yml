@@ -32,7 +32,7 @@ jobs:
       - name: Install
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev]"
+          pip install -e ".[dev,cli]"
 
       # The suite runs entirely against recorded fixtures and blocks real sockets,
       # so CI never sends traffic to a school canteen's server.
