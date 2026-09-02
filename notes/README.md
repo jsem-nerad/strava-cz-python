@@ -1,617 +1,312 @@
-# Poznamky Strava.cz
+# Poznámky ke Strava.cz
 
-## Prihlaseni uzivatele
+Všechno, co jsem zjistil o interním API webové aplikace
+[app.strava.cz](https://app.strava.cz). Aplikace mluví se svým backendem přes
+JSON POST požadavky na `https://app.strava.cz/api/<endpoint>`.
 
-#### Request payload 
+Kompletní nahrané odpovědi z reálného účtu jsou v `tests/fixtures/`, takže se sem
+už nemusí opisovat celé. Novou odpověď si nahrajete pomocí `examples/capture_api.py`.
 
-Request URL: https://app.strava.cz/api/login
+## Obecné chování
 
-Request type: POST
+- Všechny endpointy jsou **POST** s JSON tělem.
+- Webová aplikace posílá hlavičku `Content-Type: text/plain;charset=UTF-8`, přestože
+  tělo je JSON. Server to přijímá a knihovna to napodobuje.
+- `sid` získané při přihlášení musí být v každém dalším autorizovaném požadavku.
+- `ignoreCert` se posílá jako řetězec `"false"`, ne jako boolean. Server je v tom
+  ale tolerantní.
 
-Payload type: JSON
+### Chybové odpovědi
 
-Payload value: 
+Chyba se ohlašuje **nestandardním HTTP statusem 555** a tělem v tomto tvaru:
+
 ```json
 {
-    "cislo":"3753",
-    "jmeno":"vojtech.nerad",
-    "heslo":"XXXXXXXXX",
-    "zustatPrihlasen":false,
-    "environment":"W",
-    "lang":"EN"
+    "state": "error",
+    "number": 20,
+    "message": "The client was not found in the client register or the wrong nickname or password was entered...",
+    "backend": { "...": "..." }
 }
 ```
 
+Samotný HTTP status tedy nestačí — je potřeba se dívat i na pole `state`.
 
-| key             | description               | example       | type    |
-|-----------------|---------------------------|---------------|---------|
-| cislo           | cislo jidelny             | 3753          | string  |
-| jmeno           | uzivatelske jmeno         | vojtech.nerad | string  |
-| heslo           | plaintext heslo uzivatele | Heslo123      | string  |
-| zustatPrihlasen | zustat prihlasen          | false         | boolean |
-| environment     | ...                       | W             | string  |
-| lang            | jazyk aplikace            | EN            | string  |
+| `number` | význam |
+|---|---|
+| 20 | Neexistující uživatel, špatné heslo nebo zablokovaný účet |
+| 35 | Nedostatečný zůstatek na kontě pro objednání jídla |
 
+## Přihlášení uživatele
 
-#### Response
-
-Response type: JSON
-
-Response value:
+`POST /api/login`
 
 ```json
 {
-    "sid": "01C6FCF02A7146159BC5F245A57AF29F",
-    "s5url": "https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc",
     "cislo": "3753",
     "jmeno": "vojtech.nerad",
-    "uzivatel": {
-        "konto": "0.00",
-        "kontoAll": "[{\"nazev\":\"Stravné\",\"hodnota\":\"0.00\"}]",
-        "vydej": "1",
-        "pocetJidel": "0",
-        "podrobnosti": "0",
-        "hodnoceni": "0",
-        "dochazka": "",
-        "editaceJidelnicku": 0,
-        "vs": "12142",
-        "jmeno": "Vojtěch Nerad",
-        "email": "muj.email@gmail.com",
-        "zprava": "",
-        "slabeHeslo": false,
-        "id": "vojtech.nerad",
-        "vicenasobny": false,
-        "mena": "Kč",
-        "blokace": false,
-        "cislo": "3753",
-        "bakalarId": "202506140500010002",
-        "prihlaska": "0",
-        "prodej": "0",
-        "zapsan": "1",
-        "trida": "1.",
-        "zakazPrihlaskou": "0",
-        "evCislo": "12142",
-        "burza": "0",
-        "patron": "[]",
-        "text": "Vítejte na stránkách pro objednávání stravy naší jídelny.<br>",
-        "nazevJidelny": "Školní jídelna, Praha 5 - Smíchov, Štefánikova 11/235",
-        "pasivni": false,
-        "verze": "5.13"
-    },
-    "betatest": false,
-    "ignoreCert": false,
-    "zustatPrihlasen": false
+    "heslo": "XXXXXXXXX",
+    "zustatPrihlasen": false,
+    "environment": "W",
+    "lang": "EN"
 }
 ```
 
-Dulezite hodnoty:
+| key | popis | příklad | typ |
+|---|---|---|---|
+| cislo | číslo jídelny | 3753 | string |
+| jmeno | uživatelské jméno | vojtech.nerad | string |
+| heslo | plaintext heslo uživatele | Heslo123 | string |
+| zustatPrihlasen | zůstat přihlášen | false | boolean |
+| environment | prostředí, web posílá `W` | W | string |
+| lang | jazyk aplikace | EN | string |
 
-| key            | description                                                                                             | example                                             | type   |
-|----------------|---------------------------------------------------------------------------------------------------------|-----------------------------------------------------|--------|
-| sid            | session identifier, slouzi k identifikaci uzivatele, musi byt u kazdeho dalsiho autorizovaneho requestu | 01C6FCF02A7146159BC5F245A57AF29F                    | string |
-| s5url          | Web service Stravne 5 endpoint                                                                          | https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc | string |
-| jmeno          | uzivatelske jmeno uzivatele                                                                             | vojtech.nerad                                       | string |
-| uzivatel/konto | penize na uctu uzivatele                                                                                | 0.00                                                | string |
-| uzivatel/jmeno | jmeno a prijmeni uzivatele                                                                              | Vojtěch Nerad                                       | string |
-| uzivatel/email | email uzivatele                                                                                         | muj.email@gmail.com                                 | string |
-| uzivatel/id    | id uzivatele                                                                                            | vojtech.nerad                                       | string |
+### Odpověď
 
+Plná odpověď je v `tests/fixtures/login.json`. Důležité hodnoty:
 
+| key | popis | příklad | typ |
+|---|---|---|---|
+| sid | identifikátor session, patří do každého dalšího autorizovaného požadavku | 01C6FCF02A7146159BC5F245A57AF29F | string |
+| s5url | endpoint webové služby Stravné 5 | https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc | string |
+| uzivatel/konto | peníze na účtu, **posílá se jako řetězec** | "0.00" | string |
+| uzivatel/jmeno | jméno a příjmení uživatele | Vojtěch Nerad | string |
+| uzivatel/email | e-mail uživatele | muj.email@gmail.com | string |
+| uzivatel/mena | měna | Kč | string |
+| uzivatel/nazevJidelny | název jídelny | Školní jídelna, Praha 5 - Smíchov | string |
 
-## Seznam objednavek
+Pozor: `konto` je řetězec, ne číslo. Před počítáním je potřeba ho převést.
 
-#### Request payload
+## Seznam objednávek (jídelníček)
 
-Request URL: https://app.strava.cz/api/objednavky
-
-Request type: POST
-
-Payload type: JSON
-
-Payload value:
-```json
-{
-    "cislo":"3753",
-    "sid":"01C6FCF02A7146159BC5F245A57AF29F",
-    "s5url":"https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc",
-    "lang":"EN",
-    "konto":0,
-    "podminka":"",
-    "ignoreCert":"false"
-}
-```
-
-| key        | description                                         | example                                             | type          |
-|------------|-----------------------------------------------------|-----------------------------------------------------|---------------|
-| cislo      | cislo jidelny                                       | 3753                                                | string        |
-| sid        | session identifier, slouzi k identifikaci uzivatele | 01C6FCF02A7146159BC5F245A57AF29F                    | string        |
-| s5url      | Web service Stravne 5 endpoint                      | https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc | string        |
-| lang       | jazyk                                               | EN                                                  | string        |
-| konto      | penize na uctu uzivatele                            | 0                                                   | integer/float |
-| podminka   | ...                                                 |                                                     | string        |
-| ignoreCert | ...                                                 | false                                               | string       |
-
-
-
-
-#### Response
-
-Response type: JSON
-
-Response value:
+`POST /api/objednavky`
 
 ```json
 {
-    "table0": [
-        {
-            "id": 0,
-            "datum": "15.09.2025",
-            "druh_popis": "Polévka",
-            "druh_chod": "Oběd",
-            "nazev": "Vývar s kuskusem",
-            "popis": "",
-            "delsiPopis": "Vývar s kuskusem",
-            "zakazaneAlergeny": null,
-            "alergeny_text": "01 -Obiloviny obsahující lepek|06 -Sójové boby (sója)|07 -Mléko|09 -Celer|",
-            "alergeny": [
-                [
-                    "01",
-                    "Obiloviny obsahující lepek"
-                ],
-                [
-                    "06",
-                    "Sójové boby"
-                ],
-                [
-                    "07",
-                    "Mléko"
-                ],
-                [
-                    "09",
-                    "Celer"
-                ]
-            ],
-            "chod": "C",
-            "druh": "PO",
-            "cena": "0",
-            "polevka": "A",
-            "pocet": 0,
-            "veta": "75",
-            "vetaDieta": "1",
-            "omezeniObj": {
-                "den": "CO",
-                "obj": "I",
-                "zm": "I",
-                "bur": "I"
-            },
-            "burza": {
-                "zmena": "0",
-                "ostatni": "0",
-                "nabidka": "0",
-                "poptavka": "0"
-            },
-            "vydejniMisto": {
-                "misto": "",
-                "mista": ""
-            },
-            "diety": {
-                "dieta": "",
-                "diety": ""
-            },
-            "zkratkaProduktu": "",
-            "cisloJidelnicku": "1",
-            "multipleNazev": "AVývar s kuskusemCPO",
-            "version": 5,
-            "casKonec": "2025-09-12T15:00:00",
-            "casOdhlaseni": "2025-09-12T15:00:00",
-            "obrazky": []
-        },
-        {
-            "id": 1,
-            "datum": "15.09.2025",
-            "druh_popis": "Oběd 1",
-            "druh_chod": "Oběd",
-            "nazev": "Čočka s uzeným masem, kysané zelí, čaj, pv",
-            "popis": "Oběd 1",
-            "delsiPopis": "Čočka s uzeným masem, kysané zelí, čaj, pv",
-            "zakazaneAlergeny": null,
-            "alergeny_text": "01 -Obiloviny obsahující lepek|",
-            "alergeny": [
-                [
-                    "01",
-                    "Obiloviny obsahující lepek"
-                ]
-            ],
-            "chod": "C",
-            "druh": "O1",
-            "cena": "40.00",
-            "polevka": "N",
-            "pocet": 1,
-            "veta": "1",
-            "vetaDieta": "2",
-            "omezeniObj": {
-                "den": "CO",
-                "obj": "C",
-                "zm": "C",
-                "bur": "!"
-            },
-            "burza": {
-                "zmena": "0",
-                "ostatni": "0",
-                "nabidka": "0",
-                "poptavka": "0"
-            },
-            "vydejniMisto": {
-                "misto": "",
-                "mista": ""
-            },
-            "diety": {
-                "dieta": "",
-                "diety": ""
-            },
-            "zkratkaProduktu": "O1",
-            "cisloJidelnicku": "1",
-            "multipleNazev": "NČočka s uzeným masem, kysané zelí, čaj, pvCO1",
-            "version": 5,
-            "casKonec": "2025-09-12T15:00:00",
-            "casOdhlaseni": "2025-09-12T15:00:00",
-            "obrazky": []
-        },
-        {
-            "id": 2,
-            "datum": "15.09.2025",
-            "druh_popis": "Oběd 2",
-            "druh_chod": "Oběd",
-            "nazev": "Čočka s vejcem, cibulka, okurka, čaj, pv - V",
-            "popis": "Oběd 2",
-            "delsiPopis": "Čočka s vejce, cibulka, okurka, čaj, pv",
-            "zakazaneAlergeny": null,
-            "alergeny_text": "01 -Obiloviny obsahující lepek|03 -Vejce|",
-            "alergeny": [
-                [
-                    "01",
-                    "Obiloviny obsahující lepek"
-                ],
-                [
-                    "03",
-                    "Vejce"
-                ]
-            ],
-            "chod": "C",
-            "druh": "O2",
-            "cena": "40.00",
-            "polevka": "N",
-            "pocet": 0,
-            "veta": "2",
-            "vetaDieta": "3",
-            "omezeniObj": {
-                "den": "CO",
-                "obj": "C",
-                "zm": "C",
-                "bur": "!"
-            },
-            "burza": {
-                "zmena": "0",
-                "ostatni": "0",
-                "nabidka": "0",
-                "poptavka": "0"
-            },
-            "vydejniMisto": {
-                "misto": "",
-                "mista": ""
-            },
-            "diety": {
-                "dieta": "",
-                "diety": ""
-            },
-            "zkratkaProduktu": "O2",
-            "cisloJidelnicku": "1",
-            "multipleNazev": "NČočka s vejcem, cibulka, okurka, čaj, pv - VCO2",
-            "version": 5,
-            "casKonec": "2025-09-12T15:00:00",
-            "casOdhlaseni": "2025-09-12T15:00:00",
-            "obrazky": []
-        }
-    ],
-
-    "dalsi obedy nebudu vypisovat, je to moc dlouhe":[]
+    "cislo": "3753",
+    "sid": "01C6FCF02A7146159BC5F245A57AF29F",
+    "s5url": "https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc",
+    "lang": "EN",
+    "konto": 0,
+    "podminka": "",
+    "ignoreCert": "false"
 }
 ```
 
-Dulezite informace:
+### Odpověď
 
-JSON struktura seznamu objednavek:
+Odpověď je slovník, kde **každý klíč `table<N>` odpovídá jednomu dni** a obsahuje
+seznam jídel toho dne. Plná nahraná odpověď (31 dnů) je v
+`tests/fixtures/menu_live.json`.
+
+Důležitá pole jednoho jídla:
+
+| key | popis | příklad | typ |
+|---|---|---|---|
+| datum | datum, formát `dd.mm.yyyy` | 15.09.2026 | string |
+| druh | **krátký kód typu jídla**, stabilní napříč jazyky | PO, O1, O2 | string |
+| druh_popis | zobrazovaný popis typu jídla | Polévka, Oběd 1 | string |
+| nazev | název jídla | Vývar s kuskusem | string |
+| cena | cena, **jako řetězec** | "50.00" | string |
+| alergeny | alergeny jako dvojice `[kód, název]` | [["04","Ryby"]] | list |
+| zakazaneAlergeny | alergeny označené uživatelem jako nevhodné | null | list/null |
+| pocet | stav objednání: 0 = neobjednáno, 1 = objednáno | 0 | integer |
+| veta | **identifikátor jídla použitý při objednávání** | "7" | string |
+| casKonec | dokdy lze jídlo objednat | 2026-09-14T15:00:00 | string |
+| omezeniObj | omezení objednávky, viz níže | {"den":"","obj":"","zm":"","bur":"C"} | object |
+
+Datum se v některých verzích aplikace objevilo i s jiným oddělovačem
+(`15-09.2025`), takže se vyplatí parsovat tolerantně.
+
+### omezeniObj — kdy jde jídlo objednat
+
+Tohle je nejdůležitější část celého API a zároveň ta, kterou je nejsnazší pochopit
+špatně. Objekt má čtyři pole:
+
+| pole | platí pro | význam |
+|---|---|---|
+| `obj` | konkrétní jídlo | jde jídlo objednat |
+| `zm` | konkrétní jídlo | jde už uloženou objednávku změnit nebo zrušit |
+| `bur` | konkrétní jídlo | je jídlo dostupné na burze |
+| `den` | celý den | kód dne |
+
+**Pravidlo: prázdný řetězec u `obj` a `zm` znamená „smí se“.** Jakákoliv jiná hodnota
+je jedno písmeno, které říká proč ne:
+
+| hodnota | význam |
+|---|---|
+| `""` | bez omezení |
+| `"C"` | uzávěrka objednávek už proběhla (`casKonec` je v minulosti) |
+| `"I"` | položku nelze objednat samostatně — typicky polévka, která patří k obědu |
+| `"V"` | volno, jídelna ten den nevaří |
+
+Ověřeno na živém účtu (31 dnů, 113 jídel); přesně to odpovídá poli `casKonec`:
+
+| stav dne | `obj` | `zm` | `bur` | `den` |
+|---|---|---|---|---|
+| uzávěrka ještě neproběhla | `""` | `""` | `"C"` | `""` |
+| uzávěrka proběhla | `"C"` | `"C"` | `"!"` | `""` nebo `"CO"` |
+| neobjednává se automaticky | `""` | `""` | `"C"` | `"T"` |
+| nevaří se / státní svátek | `"V"` | `""` | `"V"` | `"VP"` |
+| polévka (vždy) | `"I"` | `"I"` | `"I"` | — |
+
+Pole `den` je **kód celého dne, ne konkrétního jídla**, a nehodí se k rozhodování
+o objednatelnosti:
+
+| hodnota | význam |
+|---|---|
+| `""` | běžný den |
+| `"T"` | den, na který jídelna neobjednává automaticky |
+| `"VP"` | volno nebo prázdniny |
+| `"CO"` | den po uzávěrce |
+
+- `"VP"` — volno nebo prázdniny. Jídla toho dne se jmenují `"Nevaří se"` nebo
+  `"Státní svátek"` a nejsou to skutečná jídla.
+- `"T"` — **den, který nepokrývá automatické objednávání jídelny.** Jídla na něm mají
+  `obj: ""`, takže je lze normálně objednat ručně; samy se ale nikdy neobjednají.
+  Typicky pátek, kdy se ve škole neučí.
+- `"CO"` — den, jehož uzávěrka už proběhla. Jídla mají `obj: "C"`. Verze aplikace se
+  v tom liší: 5.13 i některé jídelny na 5.15 posílají `den: "CO"`, jinde je den prázdný
+  a stav nese jen `obj`. Proto se den po uzávěrce pozná spolehlivě jen z `obj`.
+
+Ověření `"T"` na živém účtu (32 dnů, 118 jídel, září–říjen 2026):
+
+- `"T"` se vyskytlo na 6 dnech a **všech 6 byly pátky**; na žádný jiný den týdne nikdy.
+- Všechny tyhle dny měly u hlavních jídel `obj: ""`, tedy byly objednatelné.
+- V období, kde automat objednával (2.–18. 9.), měl **každý den pondělí až čtvrtek
+  právě jedno objednané jídlo, zatímco všechny pátky s `"T"` měly nula.**
+- Jinak se řádek dne s `"T"` neliší od běžného dne ani jedním polem — rozdíl je jen
+  v `omezeniObj.den`.
+
+Knihovna to od 0.3.0 vystavuje jako `Day.auto_ordered` a `DayStatus.NOT_AUTO_ORDERED`.
+Objednatelnost tím zůstává netknutá; jde o informaci navíc pro nástroje, které
+objednávají automaticky.
+
+Verze knihovny do 0.2.0 včetně četla jen `den` a podle něj určovala objednatelnost.
+Kvůli tomu mizely objednatelné dny s kódem `"T"` a u jídelníčku z verze 5.13
+vracela knihovna prázdný seznam. Od 0.3.0 se rozhoduje podle `obj` a `zm`.
+
+### Nepublikovaná jídla
+
+Jídelna zveřejňuje jídelníček po částech. Dokud jídlo není vypsané, má místo názvu
+obecný popisek. Poznáte je dvěma způsoby:
+
+- `nazev` je shodný s `druh_popis` (například obojí `"Oběd 2"`), nebo
+- `nazev` je sám o sobě obecný popisek — `"Oběd 3"`, `"Oběd 2 Rad 1"`.
+
+Kombinace `delsiPopis == "" && alergeny == []`, kterou jsem používal dřív, je
+nespolehlivá: existují reálná jídla bez dlouhého popisu i bez alergenů.
+
+## Objednávání
+
+Objednávka se skládá ze dvou kroků:
+
+1. **Zaškrtnutí políčka konkrétního jídla** — `pridejJidloS5`
+2. **Potvrzení změn** — `saveOrders`
+
+Mezi těmito dvěma kroky je změna jen rozpracovaná. Zahodit ji lze požadavkem na
+`nactiVlastnostiPA`, který znovu načte stav ze serveru.
+
+### pridejJidloS5
+
+`POST /api/pridejJidloS5`
+
 ```json
 {
-    "table0":[
-        {prvek polevka},
-        {prvek jidlo1},
-        {prvek jidlo2}
-    ],
-    "table1":[
-        {prvek jidlo1},
-        {prvek jidlo2},
-        {prvek jidlo3}
-    ]
-    ...
+    "cislo": "3753",
+    "sid": "01C6FCF02A7146159BC5F245A57AF29F",
+    "url": "https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc",
+    "veta": "7",
+    "pocet": "1",
+    "lang": "EN",
+    "ignoreCert": "false"
 }
 ```
 
-Kazdy prvek s nazvem table[X] odpovida urcitemu dni. V kazdem z techto prvku se nachazi nekolik prvku jidel.
+Pozor na nekonzistenci v pojmenování: tenhle endpoint chce `url`, zatímco
+`objednavky` chce `s5url`.
 
-JSON struktura prvku jednotlivych jidel (dulezite info):
-```json
-{
-    "id": 0 / 1 / 2 ...,
-    "datum": "15.09.2025",
-    "druh_popis": "Polévka" / "Obed1" / "Obed2"...,
-    ...
-    "nazev": "Vývar s kuskusem" / "Čočka s uzeným masem, kysané zelí, čaj, pv",
-    ...
-    "zakazaneAlergeny": null,
-    "alergeny": [
-        ["04","Ryby"],
-        ["06","Sójové boby"],
-    ],
-    ...
-    "pocet": 0 / 1 (neobjednano / objednano),
-    ...
-    "veta": "2" / "7" / "56"
+Odpověď vrátí stav všech jídel daného dne a nový zůstatek v poli `konto`:
 
-}
-```
-
-Nektere obedy jsou vypsane beze jmena, nebo se jmenuji napriklad "Polevka", "Obed 1", "Obed 2" nebo "Obed 3". To lze poznat porovnanim hodnoty "nazev" a hodnoty "druh_popis": pokud se shoduji, znamena to, ze obed jeste nebyl vypsan.
-
-Sepsane dulezite hodnoty jednotlivych jidel:
-
-| key              | description                                                                               | example 1                            | example 2                                  | type    |
-|------------------|-------------------------------------------------------------------------------------------|--------------------------------------|--------------------------------------------|---------|
-| id               | id jidla z daneho dne                                                                     | 0                                    | 1                                          | integer |
-| datum            | datum dne                                                                                 | 15.09.2025                           | 02.10.2025                                 | string  |
-| druh_popis       | popis typu jidla                                                                          | Polévka                              | Obed1                                      | string   |
-| nazev            | nazev jidla                                                                               | Vývar s kuskusem                     | Čočka s uzeným masem, kysané zelí, čaj, pv | string   |
-| zakazaneAlergeny | nejspis vypsane alergeny, ktere uzivatel nastavil jako spatne                             | null                                 | ...                                        | ...     |
-| alergeny         | alergeny obsazene v jidle                                                                 | [["04","Ryby"],["06","Sójové boby"]] | []                                         | list    |
-| pocet            | stav objednani: 0 = neobjednano, 1 = objednano                                            | 0                                    | 1                                          | integer |
-| veta             | nejspis to bude identifikacni cislo jidla z celeho jidelnicku, pouziva se pri objednavani | 2                                    | 77                                         | string  |
-
-
-
-## Objednavani
-
-Objednavani obedu se sklada ze dvou hlavnich kroku:
-
-1. **Zaskrtnuti policka konkretniho obedu** - udela API request pridejJidloS5
-2. **Potvrzeni zmen** - udela API request saveOrders
-
-V teto casti mozna bude hrat dulezitejsi roli JavaScript, ktery API cally dela, takze mozna tento typ requestu nepujde jednoduse kopirovat.
-
-Vypada to, ze parametr "veta" bude nejspis identifikacni cislo jidla v celem jidelnicku a pouziva se k objednavani konkretnich jidel.
-
-### pridejJidloS5 request
-
-#### Request payload
-
-Request URL: https://app.strava.cz/api/pridejJidloS5
-
-Request type: POST
-
-Payload type: JSON
-
-Payload value:
-```json
-{
-    "cislo":"3753",
-    "sid":"01C6FCF02A7146159BC5F245A57AF29F",
-    "url":"https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc",
-    "veta":"7",
-    "pocet":1,
-    "lang":"EN",
-    "ignoreCert":"false"
-}
-```
-
-| key        | description                                                   | example                                             | type    |
-|------------|---------------------------------------------------------------|-----------------------------------------------------|---------|
-| cislo      | cislo jidelny                                                 | 3753                                                | string  |
-| sid        | session identifier, slouzi k identifikaci uzivatele           | 01C6FCF02A7146159BC5F245A57AF29F                    | string  |
-| url        | Web service Stravne 5 endpoint                                | https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc | string  |
-| veta       | nejspis to bude identifikacni cislo jidla z celeho jidelnicku | 7                                                   | string  |
-| pocet      | stav objednani: 0 = neobjednano, 1 = objednano                | 1                                                   | integer |
-| lang       | jazyk                                                         | EN                                                  | string  |
-| ignoreCert | ...                                                           | false                                               | string  |
-
-
-#### Response
-
-Response type: JSON
-
-Response value:
 ```json
 {
     "produkt": [
-        {
-            "$": {
-                "Veta": "77",
-                "VetaDieta": "8",
-                "Pocet": "0",
-                "Druh": "PO",
-                "CJ": "1",
-                "Produkt": "",
-                "NelzeObj": "I",
-                "NelzeZm": "I",
-                "BurzaZmena": "0",
-                "NelzeBur": "I",
-                "BurzaOstatni": "0",
-                "BurzaNabidka": "0",
-                "BurzaPoptavka": "0",
-                "VydejniMisto": "",
-                "Dieta": ""
-            }
-        },
-        {
-            "$": {
-                "Veta": "6",
-                "VetaDieta": "9",
-                "Pocet": "0",
-                "Druh": "O1",
-                "CJ": "1",
-                "Produkt": "O1",
-                "NelzeObj": "",
-                "NelzeZm": "",
-                "BurzaZmena": "0",
-                "NelzeBur": "C",
-                "BurzaOstatni": "0",
-                "BurzaNabidka": "0",
-                "BurzaPoptavka": "0",
-                "VydejniMisto": "",
-                "Dieta": ""
-            }
-        },
-        {
-            "$": {
-                "Veta": "7",
-                "VetaDieta": "10",
-                "Pocet": "1",
-                "Druh": "O2",
-                "CJ": "1",
-                "Produkt": "O2",
-                "NelzeObj": "",
-                "NelzeZm": "",
-                "BurzaZmena": "0",
-                "NelzeBur": "C",
-                "BurzaOstatni": "0",
-                "BurzaNabidka": "0",
-                "BurzaPoptavka": "0",
-                "VydejniMisto": "",
-                "Dieta": ""
-            }
-        }
+        { "$": { "Veta": "7", "Pocet": "1", "Druh": "O2", "NelzeObj": "", "...": "..." } }
     ],
     "konto": "0.00"
 }
 ```
 
-Vrati informace o stavu vsech jidel na tento den.
+### saveOrders
 
-Kdyz jsem se snazil tento request rychle udelat pres webovy JavaScript, dostal jsem error 555 se zpravou "Chyba odchycena v api callu", takze to mozna bude slozitejsi.
+`POST /api/saveOrders`
 
-### saveOrders request
-
-#### Request payload
-
-Request URL: https://app.strava.cz/api/saveOrders
-
-Request type: POST
-
-Payload type: JSON
-
-Payload value:
 ```json
 {
-    "cislo":"3753",
-    "sid":"01C6FCF02A7146159BC5F245A57AF29F",
-    "url":"https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc",
-    "xml":null,
-    "lang":"EN",
-    "ignoreCert":"false"
+    "cislo": "3753",
+    "sid": "01C6FCF02A7146159BC5F245A57AF29F",
+    "url": "https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc",
+    "xml": null,
+    "lang": "EN",
+    "ignoreCert": "false"
 }
 ```
 
-| key        | description                                         | example                                             | type   |
-|------------|-----------------------------------------------------|-----------------------------------------------------|--------|
-| cislo      | cislo jidelny                                       | 3753                                                | string |
-| sid        | session identifier, slouzi k identifikaci uzivatele | 01C6FCF02A7146159BC5F245A57AF29F                    | string |
-| url        | Web service Stravne 5 endpoint                      | https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc | string |
-| xml        | ...                                                 | null                                                | ...    |
-| lang       | jazyk                                               | EN                                                  | string |
-| ignoreCert | ...                                                 | false                                               | string |
-
-
-#### Response
-
-Response type: JSON
-
-Response value:
+Odpověď obsahuje aktuální stav objednávek a nový zůstatek:
 
 ```json
 {
     "produkty": [
-        {
-            "veta": "75",
-            "pocet": 0,
-            "burza": {
-                "zmena": "0",
-                "ostatni": "0",
-                "nabidka": "0",
-                "poptavka": "0"
-            }
-        },
-        {
-            "veta": "1",
-            "pocet": 1,
-            "burza": {
-                "zmena": "0",
-                "ostatni": "0",
-                "nabidka": "0",
-                "poptavka": "0"
-            }
-        },
-        ...
-        {
-            "veta": "74",
-            "pocet": 0,
-            "burza": {
-                "zmena": "0",
-                "ostatni": "0",
-                "nabidka": "0",
-                "poptavka": "0"
-            }
-        }
+        { "veta": "75", "pocet": 0, "burza": { "...": "..." } },
+        { "veta": "1", "pocet": 1, "burza": { "...": "..." } }
     ],
     "konto": "0.00"
 }
 ```
 
-Nejspis pouze aktualni stav objednavek.
+Odpověď se ale nedá brát jako potvrzení, že se objednávka opravdu propsala.
+Knihovna proto po uložení znovu načte jídelníček a zkontroluje `pocet`.
 
+### nactiVlastnostiPA
 
+`POST /api/nactiVlastnostiPA`
 
-
-## Odhlaseni uzivatele
-
-#### Request payload 
-
-Request URL: https://app.strava.cz/api/logOut
-
-Request type: POST
-
-Payload type: JSON
-
-Payload value: 
 ```json
 {
-    "sid":"E9D5B96FE3D14DED8E543B33A4D910F2",
-    "cislo":"3753",
-    "url":"https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc",
-    "lang":"EN",
-    "ignoreCert":"false"
+    "sid": "01C6FCF02A7146159BC5F245A57AF29F",
+    "url": "https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc",
+    "cislo": "3753",
+    "ignoreCert": "false",
+    "lang": "EN",
+    "getText": true,
+    "checkVersion": true,
+    "resetTables": true,
+    "frontendFunction": "refreshInformations"
 }
 ```
 
+Znovu načte stav ze serveru. Používá se jako rollback, když objednávání selže
+uprostřed — rozpracované změny se tím zahodí.
 
-| key        | description                                         | example                                             | type   |
-|------------|-----------------------------------------------------|-----------------------------------------------------|--------|
-| sid        | session identifier, slouzi k identifikaci uzivatele | E9D5B96FE3D14DED8E543B33A4D910F2                    | string |
-| cislo      | cislo jidelny                                       | 3753                                                | string |
-| url        | Web service Stravne 5 endpoint                      | https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc | string |
-| lang       | jazyk                                               | EN                                                  | string |
-| ignoreCert | ...                                                 | false                                               | string |
+## Odhlášení uživatele
 
+`POST /api/logOut`
 
-#### Response
+```json
+{
+    "sid": "E9D5B96FE3D14DED8E543B33A4D910F2",
+    "cislo": "3753",
+    "url": "https://wss5.strava.cz/WSStravne5_15/WSStravne5.svc",
+    "lang": "EN",
+    "ignoreCert": "false"
+}
+```
 
-Tento request je bez odpovedi.
+Odpověď je holý JSON literál `true`, ne objekt. Kód, který naslepo volá
+`.json()["neco"]`, na tom spadne.
 
-(bro proste rekl "bez komentare")
+## Co jsem ještě nerozluštil
+
+- Pole `burza` a celá funkce burzy (nabídka a poptávka jídel mezi strávníky).
+- Pole `environment`, `podminka`, `ignoreCert` a `xml` — server je přijímá, ale
+  co s nimi dělá, nevím.
+- Objednávání více porcí najednou (`pocet` větší než 1).

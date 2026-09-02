@@ -4,57 +4,84 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "strava-cz"
-version = "0.2.0"
-description = "High level API pro interakci s webovou aplikaci Strava.cz"
+version = "0.3.0"
+description = "Python klient pro objednávání jídel ve školních jídelnách přes Strava.cz"
 readme = "README.md"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
 authors = [
     {name = "Vojtěch Nerad", email = "ja@jsem-nerad.cz"}
 ]
-keywords = ["czech", "canteen", "food", "school", "strava", "jidelna", "api", "scraper", "web-scraping"]
+keywords = ["czech", "canteen", "food", "school", "strava", "jidelna", "api", "httpx"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Typing :: Typed",
     "Natural Language :: Czech",
     "Topic :: Education",
-    "Topic :: Internet :: WWW/HTTP :: Session",
+    "Topic :: Internet :: WWW/HTTP",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
-    "requests>=2.25.0",
+    "httpx>=0.24",
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
-    "black>=23.0.0",
-    "flake8>=6.0.0",
+    "respx>=0.20.0",
+    "ruff>=0.5.0",
     "mypy>=1.0.0",
-    "types-requests>=2.25.0",
 ]
 
 [project.urls]
 Homepage = "https://github.com/jsem-nerad/strava-cz-python"
-Documentation = "https://github.com/jsem-nerad/strava-cz-python#readme"
+Documentation = "https://github.com/jsem-nerad/strava-cz-python/wiki"
 Repository = "https://github.com/jsem-nerad/strava-cz-python"
 Issues = "https://github.com/jsem-nerad/strava-cz-python/issues"
+Changelog = "https://github.com/jsem-nerad/strava-cz-python/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
-# Black formatter configuration
-[tool.black]
-line-length = 100
-target-version = ['py39']
+[tool.setuptools.package-data]
+strava_cz = ["py.typed"]
 
-# Pytest configuration
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM", "RUF"]
+ignore = [
+    "RUF001",  # Czech text contains characters ruff considers ambiguous
+    "RUF002",
+    "RUF003",
+    "RUF022",  # __all__ is grouped by category on purpose
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E501"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-v --cov=strava_cz --cov-report=term-missing"
+addopts = "-q"
+
+[tool.mypy]
+python_version = "3.10"
+packages = ["strava_cz"]
+strict = true
+warn_unreachable = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+ignore_errors = true

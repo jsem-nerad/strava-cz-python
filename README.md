@@ -1,268 +1,264 @@
 # Strava.cz Python API
 
-High level API pro interakci s webovou aplikaci Strava.cz udelane v Pythonu ciste pomoci request knihovny.
-
-Ve slozce [notes](https://github.com/jsem-nerad/strava-cz-python/tree/main/notes) muzete najit veskere moje poznatky, ktere jsem zjistil o internim fungovani aplikace Strava.cz.
-
-## Features
-- Prihlaseni/odhlaseni systemu
-- Vypsani a filtrace jidelnicku
-- Objednavani a odhlasovani jidel podle ID jidla
-- Automaticke filtrovani jidel podle typu a objednatelnosti
-- Vyhledavani jidel podle ID nebo data
-- Ulozeni raw i zpracovanych dat z API
-- Sledovani zustatku na uctu
-
-## Dokumentace
-
-Kompletni prehlednou **dokumentaci** najdete na **[GitHub Wiki](https://github.com/jsem-nerad/strava-cz-python/wiki)** tohoto projektu.
-
-## Usage
+Python knihovna pro objednávání jídel ve školních jídelnách, které používají systém
+**[Strava.cz](https://app.strava.cz)**. Komunikuje přímo s interním JSON API webové
+aplikace, takže nepotřebuje prohlížeč ani parsování HTML.
 
 ```bash
 pip install strava-cz
 ```
 
+Ve složce [notes](notes/) najdete všechny moje poznatky o vnitřním fungování API
+Strava.cz. Kompletní **dokumentace** je na
+**[GitHub Wiki](https://github.com/jsem-nerad/strava-cz-python/wiki)**.
+
+## Co knihovna umí
+
+- Přihlášení a odhlášení, včetně správy session
+- Načtení a filtrování jídelníčku podle typu jídla, data a objednatelnosti
+- Objednávání a rušení jídel v jedné transakci, s ověřením výsledku
+- Rozpoznání, proč konkrétní jídlo objednat nelze (uzávěrka, prázdniny, ...)
+- Sledování zůstatku na účtu
+- Plné typové anotace (`py.typed`), takže vám editor napovídá
+
+## Rychlý start
+
 ```python
-from strava_cz import StravaCZ, MealType, OrderType
+from strava_cz import StravaCZ
 
-# Vytvoreni objektu strava a prihlaseni uzivatele
-strava = StravaCZ(
-    username="your.username", 
-    password="YourPassword123", 
-    canteen_number="your canteen number"  # POVINNY parametr
-    )
+with StravaCZ("vase.jmeno", "VaseHeslo123", "3753") as strava:
+    print(strava.user)
 
-# Vypsani informaci o uzivateli
-print(strava.user)
-print(f"Zustatek: {strava.user.balance} Kč")
+    strava.menu.fetch()
+    strava.menu.print()
 
-# Ziskani jidelnicku
-strava.menu.fetch()
-strava.menu.print()
-
-# Pristup k jidelnicku podle dni
-days = strava.menu.get_days()  # Default - vsechna objednavatelna jidla
-print(f"Vsechny jidla: {len(days)} dni")
-
-# Pristup k jidlum jako plochy seznam
-meals = strava.menu.get_meals()  # Vsechna jidla jako plochy seznam
-main_meals = strava.menu.get_meals(meal_types=[MealType.MAIN])  # Pouze hlavni jidla
-soup_meals = strava.menu.get_meals(meal_types=[MealType.SOUP])  # Pouze polevky
-
-# Vcetne volitelnych jidel
-complete = strava.menu.get_days(
-    order_types=[OrderType.NORMAL, OrderType.OPTIONAL]
-)
-
-# Iterace pres menu (default seznam)
-for day in strava.menu:
-    print(f"Datum: {day['date']}, Pocet jidel: {len(day['meals'])}")
-
-# Zjisti, jestli je jidlo s meal_id 4 objednano (True/False)
-print(strava.menu.is_ordered(4))
-
-# Objedna jidla s meal_id 3 a 6
-# Automaticky detekuje duplikaty a kontroluje typ jidla
-strava.menu.order_meals(3, 6)
-
-# Objednani s pokrocilymi parametry
-strava.menu.order_meals(
-    3, 6, 
-    continue_on_error=True,      # Pokracuj i pri chybach
-    strict_duplicates=False       # Pouze varuj pri duplikatech
-)
-
-# Ziskani vsech objednanych jidel
-ordered = strava.menu.get_meals(ordered=True)
-
-# Ziskani jidelnicku podle konkretniho data (prohledava vsechny seznamy)
-today_menu = strava.menu.get_by_date("2025-11-04")
-
-# Zrus objednavky
-strava.menu.cancel_meals(3, 6)
-
-# Odhlasi uzivatele
-strava.logout()
+    # Objedná oběd s ID 5 a 9
+    strava.menu.order_meals(5, 9)
 ```
 
-> meal_id je unikatni identifikacni cislo jidla v celem jidelnicku. neni ovsem stale vazane na konkretni jidlo a meni se se zmenami jidelnicku kazdy den
+`with` blok se sám postará o odhlášení a uzavření spojení. Pokud ho nepoužijete,
+zavolejte na konci `strava.logout()` sami.
 
-> **Pozor!** Verze 0.2.0 obsahuje breaking changes. Prosim precti si [migration guide](MIGRATION_GUIDE.md) pro vice informaci o prechodu na novou verzi.
+> **ID jídla** je unikátní číslo jídla v rámci právě publikovaného jídelníčku
+> (v API pole `veta`). **Není trvale vázané na konkrétní jídlo** a mění se s každou
+> změnou jídelníčku, takže ho vždy berte z čerstvě načteného jídelníčku.
 
-### Struktura dat jidla
+## Práce s jídelníčkem
 
-Kazde jidlo v menu obsahuje nasledujici polozky:
-- `id` [int] - Unikatni identifikacni cislo jidla
-- `type` [MealType] - Typ jidla (MealType.SOUP nebo MealType.MAIN)
-- `orderType` [OrderType] - Typ objednavky (OrderType.NORMAL, OrderType.RESTRICTED, OrderType.OPTIONAL)
-- `name` [str] - Nazev jidla
-- `price` [float] - Cena jidla
-- `ordered` [bool] - Zda je jidlo objednano
-- `alergens` [str] - Alergeny
-- `forbiddenAlergens` [str] - Zakazane alergeny
+```python
+from strava_cz import StravaCZ, MealType
+
+strava = StravaCZ("vase.jmeno", "VaseHeslo123", "3753")
+strava.menu.fetch()
+
+# Dny a jídla
+dny = strava.menu.get_days()          # seznam objektů Day
+jidla = strava.menu.get_meals()       # plochý seznam objektů Meal
+
+# Filtrování - všechny parametry jdou kombinovat
+obedy = strava.menu.get_meals(meal_types=[MealType.MAIN], orderable=True)
+tento_tyden = strava.menu.get_days(date_from="2026-09-07", date_to="2026-09-11")
+objednane = strava.menu.get_meals(ordered=True)
+
+# Vyhledávání
+den = strava.menu.get_by_date("2026-09-07")
+jidlo = strava.menu.get_by_id(9)
+print(strava.menu.is_ordered(9))
+
+# Iterace, len() a indexování fungují přímo na menu
+for den in strava.menu:
+    print(den.date, [j.name for j in den.meals])
+```
+
+Ve výchozím nastavení se **nic neskrývá** — vrátí se každé publikované jídlo
+a u každého se dozvíte, jestli jde objednat. Jedinou výjimkou jsou dny, kdy se
+nevaří; ty se přidají pomocí `include_no_school=True`.
+
+### Objekt `Meal`
+
+| atribut | typ | popis |
+|---|---|---|
+| `id` | `int` | Identifikátor pro objednávání (API pole `veta`) |
+| `date` | `datetime.date` | Den, kdy se jídlo vydává |
+| `type` | `MealType` | `SOUP`, `MAIN` nebo `UNKNOWN` |
+| `variant` | `str` | Označení, které jídlu dává jídelna, například `"Oběd 1"` |
+| `name` | `str` | Název jídla |
+| `price` | `float` | Cena |
+| `ordered` | `bool` | Jestli je jídlo objednané |
+| `can_order` | `bool` | Jestli ho lze právě teď objednat |
+| `can_cancel` | `bool` | Jestli lze objednávku zrušit |
+| `order_restriction` | `Restriction` | Proč objednat nelze |
+| `cancel_restriction` | `Restriction` | Proč zrušit nelze |
+| `allergens` | `tuple[Allergen, ...]` | Alergeny, dvojice `(kód, název)` |
+| `deadline` | `datetime \| None` | Dokdy lze jídlo objednat |
+| `raw` | `dict` | Nezpracovaný záznam z API |
+
+### Objekt `Day`
+
+| atribut | typ | popis |
+|---|---|---|
+| `date` | `datetime.date` | Datum |
+| `meals` | `tuple[Meal, ...]` | Jídla toho dne |
+| `ordered` | `bool` | Jestli je aspoň jedno jídlo objednané |
+| `orderable` | `tuple[Meal, ...]` | Jídla, která lze objednat |
+| `no_school` | `bool` | Jestli se ten den nevaří |
+| `auto_ordered` | `bool` | Jestli na ten den jídelna objednává automaticky |
+| `status` | `DayStatus` | Stav celého dne |
+| `day_code` | `str` | Surový kód dne z API (`omezeniObj.den`) |
 
 ### Enumy
 
-**MealType** - Typy jidel:
-- `SOUP` - Polevka
-- `MAIN` - Hlavni jidlo
+**`MealType`** — `SOUP`, `MAIN`, `UNKNOWN`. Odvozuje se z krátkého kódu `druh`
+(`"PO"`, `"O1"`, ...), který je stabilnější než zobrazovaný text.
 
-**OrderType** - Typy objednavek:
-- `NORMAL` - Normalni objednavatelne jidlo
-- `RESTRICTED` - Jidlo, ktere uz nelze objednat (prilis pozde - "CO")
-- `OPTIONAL` - Jidlo, ktere obvykle neni objednavano, ale muze byt ("T")
+**`Restriction`** — proč jídelna nedovolí jídlo objednat nebo změnit:
 
+| hodnota | význam |
+|---|---|
+| `NONE` | Bez omezení, jídlo lze objednat |
+| `CLOSED` | Uzávěrka objednávek na tento den už proběhla |
+| `UNAVAILABLE` | Položku nelze objednat samostatně (typicky polévka) |
+| `NO_SCHOOL` | Jídelna ten den nevaří |
+| `UNKNOWN` | Jídelna vrátila kód, který knihovna nezná |
 
-### Menu class
+**`DayStatus`** — co jídelna říká o celém dni (pole `omezeniObj.den`). Na
+objednatelnost nemá vliv, tu určuje vždy jen konkrétní jídlo:
 
-#### Vlastnosti (Properties)
-| vlastnost      | typ                  | popis                                                                          |
-|----------------|----------------------|--------------------------------------------------------------------------------|
-| `raw_data`     | dict                 | Surova odpoved z API bez zpracovani                                            |
+| hodnota | význam |
+|---|---|
+| `NORMAL` | Běžný den |
+| `NOT_AUTO_ORDERED` | Jídelna na tento den neobjednává automaticky |
+| `NO_SCHOOL` | Ten den se nevaří |
+| `CLOSED` | Uzávěrka dne už proběhla |
+| `UNKNOWN` | Jídelna vrátila kód, který knihovna nezná |
 
-#### Hlavni Metody
-| funkce              | parametry                                                 | return type | popis                                                                                                              |
-|---------------------|-----------------------------------------------------------|-------------|--------------------------------------------------------------------------------------------------------------------|
-| `fetch()`           | None                                                      | Menu        | Ziska jidelnicek z API a zpracuje ho; vraci sam sebe                                                              |
-| `print()`           | None                                                      | None        | Vypise zformatovane menu (default: pouze objednavatelna jidla)                                                    |
-| `get_days()`        | meal_types=None, order_types=None, ordered=None           | list        | Vrati jidla seskupena podle dni: `[{date, ordered, meals: [...]}]`                                                |
-| `get_meals()`       | meal_types=None, order_types=None, ordered=None           | list        | Vrati vsechna jidla jako plochy seznam: `[{...meal}]`                                                            |
-| `order_meals()`     | *meal_ids, continue_on_error=False, strict_duplicates=False | None      | Objedna vice jidel; detekuje duplikaty a kontroluje typy                                                          |
-| `cancel_meals()`    | *meal_ids, continue_on_error=False                        | None        | Zrusi objednavky vice jidel                                                                                        |
+### Dny, na které se neobjednává automaticky
 
-**Parametry filtrovani:**
-- `meal_types` - Seznam typu jidel k ziskani (napr. `[MealType.SOUP, MealType.MAIN]`). None = vsechny typy
-- `order_types` - Seznam typu objednavek k ziskani (napr. `[OrderType.NORMAL, OrderType.OPTIONAL]`). None = pouze `[OrderType.NORMAL]`
-- `ordered` - Filtrovani podle stavu objednavky: `True` = pouze objednane, `False` = pouze neobjednane, `None` = vse
+Jídelna některé dny označuje kódem `"T"`. **Objednat na ně jde úplně normálně**, jen se
+neobjednají samy — typicky pátek, kdy se ve škole neučí. Knihovna to vystavuje jako
+`Day.auto_ordered` a jako filtr:
 
-**Priklady:**
 ```python
-# Vsechna objednavatelna jidla podle dni (default)
-menu.get_days()
+# Co by automat objednal, kdyby na to byl
+strava.menu.get_meals(auto_ordered=True, orderable=True)
 
-# Vsechna jidla jako flat seznam
-menu.get_meals()
-
-# Pouze polevky
-menu.get_meals(meal_types=[MealType.SOUP])
-
-# Pouze objednana jidla
-menu.get_meals(ordered=True)
-
-# Vcetne omezenych a volitelnych jidel
-menu.get_days(order_types=[OrderType.NORMAL, OrderType.RESTRICTED, OrderType.OPTIONAL])
+# Dny, které si musíte objednat sami
+[den.date for den in strava.menu.get_days(auto_ordered=False)]
 ```
 
-#### Pomocne Metody
-| funkce              | parametry                                                 | return type | popis                                                                                                              |
-|---------------------|-----------------------------------------------------------|-------------|--------------------------------------------------------------------------------------------------------------------|
-| `get_by_date()`     | date [str]                                                | dict/None   | Vrati jidla pro konkretni datum (prohledava vsechny typy objednavek)                                              |
-| `get_by_id()`       | meal_id [int]                                             | dict/None   | Vrati konkretni jidlo podle ID (prohledava vsechny typy objednavek)                                               |
-| `is_ordered()`      | meal_id [int]                                             | bool        | Zjisti, jestli je dane jidlo objednano (prohledava vsechny typy objednavek)                                       |
+Ve výchozím nastavení se tyhle dny **nijak neskrývají** — jsou to obyčejné objednatelné
+dny.
 
-#### Parametry objednavani
-- `continue_on_error` - Pokud True, pokracuje pri chybach a sbira je; pokud False (default), zastavi pri prvni chybe
-- `strict_duplicates` - Pokud True, vyhodi chybu pri vice jidlech ze stejneho dne; pokud False (default), pouze varuje a objedna prvni
+## Objednávání
 
-**Poznamka:** Menu objekt podporuje iteraci, indexovani a len() - vse pracuje s defaultnim seznamem objednatelnych jidel.
-
-### Exceptions
-
-Knihovna nabizi specialni vyjimky pro ruzne chybove stavy:
-
-| Exception                    | Popis                                                          |
-|------------------------------|----------------------------------------------------------------|
-| `StravaAPIError`             | Zakladni vyjimka pro vsechny API chyby                         |
-| `AuthenticationError`        | Chyba pri prihlaseni nebo pokud uzivatel neni prihlasen       |
-| `InsufficientBalanceError`   | Nedostatecny zustatek na uctu pro objednani jidla              |
-| `InvalidMealTypeError`       | Pokus o objednani/zruseni jidla, ktere nelze modifikovat (polevka) |
-| `DuplicateMealError`         | Pokus o objednani vice jidel ze stejneho dne (strict mode)    |
-
-**Priklad pouziti:**
 ```python
-from strava_cz import StravaCZ, InvalidMealTypeError, InsufficientBalanceError, DuplicateMealError
+from strava_cz import StravaCZ, InsufficientBalanceError, MealNotOrderableError
 
-strava = StravaCZ("user", "pass", "1234")
+strava = StravaCZ("vase.jmeno", "VaseHeslo123", "3753")
 strava.menu.fetch()
 
 try:
-    # Pokus o objednani polevky (vyhodit InvalidMealTypeError)
-    strava.menu.order_meals(75)  # ID polevky
-except InvalidMealTypeError as e:
-    print(f"Chyba: {e}")
+    vysledek = strava.menu.order_meals(5, 9)
+    print(vysledek)          # "2 changed"
+    print(vysledek.changed)  # (5, 9)
+except MealNotOrderableError as e:
+    print(f"Tohle jídlo objednat nejde: {e}")
+except InsufficientBalanceError:
+    print(f"Nedostatečný zůstatek: {strava.user.balance} Kč")
 
-try:
-    # Pokus o objednani vice jidel ze stejneho dne
-    strava.menu.order_meals(1, 2, strict_duplicates=True)
-except DuplicateMealError as e:
-    print(f"Duplicita: {e}")
-
-try:
-    # Pokus o objednani draheho jidla
-    strava.menu.order_meals(100)
-except InsufficientBalanceError as e:
-    print(f"Nedostatecny zustatek: {e}")
-    print(f"Aktualni zustatek: {strava.user.balance} Kč")
+# Zrušení objednávek
+strava.menu.cancel_meals(5, 9)
 ```
 
+Obě metody proběhnou jako **jedna transakce**: nejdřív se zaškrtnou všechna jídla,
+pak se změny uloží najednou a nakonec se výsledek ověří na čerstvě načteném
+jídelníčku. Když cokoliv selže, změny se zahodí a nic se neuloží. Pokud není co
+měnit, neodešle se žádný požadavek.
 
-### StravaCZ class
+**Parametry**
 
-| funkce              | parametry                                                 | return type | popis                                                                                                              |
-|---------------------|-----------------------------------------------------------|-------------|--------------------------------------------------------------------------------------------------------------------|
-| `__init__()` (=`StravaCZ()`)        | username=None, password=None, canteen_number=None         | None        | Inicializuje objekt StravaCZ a automaticky prihlasi uzivatele, pokud jsou vyplnene vsechny tri parametry           |
-| `login()`           | username [str], password [str], canteen_number [str]      | User        | Prihlasi uzivatele pomoci uzivatelskeho jmena, hesla a cisla jidelny (vsechny parametry jsou povinne)              |
-| `logout()`          | None                                                      | bool        | Odhlasi uzivatele                                                                                                  |
+- `continue_on_error=True` — neskončí u první chyby. Objedná, co jde, a zbytek
+  vrátí v `OrderResult`, místo aby vyhodila výjimku.
+- `strict_duplicates=True` — vyhodí `DuplicateMealError`, když se dvě zvolená jídla
+  perou o stejné místo (stejný den, stejný typ). Ve výchozím stavu se objedná
+  první z nich a u ostatních se jen vypíše varování.
 
+```python
+vysledek = strava.menu.order_meals(5, 85, 999, continue_on_error=True)
 
-## to-do
+print(vysledek.changed)    # (5,)   objednáno
+print(vysledek.unchanged)  # ()     už bylo objednané, nic se neposílalo
+print(vysledek.skipped)    # ()     vynecháno kvůli duplicitě
+print(vysledek.failed)     # ((85, MealNotOrderableError(...)), (999, MealNotFoundError(...)))
+print(vysledek.ok)         # False
+```
 
-- [x] Nahrat jako knihovnu na PyPi
-- [x] Lepe zorganizovat kod
-- [x] Lepsi datum format
-- [x] Moznost detailnejsi filtrace jidelnicku
-- [x] Kontrola stavu po objednani
-- [x] Filtrace dnu, ktere nejdou objednat
-- [x] Lepsi testing
-- [x] Balance check pred objednanim
-- [x] Detekce a prevence duplicitnich objednavek
-- [x] Kontrola typu jidla pri objednavani
-- [x] Lepe zdokumentovat pouziti
+## Výjimky
+
+Všechny výjimky knihovny dědí ze `StravaError`, takže je lze odchytit najednou.
+
+| výjimka | kdy nastane |
+|---|---|
+| `StravaError` | Základní třída všech výjimek knihovny |
+| `StravaAPIError` | API odmítlo požadavek; nese `.code`, `.status_code` a `.payload` |
+| `AuthenticationError` | Přihlášení selhalo nebo session vypršela |
+| `NotLoggedInError` | Volání, které vyžaduje přihlášení, ale uživatel přihlášený není |
+| `InsufficientBalanceError` | Na účtu není dost peněz |
+| `MealNotFoundError` | ID jídla není v načteném jídelníčku |
+| `MealNotOrderableError` | Jídelna objednávku či zrušení nedovolí; nese `.reason` |
+| `DuplicateMealError` | Dvě jídla soupeří o stejné místo a je zapnuté `strict_duplicates` |
+| `MenuNotFetchedError` | Přístup k jídelníčku dřív, než se zavolá `fetch()` |
+
+## Nastavení klienta
+
+```python
+strava = StravaCZ(
+    "vase.jmeno", "VaseHeslo123", "3753",
+    timeout=30.0,      # výchozí je 15 s, z toho 10 s na navázání spojení
+    retries=2,         # opakuje se jen spojení, které se nenavázalo
+    language="CS",     # jazyk odpovědí z API
+)
+```
+
+Heslo se použije jen pro přihlašovací požadavek a dál se nikde neukládá.
+Parametrem `client=` můžete také předat vlastní `httpx.Client`.
+
+## To-do
+
+- [x] Nahrát jako knihovnu na PyPI
+- [x] Lépe zorganizovat kód
+- [x] Lepší formát data
+- [x] Možnost detailnější filtrace jídelníčku
+- [x] Kontrola stavu po objednání
+- [x] Detekce a prevence duplicitních objednávek
+- [x] Rozpoznání důvodu, proč jídlo nelze objednat
+- [x] Lépe zdokumentovat použití
 - [ ] Login rate limiting
-- [ ] Debug/Log mode
-- [ ] Zrychleni interakce s API
+- [ ] Debug/log mód
+- [ ] Asynchronní klient
 
+## Co bude dál?
 
-## Known bugs
+Plánuji udělat aplikaci, která bude uživateli automaticky objednávat obědy podle
+jeho preferencí.
 
-
-
-## Co bude dal?
-
-Planuji udelat aplikaci, ktera bude uzivateli automaticky objednavat obedy podle jeho preferenci.
-
-Prosim, nepouzivejte tuto knihovnu k nekalym ucelum. Pouzivejte ji pouze s dobrymi zamery.
-
+Prosím, nepoužívejte tuto knihovnu k nekalým účelům. Používejte ji pouze s dobrými
+úmysly.
 
 ## Jak mi pomoct
 
-Nasel jsi chybu nebo mas navrh na zlepseni? Skvele! Vytvor prosim [bug report](https://github.com/jsem-nerad/strava-cz-python/issues/new?labels=bug) nebo [feature request](https://github.com/jsem-nerad/strava-cz-python/issues/new?labels=enhancement), hodne mi tim muzes pomoct.
+Našel jsi chybu nebo máš návrh na zlepšení? Skvělé! Vytvoř prosím
+[bug report](https://github.com/jsem-nerad/strava-cz-python/issues/new?labels=bug)
+nebo [feature request](https://github.com/jsem-nerad/strava-cz-python/issues/new?labels=enhancement).
 
-Udelal jsi sam nejake zlepseni? Jeste lepsi! Kazdy pull request je vitan.
+Udělal jsi sám nějaké zlepšení? Ještě lepší! Každý pull request je vítaný — postup
+najdeš v [notes/repo_rules.md](notes/repo_rules.md).
 
+## Použití AI
 
-## Pouziti AI
+Na tomto projektu byly do jisté míry využity modely LLM, primárně na dokumentaci,
+testy a formátování kódu. Každá taková úprava prošla mojí kontrolou.
 
-Na tento projekt byly do jiste miry vyuzity modely LLM, primarne na formatovani a dokumentaci kodu. V projektu nebyl ani nebude tolerovan cisty vibecoding.
+## Licence
 
-Zaznamy konkretniho pouziti:
-
-- Kontrola syntaxe kodu, formatovani a komentare
-- Vytvoreni testu
-- Uprava example.py podle zmen kodu
-- Uprava a formatovani README podle zmen kodu
-- Zapis do CHANGELOGu podle zmen kodu
-- Vytvoreni MIGRATION GUIDE
-- Pomoc s tvorbou wiki
-
+[GPL-3.0-or-later](LICENSE)

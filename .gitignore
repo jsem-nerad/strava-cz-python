@@ -2,6 +2,10 @@
 
 notes/plans.md
 
+# The GitHub wiki, cloned here so the docs live next to the code.
+# It is a separate git repository - do not track it from this one.
+/wiki/
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

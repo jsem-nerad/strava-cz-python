@@ -1,33 +1,64 @@
-"""
-StravaCZ - High level API pro interakci s webovou aplikaci Strava.cz
+"""strava_cz - a Python client for the Strava.cz school canteen system.
+
+from strava_cz import StravaCZ
+
+with StravaCZ("your.username", "YourPassword", "3753") as strava:
+    strava.menu.fetch()
+    strava.menu.print()
+    strava.menu.order_meals(3, 6)
 """
 
-from .main import (
-    StravaCZ,
+from .client import DEFAULT_BASE_URL, StravaCZ
+from .exceptions import (
     AuthenticationError,
-    StravaAPIError,
-    InsufficientBalanceError,
     DuplicateMealError,
-    InvalidMealTypeError,
-    User,
+    InsufficientBalanceError,
+    MealNotFoundError,
+    MealNotOrderableError,
+    MenuNotFetchedError,
+    NotLoggedInError,
+    StravaAPIError,
+    StravaError,
+)
+from .menu import Menu
+from .models import (
+    Allergen,
+    Day,
+    DayStatus,
+    Meal,
     MealType,
-    OrderType,
-    Menu,
+    OrderResult,
+    Restriction,
+    User,
 )
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 __author__ = "Vojtěch Nerad"
 __email__ = "ja@jsem-nerad.cz"
 
 __all__ = [
+    # client
     "StravaCZ",
-    "AuthenticationError",
-    "StravaAPIError",
-    "InsufficientBalanceError",
-    "DuplicateMealError",
-    "InvalidMealTypeError",
-    "User",
-    "MealType",
-    "OrderType",
     "Menu",
+    "DEFAULT_BASE_URL",
+    # data
+    "User",
+    "Day",
+    "Meal",
+    "Allergen",
+    "MealType",
+    "DayStatus",
+    "Restriction",
+    "OrderResult",
+    # exceptions
+    "StravaError",
+    "StravaAPIError",
+    "AuthenticationError",
+    "NotLoggedInError",
+    "InsufficientBalanceError",
+    "MealNotFoundError",
+    "MealNotOrderableError",
+    "DuplicateMealError",
+    "MenuNotFetchedError",
+    "__version__",
 ]
