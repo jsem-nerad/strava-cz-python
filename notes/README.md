@@ -35,6 +35,12 @@ Samotný HTTP status tedy nestačí — je potřeba se dívat i na pole `state`.
 |---|---|
 | 20 | Neexistující uživatel, špatné heslo nebo zablokovaný účet |
 | 35 | Nedostatečný zůstatek na kontě pro objednání jídla |
+| 43 | Server je přetížený, zkuste to za chvíli |
+
+Kód 43 přišel při rychlém opakovaném přihlašování ze skriptu ("The service is currently
+overloaded, please try again in a few minutes"). Vypadá to tedy spíš na omezení počtu
+požadavků než na skutečné přetížení. Knihovna ho zatím nemapuje na vlastní výjimku —
+vyletí jako obecná `StravaAPIError` s `.code == 43`.
 
 ## Přihlášení uživatele
 

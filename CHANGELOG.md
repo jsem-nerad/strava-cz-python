@@ -5,6 +5,50 @@ Všechny významné změny v tomto projektu budou dokumentovány v tomto souboru
 
 ## [unreleased]
 
+## [0.4.0] 2026-09-01
+
+Přibyl nástroj pro příkazovou řádku a profily. Knihovna sama je zpětně kompatibilní
+s 0.3.0.
+
+### Added
+- **Příkaz `strava-cz`** (a `python -m strava_cz`), který zpřístupňuje všechno, co umí
+  knihovna: `menu`, `ordered`, `order`, `cancel`, `balance`, `account`, `raw` a `profile`.
+  Výchozí výpis je pro lidi, `--format json` (zkratka `--json`) vypíše na standardní
+  výstup jeden objekt pro další zpracování. Nepotřebuje nic mimo standardní knihovnu.
+- `--dry-run` u `order` a `cancel` spočítá, co by se změnilo, a **neodešle nic**.
+  Pozná i jídla, která už jsou objednaná, a dvě jídla soupeřící o stejné místo.
+- Návratové kódy 0–6, aby shell rozeznal odmítnuté přihlášení od neobjednatelného
+  jídla nebo od prázdného konta.
+- Filtry jídelníčku jako přepínače: `--from`, `--to`, `--today`, `--tomorrow`,
+  `--week`, `--next-week`, `--type`, `--orderable`, `--ordered`, `--auto-ordered`,
+  `--include-no-school` a `--allergens`.
+- **Profily**: `strava-cz profile add|list|show|default|remove`. Uživatelské jméno
+  a číslo jídelny se ukládají do `$XDG_CONFIG_HOME/strava-cz/profiles.json` (soubor
+  `0600`, složka `0700`, zápis atomický). **Heslo se do souboru nezapisuje otevřeným
+  textem** — jde do klíčenky systému, nebo se zašifruje, nebo se čte z prostředí či se
+  na něj program ptá. Otevřeným textem se uloží jen po výslovném `--secret file`, a i
+  tak s varováním.
+- **`--secret encrypted`** pro stroje bez klíčenky, typicky servery. Heslo se zašifruje
+  algoritmem AES-256-GCM klíčem, který z heslové fráze odvodí scrypt (n=2^15, r=8, p=1);
+  sůl, nonce i parametry se ukládají do záznamu, takže pozdější zvýšení náročnosti
+  starší profily nezneplatní. GCM záznam ověřuje, takže poškozený soubor skončí
+  srozumitelnou chybou. Heslová fráze se bere z `$STRAVA_CZ_PASSPHRASE_<JMENO>`,
+  `$STRAVA_CZ_PASSPHRASE`, nebo se na ni program zeptá.
+- **`--secret auto` jako výchozí**: klíčenka, když nějaká funguje, jinak `encrypted`.
+  Heslo si tedy zapamatuje i server bez grafického prostředí, aniž by se kamkoliv
+  ukládalo otevřeným textem. Zvolená cesta se vypíše a zapíše do profilu.
+- Nepovinná závislost `cryptography` v extra `[cli]`. Na Linuxu ji stejně už instaluje
+  `keyring` přes `SecretStorage`.
+- `StravaCZ.from_profile()`, `Profile`, `ProfileStore` a `SecretSource` pro použití
+  profilů přímo z Pythonu.
+- Výjimky `ProfileError`, `ProfileNotFoundError`, `KeyringUnavailableError`
+  a `EncryptionUnavailableError`.
+- Nepovinný extra `[cli]` s balíčky `keyring` a `cryptography`.
+
+### Changed
+- Barvy se vypisují jen na terminál. V rouře, v souboru, v cronu a při nastavené
+  proměnné `NO_COLOR` se vypnou samy; `--color always` je vynutí.
+
 ## [0.3.0] 2026-08-31
 
 Velká oprava a přepis. Verze 0.3.0 obsahuje breaking changes: jídla a dny jsou nově

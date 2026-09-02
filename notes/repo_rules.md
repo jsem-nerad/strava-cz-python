@@ -34,8 +34,12 @@ python -m venv .venv
 ### 3. Instalace v development módu
 
 ```bash
-pip install -e ".[dev]"
+pip install -e ".[dev,cli]"
 ```
+
+Extra `cli` přidá balíčky `keyring` a `cryptography`. Testy si klíčenku podstrkují
+vlastní, ale bez extra by se neověřilo, že se skutečné importy chovají, jak mají,
+a šifrované profily by nešlo otestovat vůbec.
 
 > Ujistěte se, že je aktivní venv.
 
@@ -79,8 +83,8 @@ pytest
 - Zkontrolovat a naformátovat kód a ověřit typy:
 
 ```bash
-ruff check src tests
-ruff format src tests
+ruff check src tests examples
+ruff format src tests examples
 mypy
 ```
 

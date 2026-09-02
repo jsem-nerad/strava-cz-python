@@ -9,6 +9,7 @@ reintroduce by accident.
 from __future__ import annotations
 
 import json
+import os
 import socket
 from pathlib import Path
 from typing import Any
@@ -92,3 +93,79 @@ def with_ordered(payload: Any, *meal_ids: int) -> Any:
                 if isinstance(row, dict) and str(row.get("veta")) in wanted:
                     row["pocet"] = 1
     return clone
+
+
+@pytest.fixture
+def store_path(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """An isolated profile store, so no test can touch the real ~/.config."""
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "config"))
+    for var in list(os.environ):
+        if var.startswith(("STRAVA_CZ_PASSWORD", "STRAVA_CZ_PASSPHRASE")):
+            monkeypatch.delenv(var, raising=False)
+    return tmp_path / "config" / "strava-cz" / "profiles.json"
+
+
+class FakeKeyring:
+    """An in-memory stand-in for the OS keyring.
+
+    The real one cannot be used in tests: CI has no Secret Service, and a developer's
+    machine has one that should not collect entries from a test run.
+    """
+
+    def __init__(self, working: bool = True) -> None:
+        self.entries: dict[tuple[str, str], str] = {}
+        self.working = working
+
+    # The bits of the keyring API that strava_cz.profiles uses.
+    def get_password(self, service: str, name: str) -> str | None:
+        return self.entries.get((service, name))
+
+    def set_password(self, service: str, name: str, password: str) -> None:
+        self.entries[(service, name)] = password
+
+    def delete_password(self, service: str, name: str) -> None:
+        if (service, name) not in self.entries:
+            raise RuntimeError("password not found")
+        del self.entries[(service, name)]
+
+
+@pytest.fixture
+def fake_keyring(monkeypatch: pytest.MonkeyPatch) -> FakeKeyring:
+    """Route strava_cz.profiles at an in-memory keyring."""
+    from strava_cz import profiles
+
+    backend = FakeKeyring()
+    monkeypatch.setattr(profiles, "_keyring", lambda: backend)
+    return backend
+
+
+@pytest.fixture
+def passphrase(monkeypatch: pytest.MonkeyPatch) -> str:
+    """A passphrase in the environment, so encrypted profiles never prompt."""
+    value = "test-passphrase"
+    monkeypatch.setenv("STRAVA_CZ_PASSPHRASE", value)
+    return value
+
+
+@pytest.fixture
+def no_crypto(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Simulate a machine where `cryptography` is not installed."""
+    from strava_cz import profiles
+    from strava_cz.exceptions import EncryptionUnavailableError
+
+    def fail() -> Any:
+        raise EncryptionUnavailableError()
+
+    monkeypatch.setattr(profiles, "_crypto", fail)
+
+
+@pytest.fixture
+def no_keyring(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Simulate a machine with no usable keyring, as a headless server has."""
+    from strava_cz import profiles
+    from strava_cz.exceptions import KeyringUnavailableError
+
+    def fail() -> Any:
+        raise KeyringUnavailableError("no backend on this machine")
+
+    monkeypatch.setattr(profiles, "_keyring", fail)

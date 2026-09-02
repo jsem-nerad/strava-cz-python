@@ -18,6 +18,7 @@ from .exceptions import (
 )
 from .menu import Menu
 from .models import User
+from .profiles import ProfileStore
 
 __all__ = ["StravaCZ"]
 
@@ -102,6 +103,46 @@ class StravaCZ:
                 "username, password and canteen_number must be given together "
                 "(or all omitted, to log in later with login())"
             )
+
+    @classmethod
+    def from_profile(
+        cls,
+        name: str | None = None,
+        *,
+        store: ProfileStore | None = None,
+        password: str | None = None,
+        allow_prompt: bool = True,
+        **kwargs: Any,
+    ) -> StravaCZ:
+        """Log in using a stored profile, so credentials stay out of your script.
+
+            with StravaCZ.from_profile("skola") as strava:
+                strava.menu.fetch()
+
+        Args:
+            name: Which profile to use. ``None`` takes the default one.
+            store: A :class:`~strava_cz.profiles.ProfileStore` to read from; the
+                default reads ``$XDG_CONFIG_HOME/strava-cz/profiles.json``.
+            password: Skip the profile's own password lookup and use this instead.
+            allow_prompt: Set False when nothing can answer a terminal prompt, so a
+                profile that asks for its password fails instead of hanging.
+            **kwargs: Passed straight to :class:`StravaCZ`, e.g. ``timeout=30``.
+                ``language`` defaults to the profile's.
+
+        Returns:
+            A logged-in client.
+
+        Raises:
+            ProfileNotFoundError: If the profile is not stored.
+            ProfileError: If its password cannot be found.
+            AuthenticationError: If the canteen rejects the login.
+        """
+        store = store if store is not None else ProfileStore()
+        profile = store.get(name)
+        kwargs.setdefault("language", profile.language)
+        if password is None:
+            password = store.resolve_password(profile, allow_prompt=allow_prompt)
+        return cls(profile.username, password, profile.canteen_number, **kwargs)
 
     def _default_headers(self) -> dict[str, str]:
         """Headers making the request look like the web app's own.
