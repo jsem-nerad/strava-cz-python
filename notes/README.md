@@ -49,7 +49,7 @@ vyletí jako obecná `StravaAPIError` s `.code == 43`.
 ```json
 {
     "cislo": "3753",
-    "jmeno": "vojtech.nerad",
+    "jmeno": "vase.jmeno",
     "heslo": "XXXXXXXXX",
     "zustatPrihlasen": false,
     "environment": "W",
@@ -60,7 +60,7 @@ vyletí jako obecná `StravaAPIError` s `.code == 43`.
 | key | popis | příklad | typ |
 |---|---|---|---|
 | cislo | číslo jídelny | 3753 | string |
-| jmeno | uživatelské jméno | vojtech.nerad | string |
+| jmeno | uživatelské jméno | vase.jmeno | string |
 | heslo | plaintext heslo uživatele | Heslo123 | string |
 | zustatPrihlasen | zůstat přihlášen | false | boolean |
 | environment | prostředí, web posílá `W` | W | string |
@@ -116,7 +116,7 @@ Důležitá pole jednoho jídla:
 | alergeny | alergeny jako dvojice `[kód, název]` | [["04","Ryby"]] | list |
 | zakazaneAlergeny | alergeny označené uživatelem jako nevhodné | null | list/null |
 | pocet | stav objednání: 0 = neobjednáno, 1 = objednáno | 0 | integer |
-| veta | **identifikátor jídla použitý při objednávání**; platí jen v rámci jednoho přihlášení, jídelna čísluje jídelníček při každém přihlášení znovu | "7" | string |
+| veta | **identifikátor jídla použitý při objednávání**; platí jen do dalšího přihlášení nebo resetu session (`nactiVlastnostiPA`), jídelna čísluje jídelníček při každém přihlášení znovu | "7" | string |
 | casKonec | dokdy lze jídlo objednat | 2026-09-14T15:00:00 | string |
 | omezeniObj | omezení objednávky, viz níže | {"den":"","obj":"","zm":"","bur":"C"} | object |
 

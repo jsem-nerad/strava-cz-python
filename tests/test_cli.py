@@ -30,6 +30,8 @@ def cli(api, login_route, store_path: Path, monkeypatch):
     api.post(f"{BASE_URL}/api/objednavky").mock(
         return_value=httpx.Response(200, json=load("menu_live"))
     )
+    # A write is read back from the canteen's records, which starts with this reset.
+    api.post(f"{BASE_URL}/api/nactiVlastnostiPA").mock(return_value=httpx.Response(200, json={}))
     return api
 
 

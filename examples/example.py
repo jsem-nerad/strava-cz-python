@@ -6,6 +6,10 @@ Přihlašovací údaje se berou z proměnných prostředí, aby se heslo nedosta
     export STRAVA_PASSWORD="VaseHeslo123"
     export STRAVA_CANTEEN="3753"
     python examples/example.py
+
+Ve výchozím stavu jen čte. **S proměnnou STRAVA_OPRAVDU_ZAPISOVAT=1 sahá na skutečný účet:
+objedná první tři dny, které jdou objednat, a pak zruší VŠECHNY objednávky na účtu**, včetně
+těch, které jste si udělali sami. Pouštějte ji tak jen na účtu, na kterém na tom nezáleží.
 """
 
 import os
@@ -76,6 +80,10 @@ def main() -> None:
                 print(f"      [{meal.id}] {meal.name}  ({meal.price:g} Kč)")
 
         # -------------------------------------------------- objednávání
+        if os.environ.get("STRAVA_OPRAVDU_ZAPISOVAT") != "1":
+            print("\nDál by se objednávalo a rušilo, viz začátek souboru. Končím.")
+            return
+
         if not obedy:
             print("\nNení co objednat, končím.")
             return

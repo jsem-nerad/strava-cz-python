@@ -15,14 +15,61 @@ Knihovna zůstává zpětně kompatibilní.
   je nové přihlášení. Číslo přečtené z `strava-cz menu` tak v dalším běhu mohlo být
   polévka, takže přišlo odmítnutí s důvodem, který k vybranému jídlu nepatřil, nebo
   objednatelné jídlo v jiný den, které se objednalo s návratovým kódem 0. Na živém účtu
-  to bylo vidět 5. 11. 2026: stejný jídelníček chodí v několika číslováních a uvnitř
-  jednoho přihlášení se číslování nemění. Starší poznámka, že se čísla mění jen se změnou
-  jídelníčku, neplatila.
+  to bylo vidět 5. 11. 2026: stejný jídelníček chodí v několika číslováních a číslování se
+  mění při přihlášení a při resetu session, ale ne při čtení, zaškrtnutí ani uložení.
+  Starší poznámka, že se čísla mění jen se změnou jídelníčku, neplatila.
 - Kontrola po zápisu hledá jídlo podle dne a místa v jídelníčku, takže odpověď nemůže
   přijít z řádku jiného jídla. Pokud místo z jídelníčku zmizelo, zápis se hlásí jako
   nepotvrzený.
+- **Opakovaný pokus po neúspěšné objednávce mohl v knihovně objednat jiné jídlo v jiný
+  den.** Jídelna čísluje jídelníček znovu nejen při přihlášení, ale i při resetu session
+  (`nactiVlastnostiPA`), a ten knihovna volá při vracení změn zpátky. Když selhalo
+  zaškrtnutí všech jídel a nebo následné načtení, zůstala v paměti stará čísla a další
+  `order_meals()` v tomtéž přihlášení je poslalo dál. Reset teď vždycky znovu načte
+  jídelníček, a když se to nepovede, jídelníček se zahodí. Číslo přečtené před resetem se
+  odmítne s `MenuNotFetchedError`, dokud nezavoláte `fetch()`; klíč funguje dál.
+- **Selhání při zápisu už nelže o tom, co je na účtu.** Vypršený čas u `saveOrders` nic
+  neříká o tom, jestli se uložení povedlo, a knihovna přesto hlásila jen „timed out“, i když
+  objednávka na účtu byla. Timeout při kontrole po úspěšném uložení vypadal jako neúspěšná
+  objednávka. Teď se po neúspěšném uložení přečte stav znovu: když se změna uložila, je to
+  úspěch, když ne, chyba říká „Nothing was saved“. Když to zjistit nejde, přijde nová
+  výjimka `OrderNotConfirmedError` s atributy `changed` a `unconfirmed`, a příkaz skončí
+  kódem 1 a napíše, co je nepotvrzené, s `--json` i v polích `error.unconfirmed` a
+  `error.changed`. S `--continue-on-error` se jídlo, u kterého se ztratila odpověď na
+  zaškrtnutí a které se přesto uložilo, hlásí jako změněné, ne jako selhané.
+- **Kontrola po zápisu nic nedokazovala.** Každé přihlášení pracuje s vlastní kopií
+  objednávek a zaškrtnuté jídlo je v ní vidět ještě před uložením, takže ji uložení, které
+  nic neudělalo, projde (na živém účtu 5. 11. 2026). `strava-cz order` a `cancel` teď
+  ověřují výsledek proti záznamům jídelny, stejně jako knihovna s `verify_saved=True`.
+- **S `--continue-on-error` byl návratový kód vždycky 4**, ať se stalo cokoliv. Nedostatek
+  peněz teď končí kódem 5 a selhání sítě nebo jídelny kódem 1, obojí i vedle odmítnutého
+  dne. Odmítnuté jídlo zůstává 4. Skončená session přeruší celou dávku, nic neuloží a
+  skončí kódem 3, i s `continue_on_error=True` v knihovně.
+- **`--dry-run` tvrdil něco jiného, než co pak skutečné volání udělalo.** Bez
+  `--continue-on-error` jedno odmítnuté jídlo zastaví celou dávku, ale `--dry-run` dál
+  vypisoval, co by se objednalo. Stejně tak u `--strict-duplicates`. Teď je `would_change`
+  v takovém případě prázdné, zadržená jídla jsou v novém poli `blocked` a návratový kód
+  sedí. V JSONu bylo `ok: true` i u odmítnutého jídla s kódem 4. `balance_change` u výměny
+  jídla počítá rozdíl cen, ne celou cenu nového jídla. Nové pole `balance_after` říká, kolik
+  by na účtu zůstalo, a když by to bylo pod nulou, přijde varování: jídelna v takovém případě
+  může objednávku odmítnout (na živém účtu s nulovým zůstatkem kódem 35), ale limit účtu
+  `--dry-run` nezná, takže návratový kód zůstává 0.
+- `order` s objednaným jídlem a jeho alternativou na stejný den jídlo vyměnil a přitom
+  o tom objednaném hlásil „already ordered“, což už po běhu neplatilo. Objednané jídlo teď
+  své místo drží, alternativa se přeskočí s varováním a s `--strict-duplicates` je to chyba.
+- **Vypršená session teď opravdu je `AuthenticationError`**, jak slibuje dokumentace.
+  Jídelna na ni odpovídá číslem chyby 15, které knihovna neznala, takže šla jen obecná
+  `StravaAPIError` a příkaz končil kódem 1 místo 3 (na živém účtu 5. 11. 2026).
+- `logout()` u skončené session nezvládl odhlášení a klient pak `login()` odmítal, protože
+  se pořád tvářil přihlášeně. Po `logout()` je teď klient odhlášený vždycky, a odhlášení ze
+  session, která už skončila, není chyba.
+- Když reset selže, udělá se dodatečně před dalším `fetch()`. Jinak by se zaškrtnuté a
+  neuložené jídlo tvářilo jako objednané a další uložení by ho opravdu objednalo.
 
 ### Changed
+- `examples/example.py` ve výchozím stavu jen čte. Dřív po spuštění objednal první tři dny
+  a pak zrušil všechny objednávky na účtu, včetně těch cizích, aniž by na to cokoliv
+  upozornilo. Zapisuje až s `STRAVA_OPRAVDU_ZAPISOVAT=1`.
 - **Id v příkazu `strava-cz` je den a místo v jídelníčku**, např. `2026-11-09:O2`.
   Vypisují ho `menu`, `ordered` a `--dry-run`, je v poli `id` v JSONu (teď řetězec,
   stejně jako v `changed`, `unchanged`, `failed` a `meal_id`) a berou ho `order` a
@@ -34,6 +81,10 @@ Knihovna zůstává zpětně kompatibilní.
   terminálu se řádky zalomí.
 
 ### Added
+- `order_meals()` a `cancel_meals()` berou `verify_saved=True`, které výsledek ověří proti
+  záznamům jídelny. Stojí jeden požadavek navíc a přečísluje jídelníček, takže `Meal.id`
+  přečtená předtím přestanou platit do dalšího `fetch()`, klíče platí dál. Výchozí chování
+  se proto nemění.
 - `Meal.key`, `Meal.kind_code` a `Menu.get_by_key()`. `order_meals()`, `cancel_meals()`
   a `is_ordered()` berou vedle `Meal.id` i klíč a `OrderResult` hlásí jídla tak, jak je
   zadal volající. `in` na jídelníčku bere obojí a jedno jídlo zadané dvakrát různě se

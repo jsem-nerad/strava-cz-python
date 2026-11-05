@@ -23,9 +23,10 @@ from ..exceptions import (
     MealNotFoundError,
     MealNotOrderableError,
     ProfileError,
+    StravaAPIError,
     StravaError,
 )
-from ..models import Meal, MealType
+from ..models import Meal, MealType, OrderResult
 from ..profiles import (
     PASSPHRASE_ENV,
     PASSWORD_ENV,
@@ -76,6 +77,23 @@ def exit_code_for(exc: BaseException) -> int:
     if isinstance(exc, ProfileError):
         return EXIT["profile"]
     return EXIT["error"]
+
+
+def exit_code_for_result(result: OrderResult) -> int:
+    """The exit code of a run that carried on past its failures.
+
+    Not every failure is a meal that couldn't be ordered: no money is worth knowing about
+    whatever else happened, and a failure with no error number from the canteen means the
+    canteen or the network failed.
+    """
+    errors = [exc for _, exc in result.failed]
+    if not errors:
+        return EXIT["ok"]
+    if any(isinstance(exc, InsufficientBalanceError) for exc in errors):
+        return EXIT["balance"]
+    if any(isinstance(exc, StravaAPIError) and exc.code is None for exc in errors):
+        return EXIT["error"]
+    return EXIT["meal"]
 
 
 # ------------------------------------------------------------------------- session
@@ -312,19 +330,36 @@ def _change(args: argparse.Namespace, out: Output, *, ordered: bool) -> int:
             out.warn(str(warning))
 
         if args.dry_run:
-            plan = _plan(strava, meal_ids, ordered=ordered)
+            strict = ordered and args.strict_duplicates
+            plan = _plan(
+                strava,
+                meal_ids,
+                ordered=ordered,
+                continue_on_error=args.continue_on_error,
+                strict_duplicates=strict,
+            )
+            code = EXIT["meal"] if plan.refused or (strict and plan.duplicate) else EXIT["ok"]
+            after = strava.user.balance + plan.balance_change
+            if after < 0 and plan.balance_change < 0:
+                out.warn(
+                    f"this would leave the balance at {after:g} {currency}, so the canteen may "
+                    "refuse it, which a dry run can't tell"
+                )
             out.emit(
                 action,
                 {
+                    "ok": code == EXIT["ok"],
                     "dry_run": True,
                     **plan.payload,
+                    "balance_after": after,
                     "meals": [meal_to_json(meal, currency) for meal in plan.would],
                 },
                 lambda: _render_plan(out, plan, action, currency),
             )
-            return EXIT["meal"] if plan.refused else EXIT["ok"]
+            return code
 
-        kwargs: dict[str, Any] = {"continue_on_error": args.continue_on_error}
+        # Each run is one login and names meals by key, so renumbering costs it nothing.
+        kwargs: dict[str, Any] = {"continue_on_error": args.continue_on_error, "verify_saved": True}
         if ordered:
             kwargs["strict_duplicates"] = args.strict_duplicates
         method = strava.menu.order_meals if ordered else strava.menu.cancel_meals
@@ -339,7 +374,7 @@ def _change(args: argparse.Namespace, out: Output, *, ordered: bool) -> int:
             {**result_to_json(result), "account": user_to_json(strava.user)},
             render,
         )
-        return EXIT["ok"] if result.ok else EXIT["meal"]
+        return exit_code_for_result(result)
 
 
 class Plan:
@@ -347,11 +382,14 @@ class Plan:
 
     Mirrors the checks :meth:`Menu._change_orders` makes - unknown id, already in the
     wanted state, refused by the canteen, two meals competing for one slot - so a dry
-    run answers the same question the real call would.
+    run answers the same question the real call would, including that one refusal stops
+    the whole batch unless the call carries on past it.
     """
 
     def __init__(self) -> None:
         self.would: list[Meal] = []
+        self.blocked: list[Meal] = []
+        self.blocked_by = ""
         self.already: list[str] = []
         self.refused: list[dict[str, Any]] = []
         self.duplicate: list[dict[str, Any]] = []
@@ -359,12 +397,13 @@ class Plan:
 
     @property
     def empty(self) -> bool:
-        return not (self.would or self.already or self.refused or self.duplicate)
+        return not (self.would or self.blocked or self.already or self.refused or self.duplicate)
 
     @property
     def payload(self) -> dict[str, Any]:
         return {
             "would_change": [meal.key for meal in self.would],
+            "blocked": [meal.key for meal in self.blocked],
             "already": self.already,
             "refused": self.refused,
             "duplicate": self.duplicate,
@@ -372,10 +411,23 @@ class Plan:
         }
 
 
-def _plan(strava: StravaCZ, meal_ids: list[str], *, ordered: bool) -> Plan:
+def _plan(
+    strava: StravaCZ,
+    meal_ids: list[str],
+    *,
+    ordered: bool,
+    continue_on_error: bool,
+    strict_duplicates: bool,
+) -> Plan:
     """Resolve *meal_ids* against the fetched menu without sending anything."""
     plan = Plan()
     claimed: dict[tuple[_dt.date, MealType], str] = {}
+
+    if ordered:  # a requested meal that is already ordered holds its slot, as in the real call
+        for meal_id in meal_ids:
+            meal = strava.menu.get_by_key(meal_id)
+            if meal is not None and meal.ordered:
+                claimed[(meal.date, meal.type)] = meal_id
 
     for meal_id in dict.fromkeys(meal_ids):
         meal = strava.menu.get_by_key(meal_id)
@@ -397,14 +449,38 @@ def _plan(strava: StravaCZ, meal_ids: list[str], *, ordered: bool) -> Plan:
         claimed[slot] = meal_id
         plan.would.append(meal)
 
-    total = sum(meal.price for meal in plan.would)
-    plan.balance_change = -total if ordered else total
+    if plan.refused and not continue_on_error:
+        plan.blocked_by = "--continue-on-error"
+    elif strict_duplicates and plan.duplicate:
+        plan.blocked_by = "--strict-duplicates"
+    if plan.blocked_by:
+        plan.blocked, plan.would = plan.would, []
+
+    if ordered:
+        plan.balance_change = 0.0 - sum(_cost_of_ordering(strava, meal) for meal in plan.would)
+    else:
+        plan.balance_change = sum(meal.price for meal in plan.would)
     return plan
+
+
+def _cost_of_ordering(strava: StravaCZ, meal: Meal) -> float:
+    """What ordering *meal* costs: ordering another meal that day replaces the one there."""
+    day = strava.menu.get_by_date(meal.date)
+    replaced = day.meals if day is not None else ()
+    return meal.price - sum(m.price for m in replaced if m.ordered and m.type is meal.type)
 
 
 def _render_plan(out: Output, plan: Plan, action: str, currency: str) -> None:
     out.line(out.c.dim("dry run - nothing was sent to the canteen"))
     out.line()
+    if plan.blocked_by == "--continue-on-error":
+        out.line(out.c.bold(f"would {action} nothing: without {plan.blocked_by} one refusal"))
+        out.line(out.c.bold("stops the whole batch, so these would be left alone:"))
+        out.render_meals(plan.blocked, currency=currency)
+    elif plan.blocked_by:
+        out.line(out.c.bold(f"would {action} nothing: {plan.blocked_by} refuses the whole batch"))
+        out.line(out.c.bold("when two meals compete for one slot, so these would be left alone:"))
+        out.render_meals(plan.blocked, currency=currency)
     if plan.would:
         out.line(out.c.bold(f"would {action}:"))
         out.render_meals(plan.would, currency=currency)

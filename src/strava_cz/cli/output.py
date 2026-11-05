@@ -173,6 +173,10 @@ def error_to_json(exc: BaseException) -> dict[str, Any]:
         value = getattr(exc, attr, None)
         if value is not None:
             error[attr] = value
+    for attr in ("changed", "unconfirmed"):
+        value = getattr(exc, attr, None)
+        if value is not None:
+            error[attr] = list(value)
     reason = getattr(exc, "reason", None)
     if reason is not None:
         error["reason"] = getattr(reason, "name", str(reason)).lower()

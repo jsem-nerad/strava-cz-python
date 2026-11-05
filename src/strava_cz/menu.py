@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import datetime as _dt
 import warnings
 from collections import Counter
@@ -9,10 +10,12 @@ from collections.abc import Iterable, Iterator, Sequence
 from typing import TYPE_CHECKING, Any
 
 from .exceptions import (
+    AuthenticationError,
     DuplicateMealError,
     MealNotFoundError,
     MealNotOrderableError,
     MenuNotFetchedError,
+    OrderNotConfirmedError,
     StravaAPIError,
 )
 from .models import Day, DayStatus, Meal, MealType, OrderResult, coerce_date
@@ -78,10 +81,11 @@ class Menu:
     which they are, and ``get_days(auto_ordered=True)`` is the filter an automatic
     ordering tool wants.
 
-    Meals can be named two ways. :attr:`Meal.id` is the canteen's own number and is
-    only good within one login, because each session gets the menu numbered differently.
-    :attr:`Meal.key` is the day and slot (``"2026-11-09:O2"``), which means the same
-    thing in every session. Anything that crosses a login has to use the key.
+    Meals can be named two ways. :attr:`Meal.id` is the canteen's own number. It is only
+    good until the canteen next renumbers the menu, which it does at every login and at
+    every reset of the session, including the one that rolls back a failed order.
+    :attr:`Meal.key` is the day and slot (``"2026-11-09:O2"``), which means the same thing
+    in every session. Anything that outlives one fetch should use the key.
     """
 
     def __init__(self, client: StravaCZ) -> None:
@@ -91,11 +95,19 @@ class Menu:
         self._by_key: dict[str, Meal] = {}
         self.raw_data: dict[str, Any] = {}
         self.parse_warnings: tuple[ParseWarning, ...] = ()
+        #: The canteen renumbered the menu and the caller hasn't fetched since.
+        self._numbers_moved = False
+        #: A reset failed, so the session may still hold staged changes.
+        self._reset_owed = False
 
     # ------------------------------------------------------------------ loading
 
     def fetch(self) -> Menu:
-        """Load the menu from the API and parse it.
+        """Load this login's copy of the menu and parse it.
+
+        The canteen gives each login its own copy of the orders, taken when it logged in,
+        so this doesn't show what another session has changed since: an order placed in
+        the app meanwhile, say. Log in again to see that.
 
         Returns:
             Self, so calls can be chained: ``days = strava.menu.fetch().get_days()``.
@@ -104,6 +116,15 @@ class Menu:
             NotLoggedInError: If no one is logged in.
             StravaAPIError: If the API request fails.
         """
+        if self._reset_owed:
+            self._discard_staged_changes()
+            self._reset_owed = False
+        self._load()
+        self._numbers_moved = False
+        return self
+
+    def _load(self) -> None:
+        """Read the menu without telling the caller its numbers are good again."""
         user = self._client.user
         payload = {
             "cislo": user.canteen_number,
@@ -119,7 +140,23 @@ class Menu:
         self._by_id = {meal.id: meal for day in self._days for meal in day.meals}
         self._by_key, key_warnings = _index_by_key(self._days)
         self.parse_warnings = parse_warnings + key_warnings
-        return self
+
+    def _resync(self) -> None:
+        """Drop the session's copy of the orders and read the canteen's records.
+
+        The reset this needs also renumbers the menu, so whatever was loaded before it
+        goes first: if a step here fails there are no old numbers left that could order
+        another meal. Numbers the caller got earlier stay refused until they fetch.
+
+        Raises:
+            StravaAPIError: If either request fails. The menu is then not fetched.
+        """
+        self._forget()
+        self._numbers_moved = True
+        self._reset_owed = True
+        self._discard_staged_changes()
+        self._reset_owed = False
+        self._load()
 
     @property
     def fetched(self) -> bool:
@@ -143,7 +180,13 @@ class Menu:
         return tuple(meal for day in self.days for meal in day.meals)
 
     def _reset(self) -> None:
-        """Forget everything loaded, used when logging out."""
+        """Forget everything about this login, used when logging out."""
+        self._forget()
+        self._numbers_moved = False
+        self._reset_owed = False
+
+    def _forget(self) -> None:
+        """Forget the loaded menu, when it may no longer be true."""
         self._days = None
         self._by_id = {}
         self._by_key = {}
@@ -239,9 +282,19 @@ class Menu:
         ]
 
     def get_by_id(self, meal_id: int) -> Meal | None:
-        """The meal with this id, or ``None`` if the menu holds no such meal."""
+        """The meal with this id, or ``None`` if the menu holds no such meal.
+
+        Raises:
+            MenuNotFetchedError: If the menu isn't fetched, or the canteen has renumbered
+                it since the last :meth:`fetch`, when a number could mean another meal.
+        """
         if self._days is None:
             raise MenuNotFetchedError()
+        if self._numbers_moved:
+            raise MenuNotFetchedError(
+                "The canteen renumbered the menu when the session was reset, so this number "
+                "may be another meal now. Call menu.fetch() again, or use Meal.key"
+            )
         return self._by_id.get(int(meal_id))
 
     def get_by_key(self, key: str) -> Meal | None:
@@ -292,6 +345,7 @@ class Menu:
         *meals: int | str,
         continue_on_error: bool = False,
         strict_duplicates: bool = False,
+        verify_saved: bool = False,
     ) -> OrderResult:
         """Order one or more meals and save the changes in a single transaction.
 
@@ -309,6 +363,11 @@ class Menu:
                 requested meals compete for the same slot (same day, same kind).
                 When ``False`` the first one wins and the rest are skipped with a
                 warning.
+            verify_saved: Check the result against the canteen's records. By default it
+                is checked against this login's own copy, which already shows staged
+                changes, so it can't tell a save that did nothing. This costs one more
+                request and renumbers the menu, so :attr:`Meal.id` values read earlier
+                stop working until the next :meth:`fetch`. :attr:`Meal.key` values don't.
 
         Returns:
             An :class:`~strava_cz.models.OrderResult` describing what happened.
@@ -318,19 +377,25 @@ class Menu:
             MealNotOrderableError: If the canteen does not allow ordering a meal.
             InsufficientBalanceError: If the account cannot cover an order.
             DuplicateMealError: See ``strict_duplicates``.
-            StravaAPIError: If the API refuses a request.
+            MenuNotFetchedError: If the menu isn't fetched, or a failed read-back forgot it.
+            OrderNotConfirmedError: If a change may have been saved but can't be confirmed,
+                or was accepted and didn't happen. Raised even with ``continue_on_error``
+                when the whole batch is in doubt. Check the menu before trying again.
+            StravaAPIError: If the API refuses a request. Nothing was saved.
         """
         return self._change_orders(
             meals,
             ordered=True,
             continue_on_error=continue_on_error,
             strict_duplicates=strict_duplicates,
+            verify_saved=verify_saved,
         )
 
     def cancel_meals(
         self,
         *meals: int | str,
         continue_on_error: bool = False,
+        verify_saved: bool = False,
     ) -> OrderResult:
         """Cancel one or more orders and save the changes in a single transaction.
 
@@ -342,6 +407,8 @@ class Menu:
                 fetched menu.
             continue_on_error: Cancel what can be cancelled and report the rest
                 instead of raising.
+            verify_saved: Check the result against the canteen's records rather than
+                this login's copy. See :meth:`order_meals`.
 
         Returns:
             An :class:`~strava_cz.models.OrderResult` describing what happened.
@@ -349,13 +416,18 @@ class Menu:
         Raises:
             MealNotFoundError: If a meal is not in the fetched menu.
             MealNotOrderableError: If the canteen does not allow cancelling a meal.
-            StravaAPIError: If the API refuses a request.
+            MenuNotFetchedError: If the menu isn't fetched, or a failed read-back forgot it.
+            OrderNotConfirmedError: If a change may have been saved but can't be confirmed,
+                or was accepted and didn't happen. Raised even with ``continue_on_error``
+                when the whole batch is in doubt. Check the menu before trying again.
+            StravaAPIError: If the API refuses a request. Nothing was saved.
         """
         return self._change_orders(
             meals,
             ordered=False,
             continue_on_error=continue_on_error,
             strict_duplicates=False,
+            verify_saved=verify_saved,
         )
 
     def _change_orders(
@@ -365,6 +437,7 @@ class Menu:
         ordered: bool,
         continue_on_error: bool,
         strict_duplicates: bool,
+        verify_saved: bool,
     ) -> OrderResult:
         """Shared body of :meth:`order_meals` and :meth:`cancel_meals`.
 
@@ -378,6 +451,7 @@ class Menu:
 
         # 1. Resolve each meal and check the canteen allows the change at all.
         planned: list[tuple[int | str, Meal]] = []
+        already: list[tuple[int | str, Meal]] = []
         seen: set[int] = set()
         for ref in dict.fromkeys(_normal_ref(r) for r in refs):  # de-duplicate, keep order
             try:
@@ -387,6 +461,7 @@ class Menu:
                 seen.add(meal.id)
                 if meal.ordered is ordered:
                     unchanged.append(ref)
+                    already.append((ref, meal))
                     continue
                 allowed = meal.can_order if ordered else meal.can_cancel
                 if not allowed:
@@ -400,50 +475,109 @@ class Menu:
 
         # 2. Two meals of the same kind on the same day compete for one slot.
         if ordered:
-            planned, dupes = self._resolve_duplicates(planned, strict_duplicates)
+            planned, dupes = self._resolve_duplicates(planned, already, strict_duplicates)
             skipped.extend(dupes)
 
         # 3. Nothing to do means nothing to send.
         if not planned:
             return OrderResult(tuple(changed), tuple(unchanged), tuple(skipped), tuple(failed))
 
-        # 4. Stage each change, then commit them all at once.
+        # 4. Stage each change. Only the save reaches the canteen's records, so a failure
+        #    in here leaves nothing behind once the session's copy is thrown away.
         staged: list[tuple[int | str, Meal]] = []
+        unanswered: list[tuple[int | str, Meal, StravaAPIError]] = []
         try:
             for ref, meal in planned:
                 try:
                     self._stage(meal.id, ordered)
                     staged.append((ref, meal))
+                except AuthenticationError:
+                    raise  # the session is gone, so the other meals can't go through either
                 except StravaAPIError as exc:
                     if not continue_on_error:
                         raise
-                    failed.append((ref, exc))
-
-            if not staged:
-                self._discard_staged_changes()
-                return OrderResult(tuple(changed), tuple(unchanged), tuple(skipped), tuple(failed))
-
-            self._save()
+                    unanswered.append((ref, meal, exc))
         except StravaAPIError:
             self._rollback()
             raise
 
-        # 5. Confirm against a fresh copy of the menu rather than trusting the write.
-        self.fetch()
-        for ref, meal in staged:
-            refreshed = self._same_meal(meal)
-            if refreshed is not None and refreshed.ordered is ordered:
-                changed.append(ref)
-                continue
-            error = StravaAPIError(
-                f"The canteen accepted the request but meal {ref} is still "
-                f"{'not ordered' if ordered else 'ordered'}"
-            )
+        if not staged:
+            self._rollback()
+            failed.extend((ref, exc) for ref, _, exc in unanswered)
+            return OrderResult(tuple(changed), tuple(unchanged), tuple(skipped), tuple(failed))
+
+        # 5. Commit them all at once. A failure here doesn't say the save didn't happen.
+        save_error: StravaAPIError | None = None
+        try:
+            self._save()
+        except StravaAPIError as exc:
+            save_error = exc
+
+        # 6. Read the result back, which after a failed save is the only way to learn it.
+        try:
+            if save_error is not None or verify_saved:
+                self._resync()
+            else:
+                self._load()
+        except StravaAPIError as exc:
+            self._forget()
+            if save_error is not None and save_error.code is not None:
+                raise save_error from exc  # the canteen answered no, whatever came after
+            # A stage with no answer from the canteen may have landed, and the save takes it.
+            doubtful = [ref for ref, _ in staged]
+            doubtful += [ref for ref, _, stage_error in unanswered if stage_error.code is None]
+            names = ", ".join(str(ref) for ref in doubtful)
+            if save_error is not None:
+                message = (
+                    f"{save_error}, and reading the menu back failed too, so {names} may or "
+                    "may not have been saved. Check the menu before trying again"
+                )
+            else:
+                message = (
+                    f"The canteen accepted the change for {names}, but reading the menu back "
+                    f"failed, so it isn't confirmed: {exc}. Check the menu before trying again"
+                )
+            raise OrderNotConfirmedError(message, unconfirmed=tuple(doubtful)) from exc
+
+        # 7. Compare meal by meal.
+        unconfirmed = [
+            ref for ref, meal in staged if not self._has_state(meal, ordered, changed, ref)
+        ]
+        for ref, meal, stage_error in unanswered:
+            # Its answer was lost, not necessarily its effect, and the save takes it along.
+            if not self._has_state(meal, ordered, changed, ref):
+                failed.append((ref, stage_error))
+
+        if save_error is not None and not changed:
+            save_error.message += ". Nothing was saved: the menu was read back and is unchanged"
+            raise save_error
+
+        if unconfirmed:
+            state = "not ordered" if ordered else "ordered"
+            still = [f"meal {ref} is still {state}" for ref in unconfirmed]
             if not continue_on_error:
-                raise error
-            failed.append((ref, error))
+                done = f". These did change: {', '.join(map(str, changed))}" if changed else ""
+                raise OrderNotConfirmedError(
+                    f"The canteen accepted the request but {', '.join(still)}{done}",
+                    changed=tuple(changed),
+                    unconfirmed=tuple(unconfirmed),
+                )
+            failed.extend(
+                (ref, StravaAPIError(f"The canteen accepted the request but {text}"))
+                for ref, text in zip(unconfirmed, still, strict=True)
+            )
 
         return OrderResult(tuple(changed), tuple(unchanged), tuple(skipped), tuple(failed))
+
+    def _has_state(
+        self, meal: Meal, ordered: bool, changed: list[int | str], ref: int | str
+    ) -> bool:
+        """Whether the menu now shows *meal* as wanted, noting it in *changed* if so."""
+        fresh = self._same_meal(meal)
+        if fresh is None or fresh.ordered is not ordered:
+            return False
+        changed.append(ref)
+        return True
 
     def _same_meal(self, meal: Meal) -> Meal | None:
         """Find *meal* in a fresh menu, never answering with another meal's row.
@@ -454,16 +588,25 @@ class Menu:
         found = self.get_by_key(meal.key)
         if found is not None:
             return found
-        by_id = self.get_by_id(meal.id)
+        by_id = self._by_id.get(meal.id)
         return by_id if by_id is not None and by_id.key == meal.key else None
 
     def _resolve_duplicates(
-        self, planned: list[tuple[int | str, Meal]], strict: bool
+        self,
+        planned: list[tuple[int | str, Meal]],
+        already: list[tuple[int | str, Meal]],
+        strict: bool,
     ) -> tuple[list[tuple[int | str, Meal]], list[tuple[int | str, str]]]:
-        """Keep one meal per (day, kind) slot; skip or reject the rest."""
+        """Keep one meal per (day, kind) slot; skip or reject the rest.
+
+        A requested meal that is already ordered holds its slot, wherever it comes in the
+        request: ordering the other one would replace it, and it was reported unchanged.
+        """
         kept: list[tuple[int | str, Meal]] = []
         skipped: list[tuple[int | str, str]] = []
-        claimed: dict[tuple[_dt.date, MealType], int | str] = {}
+        claimed: dict[tuple[_dt.date, MealType], int | str] = {
+            (meal.date, meal.type): ref for ref, meal in already
+        }
 
         for ref, meal in planned:
             slot = (meal.date, meal.type)
@@ -485,11 +628,8 @@ class Menu:
 
     def _rollback(self) -> None:
         """Undo staged changes and reload, without masking the original error."""
-        try:
-            self._discard_staged_changes()
-            self.fetch()
-        except StravaAPIError:  # pragma: no cover - best effort only
-            pass
+        with contextlib.suppress(StravaAPIError):
+            self._resync()
 
     # -------------------------------------------------------------- API actions
 
@@ -598,7 +738,10 @@ class Menu:
     def __contains__(self, meal_id: object) -> bool:
         if self._days is None or not isinstance(meal_id, (int, str)):
             return False
-        return self._find(meal_id) is not None
+        try:
+            return self._find(meal_id) is not None
+        except MenuNotFetchedError:
+            return False
 
     def __repr__(self) -> str:
         if self._days is None:

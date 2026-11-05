@@ -227,3 +227,44 @@ class TestLifetime:
         assert "test.user" in repr(strava)
         assert strava.user.sid not in repr(strava)
         assert strava.user.sid not in repr(strava.user)
+
+
+#: How the live canteen answers a logged-out or unknown sid, with HTTP 555.
+EXPIRED = {
+    "state": "error",
+    "number": 15,
+    "message": "Because the user has been inactive for a long time, he/she has been logged out",
+}
+
+
+class TestASessionThatEnded:
+    def test_it_is_an_authentication_error(self, api, strava):
+        api.post(f"{BASE_URL}/api/objednavky").mock(return_value=httpx.Response(555, json=EXPIRED))
+        with pytest.raises(AuthenticationError, match="logged out") as exc:
+            strava.menu.fetch()
+        assert exc.value.code == 15
+
+    def test_logging_out_of_it_just_works(self, api, strava):
+        api.post(f"{BASE_URL}/api/logOut").mock(return_value=httpx.Response(555, json=EXPIRED))
+        assert strava.logout() is True
+        assert strava.user.is_logged_in is False
+
+    def test_the_client_can_log_in_again_after_it(self, api, strava):
+        api.post(f"{BASE_URL}/api/logOut").mock(return_value=httpx.Response(555, json=EXPIRED))
+        strava.logout()
+        strava.login("test.user", "test-password", "1234")
+        assert strava.user.is_logged_in
+
+    @pytest.mark.parametrize(
+        "failure",
+        [httpx.ConnectError("no route"), httpx.Response(502, text="<html>Bad Gateway</html>")],
+        ids=["network", "gateway"],
+    )
+    def test_a_logout_that_fails_still_ends_the_session_here(self, api, strava, failure):
+        api.post(f"{BASE_URL}/api/logOut").mock(side_effect=[failure])
+        with pytest.raises(StravaAPIError):
+            strava.logout()
+        assert strava.user.is_logged_in is False
+        assert strava.user.sid is None
+        strava.login("test.user", "test-password", "1234")
+        assert strava.user.is_logged_in

@@ -321,29 +321,38 @@ class StravaCZ:
     def logout(self) -> bool:
         """Log out and clear the session.
 
+        The client counts as logged out afterwards whatever the canteen answers, so it can
+        always log in again.
+
         Returns:
-            True. Calling it when already logged out is a no-op.
+            True. Calling it when already logged out is a no-op, and so is logging out of
+            a session that has already ended.
 
         Raises:
-            StravaAPIError: If the API refuses the request.
+            StravaAPIError: If the request fails. The session may then live on at the
+                canteen until it expires.
         """
         if not self.user.is_logged_in:
             return True
 
-        self._request(
-            "logOut",
-            {
-                "sid": self.user.sid,
-                "cislo": self.user.canteen_number,
-                "url": self.user.s5url,
-                "lang": self.language,
-                "ignoreCert": "false",
-            },
-            authenticated=True,
-        )
-        # Reset in place, so references held elsewhere do not go stale.
-        self.user.reset()
-        self.menu._reset()
+        try:
+            # A session that has already ended is what was asked for.
+            with contextlib.suppress(AuthenticationError):
+                self._request(
+                    "logOut",
+                    {
+                        "sid": self.user.sid,
+                        "cislo": self.user.canteen_number,
+                        "url": self.user.s5url,
+                        "lang": self.language,
+                        "ignoreCert": "false",
+                    },
+                    authenticated=True,
+                )
+        finally:
+            # Reset in place, so references held elsewhere do not go stale.
+            self.user.reset()
+            self.menu._reset()
         return True
 
     def _update_balance(self, response: Any) -> None:

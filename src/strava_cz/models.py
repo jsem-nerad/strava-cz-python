@@ -161,10 +161,11 @@ class Meal:
     """A single item on the menu.
 
     Attributes:
-        id: Identifier used when ordering (the API's ``veta``). **Only valid for the
-            login that fetched it**: the canteen numbers its whole menu afresh per
-            session, so after logging in again the same number can be a different
-            meal on a different day. Use :attr:`key` for anything that outlives a login.
+        id: Identifier used when ordering (the API's ``veta``). **Only valid until the
+            canteen next renumbers the menu**, which it does at every login and whenever
+            the session is reset, as rolling back a failed order does. The same number can
+            then be a different meal on a different day. Use :attr:`key` for anything that
+            outlives one fetch.
         date: The day this meal is served on.
         type: Soup, main dish, or unknown.
         variant: The canteen's own label, e.g. ``"Oběd 1"``.
