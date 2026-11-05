@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 
+import httpx
 import pytest
 
 import strava_cz as sc
@@ -463,3 +464,37 @@ class TestAMealAlreadyOrderedAndItsAlternative:
         result = strava.menu.cancel_meals(*self.BOTH[0])
         assert result.changed == ("2026-09-07:O1",)
         assert result.unchanged == (A,)
+
+
+class TestADryRunAndTheMoney:
+    """The live canteen refused a Friday at zero balance (code 35), so it isn't only prepaid."""
+
+    def test_it_warns_when_the_order_would_go_below_zero(self, cli_canteen, capsys, api):
+        from .conftest import BASE_URL, load
+
+        login = load("login")
+        login["uzivatel"]["konto"] = "0.00"
+        api.post(f"{BASE_URL}/api/login").mock(return_value=httpx.Response(200, json=login))
+        assert main(["order", A, "--dry-run"]) == EXIT["ok"]
+        assert "canteen may refuse" in capsys.readouterr().err
+
+    def test_json_says_what_the_balance_would_be(self, cli_canteen, capsys, api):
+        from .conftest import BASE_URL, load
+
+        login = load("login")
+        login["uzivatel"]["konto"] = "0.00"
+        api.post(f"{BASE_URL}/api/login").mock(return_value=httpx.Response(200, json=login))
+        main(["--json", "order", A, "--dry-run"])
+        captured = capsys.readouterr()
+        assert json.loads(captured.out)["balance_after"] == -50
+        assert "canteen may refuse" in captured.err
+
+    def test_a_swap_at_zero_is_no_cause_for_alarm(self, cli_canteen, capsys, api):
+        from .conftest import BASE_URL, load
+
+        login = load("login")
+        login["uzivatel"]["konto"] = "0.00"
+        api.post(f"{BASE_URL}/api/login").mock(return_value=httpx.Response(200, json=login))
+        cli_canteen.table[("07.09.2026", "O1")] = 1
+        main(["order", A, "--dry-run"])
+        assert "canteen may refuse" not in capsys.readouterr().err

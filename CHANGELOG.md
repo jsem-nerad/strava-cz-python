@@ -50,7 +50,10 @@ Knihovna zůstává zpětně kompatibilní.
   vypisoval, co by se objednalo. Stejně tak u `--strict-duplicates`. Teď je `would_change`
   v takovém případě prázdné, zadržená jídla jsou v novém poli `blocked` a návratový kód
   sedí. V JSONu bylo `ok: true` i u odmítnutého jídla s kódem 4. `balance_change` u výměny
-  jídla počítá rozdíl cen, ne celou cenu nového jídla.
+  jídla počítá rozdíl cen, ne celou cenu nového jídla. Nové pole `balance_after` říká, kolik
+  by na účtu zůstalo, a když by to bylo pod nulou, přijde varování: jídelna v takovém případě
+  může objednávku odmítnout (na živém účtu s nulovým zůstatkem kódem 35), ale limit účtu
+  `--dry-run` nezná, takže návratový kód zůstává 0.
 - `order` s objednaným jídlem a jeho alternativou na stejný den jídlo vyměnil a přitom
   o tom objednaném hlásil „already ordered“, což už po běhu neplatilo. Objednané jídlo teď
   své místo drží, alternativa se přeskočí s varováním a s `--strict-duplicates` je to chyba.

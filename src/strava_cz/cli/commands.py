@@ -339,12 +339,19 @@ def _change(args: argparse.Namespace, out: Output, *, ordered: bool) -> int:
                 strict_duplicates=strict,
             )
             code = EXIT["meal"] if plan.refused or (strict and plan.duplicate) else EXIT["ok"]
+            after = strava.user.balance + plan.balance_change
+            if after < 0 and plan.balance_change < 0:
+                out.warn(
+                    f"this would leave the balance at {after:g} {currency}, so the canteen may "
+                    "refuse it, which a dry run can't tell"
+                )
             out.emit(
                 action,
                 {
                     "ok": code == EXIT["ok"],
                     "dry_run": True,
                     **plan.payload,
+                    "balance_after": after,
                     "meals": [meal_to_json(meal, currency) for meal in plan.would],
                 },
                 lambda: _render_plan(out, plan, action, currency),
