@@ -15,9 +15,9 @@ Knihovna zůstává zpětně kompatibilní.
   je nové přihlášení. Číslo přečtené z `strava-cz menu` tak v dalším běhu mohlo být
   polévka, takže přišlo odmítnutí s důvodem, který k vybranému jídlu nepatřil, nebo
   objednatelné jídlo v jiný den, které se objednalo s návratovým kódem 0. Na živém účtu
-  to bylo vidět 5. 11. 2026: stejný jídelníček chodí v několika číslováních a uvnitř
-  jednoho přihlášení se číslování nemění. Starší poznámka, že se čísla mění jen se změnou
-  jídelníčku, neplatila.
+  to bylo vidět 5. 11. 2026: stejný jídelníček chodí v několika číslováních a číslování se
+  mění při přihlášení a při resetu session, ale ne při čtení, zaškrtnutí ani uložení.
+  Starší poznámka, že se čísla mění jen se změnou jídelníčku, neplatila.
 - Kontrola po zápisu hledá jídlo podle dne a místa v jídelníčku, takže odpověď nemůže
   přijít z řádku jiného jídla. Pokud místo z jídelníčku zmizelo, zápis se hlásí jako
   nepotvrzený.
