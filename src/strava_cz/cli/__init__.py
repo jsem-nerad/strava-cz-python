@@ -1,7 +1,7 @@
 """The ``strava-cz`` command.
 
     strava-cz menu --week
-    strava-cz order 5 9
+    strava-cz order 2026-11-09:O2 2026-11-11:O2
     strava-cz --format json menu --orderable | jq '.days[].meals[].id'
 
 Pretty output is the default; ``--format json`` prints one machine-readable object on
@@ -38,7 +38,7 @@ exit codes:
 examples:
   strava-cz profile add skola --username your.name --canteen 3753
   strava-cz menu --week --orderable
-  strava-cz order 5 9 --dry-run
+  strava-cz order 2026-11-09:O2 2026-11-11:O2 --dry-run
   strava-cz --format json ordered | jq '.total_price'
 
 The password is read from $STRAVA_CZ_PASSWORD_<PROFILE>, then $STRAVA_CZ_PASSWORD, and
@@ -138,7 +138,10 @@ def _add_menu_filters(parser: argparse.ArgumentParser) -> None:
 
 def _add_write_flags(parser: argparse.ArgumentParser, *, ordering: bool) -> None:
     parser.add_argument(
-        "meal_ids", nargs="+", type=int, metavar="ID", help="meal ids, as shown by 'strava-cz menu'"
+        "meal_ids",
+        nargs="+",
+        metavar="ID",
+        help="meal ids such as 2026-11-09:O2, as shown by 'strava-cz menu'",
     )
     parser.add_argument(
         "-n",

@@ -116,7 +116,7 @@ Důležitá pole jednoho jídla:
 | alergeny | alergeny jako dvojice `[kód, název]` | [["04","Ryby"]] | list |
 | zakazaneAlergeny | alergeny označené uživatelem jako nevhodné | null | list/null |
 | pocet | stav objednání: 0 = neobjednáno, 1 = objednáno | 0 | integer |
-| veta | **identifikátor jídla použitý při objednávání** | "7" | string |
+| veta | **identifikátor jídla použitý při objednávání**; platí jen v rámci jednoho přihlášení, jídelna čísluje jídelníček při každém přihlášení znovu | "7" | string |
 | casKonec | dokdy lze jídlo objednat | 2026-09-14T15:00:00 | string |
 | omezeniObj | omezení objednávky, viz níže | {"den":"","obj":"","zm":"","bur":"C"} | object |
 

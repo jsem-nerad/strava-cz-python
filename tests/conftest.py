@@ -95,6 +95,39 @@ def with_ordered(payload: Any, *meal_ids: int) -> Any:
     return clone
 
 
+def renumbered(payload: Any, shift: int) -> Any:
+    """The same menu as another login sees it: every meal has moved to a different id.
+
+    The live canteen does this. Numbering is stable within a session and differs between
+    sessions, with no change to the menu itself.
+    """
+    import copy
+
+    clone = copy.deepcopy(payload)
+    rows = [
+        row
+        for table in clone.values()
+        if isinstance(table, list)
+        for row in table
+        if isinstance(row, dict) and "veta" in row
+    ]
+    ids = sorted(int(row["veta"]) for row in rows)
+    moved = {old: ids[(index + shift) % len(ids)] for index, old in enumerate(ids)}
+    for row in rows:
+        row["veta"] = str(moved[int(row["veta"])])
+    return clone
+
+
+def veta_of(payload: Any, date: str, kind: str) -> int:
+    """The id a menu payload gives one day's slot, with the date as the API writes it."""
+    for table in payload.values():
+        if isinstance(table, list):
+            for row in table:
+                if isinstance(row, dict) and row.get("datum") == date and row.get("druh") == kind:
+                    return int(row["veta"])
+    raise AssertionError(f"no {kind} on {date} in this payload")
+
+
 @pytest.fixture
 def store_path(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """An isolated profile store, so no test can touch the real ~/.config."""

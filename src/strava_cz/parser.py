@@ -132,6 +132,7 @@ def _parse_meal(row: Mapping[str, Any], date: _dt.date) -> Meal:
         allergens=_parse_allergens(row.get("alergeny")),
         deadline=_parse_deadline(_get(row, "casKonec", None)),
         raw=dict(row),
+        kind_code=kind_code.strip().upper(),
     )
 
 

@@ -161,9 +161,10 @@ class Meal:
     """A single item on the menu.
 
     Attributes:
-        id: Identifier used when ordering (the API's ``veta``). It identifies a meal
-            within the currently published menu only, and changes whenever the menu
-            changes - always take it from a fresh :meth:`~strava_cz.Menu.fetch`.
+        id: Identifier used when ordering (the API's ``veta``). **Only valid for the
+            login that fetched it**: the canteen numbers its whole menu afresh per
+            session, so after logging in again the same number can be a different
+            meal on a different day. Use :attr:`key` for anything that outlives a login.
         date: The day this meal is served on.
         type: Soup, main dish, or unknown.
         variant: The canteen's own label, e.g. ``"Oběd 1"``.
@@ -177,6 +178,8 @@ class Meal:
         allergens: Allergens declared for the meal.
         deadline: When ordering closes, if the API reported it.
         raw: The untouched API record, so nothing is ever lost.
+        kind_code: The canteen's code for the meal's slot that day (the API's
+            ``druh``), e.g. ``"O2"``. Part of :attr:`key`.
     """
 
     id: int
@@ -193,6 +196,17 @@ class Meal:
     allergens: tuple[Allergen, ...] = ()
     deadline: _dt.datetime | None = None
     raw: Mapping[str, Any] = field(default_factory=dict, repr=False, compare=False)
+    kind_code: str = ""
+
+    @property
+    def key(self) -> str:
+        """A name for this meal that survives logging in again, e.g. ``"2026-11-09:O2"``.
+
+        It is the day and the slot, so it keeps meaning the same place on the menu when
+        :attr:`id` has moved. If the canteen republishes that slot with another dish, the
+        key follows the slot: check :attr:`name` when the dish itself matters.
+        """
+        return f"{self.date.isoformat()}:{self.kind_code}"
 
     def __str__(self) -> str:
         status = "ordered" if self.ordered else "not ordered"
@@ -270,17 +284,19 @@ class OrderResult:
     Returned by :meth:`~strava_cz.Menu.order_meals` and
     :meth:`~strava_cz.Menu.cancel_meals` when ``continue_on_error=True``.
 
+    Meals are reported the way the caller named them, by id or by key.
+
     Attributes:
-        changed: Ids whose state was successfully changed.
-        unchanged: Ids that already had the requested state, so nothing was sent.
-        skipped: ``(id, reason)`` for meals deliberately left out, e.g. duplicates.
-        failed: ``(id, error)`` for meals the canteen refused.
+        changed: Meals whose state was successfully changed.
+        unchanged: Meals that already had the requested state, so nothing was sent.
+        skipped: ``(meal, reason)`` for meals deliberately left out, e.g. duplicates.
+        failed: ``(meal, error)`` for meals the canteen refused.
     """
 
-    changed: tuple[int, ...] = ()
-    unchanged: tuple[int, ...] = ()
-    skipped: tuple[tuple[int, str], ...] = ()
-    failed: tuple[tuple[int, Exception], ...] = ()
+    changed: tuple[int | str, ...] = ()
+    unchanged: tuple[int | str, ...] = ()
+    skipped: tuple[tuple[int | str, str], ...] = ()
+    failed: tuple[tuple[int | str, Exception], ...] = ()
 
     @property
     def ok(self) -> bool:

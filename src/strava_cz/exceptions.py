@@ -77,13 +77,15 @@ class InsufficientBalanceError(StravaAPIError):
 
 
 class MealNotFoundError(StravaError):
-    """No meal with the given id exists in the fetched menu."""
+    """No meal with the given id or key exists in the fetched menu."""
 
-    def __init__(self, meal_id: int) -> None:
-        super().__init__(
-            f"No meal with id {meal_id} in the fetched menu. "
-            f"Ids change whenever the menu changes - re-run menu.fetch()."
+    def __init__(self, meal_id: int | str) -> None:
+        hint = (
+            ""
+            if isinstance(meal_id, str)
+            else " Numeric ids only last as long as the login that fetched them."
         )
+        super().__init__(f"No meal {meal_id} in the fetched menu.{hint}")
         self.meal_id = meal_id
 
 
@@ -95,7 +97,7 @@ class MealNotOrderableError(StravaError):
         reason: Why the canteen refuses it, as a :class:`~strava_cz.models.Restriction`.
     """
 
-    def __init__(self, meal_id: int, reason: Any, action: str = "order") -> None:
+    def __init__(self, meal_id: int | str, reason: Any, action: str = "order") -> None:
         super().__init__(
             f"Cannot {action} meal {meal_id}: {getattr(reason, 'description', reason)}"
         )

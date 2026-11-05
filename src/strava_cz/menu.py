@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime as _dt
 import warnings
+from collections import Counter
 from collections.abc import Iterable, Iterator, Sequence
 from typing import TYPE_CHECKING, Any
 
@@ -21,6 +22,38 @@ if TYPE_CHECKING:  # pragma: no cover
     from .client import StravaCZ
 
 __all__ = ["Menu"]
+
+
+def _normal_ref(ref: int | str) -> int | str:
+    """One spelling per meal: a number as an int, a key stripped and upper-case."""
+    if isinstance(ref, str):
+        text = ref.strip().upper()
+        return int(text) if text.isdigit() else text
+    return int(ref)
+
+
+def _index_by_key(days: Iterable[Day]) -> tuple[dict[str, Meal], tuple[ParseWarning, ...]]:
+    """Map each :attr:`Meal.key` to its meal, leaving out any key that can't name just one.
+
+    A meal with no slot code, or sharing its key with another, stays out of the index, so
+    asking for it finds nothing rather than a guess that could order the wrong one. Each
+    one gets a warning, because "not found" alone would hide the reason.
+    """
+    meals = [meal for day in days for meal in day.meals]
+    counts = Counter(meal.key for meal in meals)
+    index: dict[str, Meal] = {}
+    problems: list[ParseWarning] = []
+    for meal in meals:
+        if meal.kind_code and counts[meal.key] == 1:
+            index[meal.key] = meal
+        else:
+            problems.append(
+                ParseWarning(
+                    f"{meal.name!r} cannot be named by {meal.key!r}: the canteen gave it no "
+                    "slot code, or gave the same one to another meal that day"
+                )
+            )
+    return index, tuple(problems)
 
 
 class Menu:
@@ -44,12 +77,18 @@ class Menu:
     orderable days that simply never fill themselves in. :attr:`Day.auto_ordered` says
     which they are, and ``get_days(auto_ordered=True)`` is the filter an automatic
     ordering tool wants.
+
+    Meals can be named two ways. :attr:`Meal.id` is the canteen's own number and is
+    only good within one login, because each session gets the menu numbered differently.
+    :attr:`Meal.key` is the day and slot (``"2026-11-09:O2"``), which means the same
+    thing in every session. Anything that crosses a login has to use the key.
     """
 
     def __init__(self, client: StravaCZ) -> None:
         self._client = client
         self._days: tuple[Day, ...] | None = None
         self._by_id: dict[int, Meal] = {}
+        self._by_key: dict[str, Meal] = {}
         self.raw_data: dict[str, Any] = {}
         self.parse_warnings: tuple[ParseWarning, ...] = ()
 
@@ -76,8 +115,10 @@ class Menu:
             "ignoreCert": False,
         }
         self.raw_data = self._client._request("objednavky", payload, authenticated=True)
-        self._days, self.parse_warnings = parse_menu(self.raw_data)
+        self._days, parse_warnings = parse_menu(self.raw_data)
         self._by_id = {meal.id: meal for day in self._days for meal in day.meals}
+        self._by_key, key_warnings = _index_by_key(self._days)
+        self.parse_warnings = parse_warnings + key_warnings
         return self
 
     @property
@@ -105,6 +146,7 @@ class Menu:
         """Forget everything loaded, used when logging out."""
         self._days = None
         self._by_id = {}
+        self._by_key = {}
         self.raw_data = {}
         self.parse_warnings = ()
 
@@ -202,6 +244,16 @@ class Menu:
             raise MenuNotFetchedError()
         return self._by_id.get(int(meal_id))
 
+    def get_by_key(self, key: str) -> Meal | None:
+        """The meal with this :attr:`Meal.key`, or ``None`` if no single meal has it.
+
+        A key two meals share is treated as not found rather than guessed at, so it can
+        never put an order on the wrong one. :attr:`parse_warnings` says which those are.
+        """
+        if self._days is None:
+            raise MenuNotFetchedError()
+        return self._by_key.get(key.strip().upper())
+
     def get_by_date(self, date: _dt.date | str) -> Day | None:
         """The day for this date, or ``None`` if the menu does not cover it.
 
@@ -214,28 +266,30 @@ class Menu:
                 return day
         return None
 
-    def is_ordered(self, meal_id: int) -> bool:
-        """Whether this meal is currently ordered.
+    def is_ordered(self, meal_id: int | str) -> bool:
+        """Whether this meal, given by id or key, is currently ordered.
 
         Raises:
-            MealNotFoundError: If the menu holds no meal with this id.
+            MealNotFoundError: If the menu holds no such meal.
         """
-        meal = self.get_by_id(meal_id)
-        if meal is None:
-            raise MealNotFoundError(meal_id)
-        return meal.ordered
+        return self._require(meal_id).ordered
 
-    def _require(self, meal_id: int) -> Meal:
-        meal = self.get_by_id(meal_id)
+    def _find(self, ref: int | str) -> Meal | None:
+        """Look a meal up by key, or by id when given a number."""
+        normal = _normal_ref(ref)
+        return self.get_by_key(normal) if isinstance(normal, str) else self.get_by_id(normal)
+
+    def _require(self, ref: int | str) -> Meal:
+        meal = self._find(ref)
         if meal is None:
-            raise MealNotFoundError(meal_id)
+            raise MealNotFoundError(_normal_ref(ref))
         return meal
 
     # ----------------------------------------------------------------- ordering
 
     def order_meals(
         self,
-        *meal_ids: int,
+        *meals: int | str,
         continue_on_error: bool = False,
         strict_duplicates: bool = False,
     ) -> OrderResult:
@@ -245,7 +299,8 @@ class Menu:
         is sent at all.
 
         Args:
-            *meal_ids: Ids from the fetched menu, as shown by :meth:`print`.
+            *meals: Each one a :attr:`Meal.key`, or a :attr:`Meal.id` from this login's
+                fetched menu, as shown by :meth:`print`.
             continue_on_error: Order everything that can be ordered and report the
                 rest in the returned :class:`~strava_cz.models.OrderResult` instead
                 of raising. When ``False`` (the default) the first failure rolls back
@@ -259,14 +314,14 @@ class Menu:
             An :class:`~strava_cz.models.OrderResult` describing what happened.
 
         Raises:
-            MealNotFoundError: If an id is not in the fetched menu.
+            MealNotFoundError: If a meal is not in the fetched menu.
             MealNotOrderableError: If the canteen does not allow ordering a meal.
             InsufficientBalanceError: If the account cannot cover an order.
             DuplicateMealError: See ``strict_duplicates``.
             StravaAPIError: If the API refuses a request.
         """
         return self._change_orders(
-            meal_ids,
+            meals,
             ordered=True,
             continue_on_error=continue_on_error,
             strict_duplicates=strict_duplicates,
@@ -274,7 +329,7 @@ class Menu:
 
     def cancel_meals(
         self,
-        *meal_ids: int,
+        *meals: int | str,
         continue_on_error: bool = False,
     ) -> OrderResult:
         """Cancel one or more orders and save the changes in a single transaction.
@@ -283,7 +338,8 @@ class Menu:
         request is sent.
 
         Args:
-            *meal_ids: Ids from the fetched menu.
+            *meals: Each one a :attr:`Meal.key`, or a :attr:`Meal.id` from this login's
+                fetched menu.
             continue_on_error: Cancel what can be cancelled and report the rest
                 instead of raising.
 
@@ -291,12 +347,12 @@ class Menu:
             An :class:`~strava_cz.models.OrderResult` describing what happened.
 
         Raises:
-            MealNotFoundError: If an id is not in the fetched menu.
+            MealNotFoundError: If a meal is not in the fetched menu.
             MealNotOrderableError: If the canteen does not allow cancelling a meal.
             StravaAPIError: If the API refuses a request.
         """
         return self._change_orders(
-            meal_ids,
+            meals,
             ordered=False,
             continue_on_error=continue_on_error,
             strict_duplicates=False,
@@ -304,36 +360,43 @@ class Menu:
 
     def _change_orders(
         self,
-        meal_ids: Sequence[int],
+        refs: Sequence[int | str],
         *,
         ordered: bool,
         continue_on_error: bool,
         strict_duplicates: bool,
     ) -> OrderResult:
-        """Shared body of :meth:`order_meals` and :meth:`cancel_meals`."""
-        action = "order" if ordered else "cancel"
-        changed: list[int] = []
-        unchanged: list[int] = []
-        skipped: list[tuple[int, str]] = []
-        failed: list[tuple[int, Exception]] = []
+        """Shared body of :meth:`order_meals` and :meth:`cancel_meals`.
 
-        # 1. Resolve ids and check the canteen allows the change at all.
-        planned: list[Meal] = []
-        for meal_id in dict.fromkeys(int(i) for i in meal_ids):  # de-duplicate, keep order
+        Results name each meal the way the caller did, whether that was an id or a key.
+        """
+        action = "order" if ordered else "cancel"
+        changed: list[int | str] = []
+        unchanged: list[int | str] = []
+        skipped: list[tuple[int | str, str]] = []
+        failed: list[tuple[int | str, Exception]] = []
+
+        # 1. Resolve each meal and check the canteen allows the change at all.
+        planned: list[tuple[int | str, Meal]] = []
+        seen: set[int] = set()
+        for ref in dict.fromkeys(_normal_ref(r) for r in refs):  # de-duplicate, keep order
             try:
-                meal = self._require(meal_id)
+                meal = self._require(ref)
+                if meal.id in seen:  # the same meal again, by its other name
+                    continue
+                seen.add(meal.id)
                 if meal.ordered is ordered:
-                    unchanged.append(meal_id)
+                    unchanged.append(ref)
                     continue
                 allowed = meal.can_order if ordered else meal.can_cancel
                 if not allowed:
                     reason = meal.order_restriction if ordered else meal.cancel_restriction
-                    raise MealNotOrderableError(meal_id, reason, action)
-                planned.append(meal)
+                    raise MealNotOrderableError(ref, reason, action)
+                planned.append((ref, meal))
             except (MealNotFoundError, MealNotOrderableError) as exc:
                 if not continue_on_error:
                     raise
-                failed.append((meal_id, exc))
+                failed.append((ref, exc))
 
         # 2. Two meals of the same kind on the same day compete for one slot.
         if ordered:
@@ -345,16 +408,16 @@ class Menu:
             return OrderResult(tuple(changed), tuple(unchanged), tuple(skipped), tuple(failed))
 
         # 4. Stage each change, then commit them all at once.
-        staged: list[int] = []
+        staged: list[tuple[int | str, Meal]] = []
         try:
-            for meal in planned:
+            for ref, meal in planned:
                 try:
                     self._stage(meal.id, ordered)
-                    staged.append(meal.id)
+                    staged.append((ref, meal))
                 except StravaAPIError as exc:
                     if not continue_on_error:
                         raise
-                    failed.append((meal.id, exc))
+                    failed.append((ref, exc))
 
             if not staged:
                 self._discard_staged_changes()
@@ -367,34 +430,46 @@ class Menu:
 
         # 5. Confirm against a fresh copy of the menu rather than trusting the write.
         self.fetch()
-        for meal_id in staged:
-            refreshed = self.get_by_id(meal_id)
+        for ref, meal in staged:
+            refreshed = self._same_meal(meal)
             if refreshed is not None and refreshed.ordered is ordered:
-                changed.append(meal_id)
+                changed.append(ref)
                 continue
             error = StravaAPIError(
-                f"The canteen accepted the request but meal {meal_id} is still "
+                f"The canteen accepted the request but meal {ref} is still "
                 f"{'not ordered' if ordered else 'ordered'}"
             )
             if not continue_on_error:
                 raise error
-            failed.append((meal_id, error))
+            failed.append((ref, error))
 
         return OrderResult(tuple(changed), tuple(unchanged), tuple(skipped), tuple(failed))
 
-    def _resolve_duplicates(
-        self, planned: list[Meal], strict: bool
-    ) -> tuple[list[Meal], list[tuple[int, str]]]:
-        """Keep one meal per (day, kind) slot; skip or reject the rest."""
-        kept: list[Meal] = []
-        skipped: list[tuple[int, str]] = []
-        claimed: dict[tuple[_dt.date, MealType], int] = {}
+    def _same_meal(self, meal: Meal) -> Meal | None:
+        """Find *meal* in a fresh menu, never answering with another meal's row.
 
-        for meal in planned:
+        By key where the key names one meal. Otherwise its number is all there is, and
+        that counts only while the row with that number is still the same day and slot.
+        """
+        found = self.get_by_key(meal.key)
+        if found is not None:
+            return found
+        by_id = self.get_by_id(meal.id)
+        return by_id if by_id is not None and by_id.key == meal.key else None
+
+    def _resolve_duplicates(
+        self, planned: list[tuple[int | str, Meal]], strict: bool
+    ) -> tuple[list[tuple[int | str, Meal]], list[tuple[int | str, str]]]:
+        """Keep one meal per (day, kind) slot; skip or reject the rest."""
+        kept: list[tuple[int | str, Meal]] = []
+        skipped: list[tuple[int | str, str]] = []
+        claimed: dict[tuple[_dt.date, MealType], int | str] = {}
+
+        for ref, meal in planned:
             slot = (meal.date, meal.type)
             if slot in claimed:
                 message = (
-                    f"meal {meal.id} competes with meal {claimed[slot]} for the same slot "
+                    f"meal {ref} competes with meal {claimed[slot]} for the same slot "
                     f"({meal.date.isoformat()}, {meal.type.value})"
                 )
                 if strict:
@@ -402,10 +477,10 @@ class Menu:
                         f"Cannot order two meals of the same kind on one day: {message}"
                     )
                 warnings.warn(f"Skipping {message}", stacklevel=4)
-                skipped.append((meal.id, message))
+                skipped.append((ref, message))
                 continue
-            claimed[slot] = meal.id
-            kept.append(meal)
+            claimed[slot] = ref
+            kept.append((ref, meal))
         return kept, skipped
 
     def _rollback(self) -> None:
@@ -521,7 +596,9 @@ class Menu:
         return self.get_days()[key]
 
     def __contains__(self, meal_id: object) -> bool:
-        return isinstance(meal_id, int) and meal_id in self._by_id
+        if self._days is None or not isinstance(meal_id, (int, str)):
+            return False
+        return self._find(meal_id) is not None
 
     def __repr__(self) -> str:
         if self._days is None:

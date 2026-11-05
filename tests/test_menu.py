@@ -141,6 +141,8 @@ class TestLookup:
     def test_membership(self, menu):
         assert 9 in menu.menu
         assert 999999 not in menu.menu
+        assert "2026-09-07:O2" in menu.menu
+        assert "2030-01-01:O1" not in menu.menu
 
 
 class TestContainerProtocol:
@@ -192,3 +194,9 @@ class TestMealPresentation:
         assert soup.can_order is False
         assert soup.order_restriction is Restriction.UNAVAILABLE
         assert "cannot be ordered separately" in str(soup)
+
+
+def test_asking_for_a_key_before_fetching_is_false_rather_than_an_error(strava):
+    """`in` never raises, whichever way the meal is named."""
+    assert "2026-09-07:O2" not in strava.menu
+    assert 9 not in strava.menu
