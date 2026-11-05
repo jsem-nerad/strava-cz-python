@@ -21,6 +21,15 @@ Knihovna zůstává zpětně kompatibilní.
 - Kontrola po zápisu hledá jídlo podle dne a místa v jídelníčku, takže odpověď nemůže
   přijít z řádku jiného jídla. Pokud místo z jídelníčku zmizelo, zápis se hlásí jako
   nepotvrzený.
+- **Opakovaný pokus po neúspěšné objednávce mohl v knihovně objednat jiné jídlo v jiný
+  den.** Jídelna čísluje jídelníček znovu nejen při přihlášení, ale i při resetu session
+  (`nactiVlastnostiPA`), a ten knihovna volá při vracení změn zpátky. Když selhalo
+  zaškrtnutí všech jídel a nebo následné načtení, zůstala v paměti stará čísla a další
+  `order_meals()` v tomtéž přihlášení je poslalo dál. Reset teď vždycky znovu načte
+  jídelníček, a když se to nepovede, jídelníček se zahodí. Číslo přečtené před resetem se
+  odmítne s `MenuNotFetchedError`, dokud nezavoláte `fetch()`; klíč funguje dál.
+- Když reset selže, udělá se dodatečně před dalším `fetch()`. Jinak by se zaškrtnuté a
+  neuložené jídlo tvářilo jako objednané a další uložení by ho opravdu objednalo.
 
 ### Changed
 - **Id v příkazu `strava-cz` je den a místo v jídelníčku**, např. `2026-11-09:O2`.

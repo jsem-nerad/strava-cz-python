@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import datetime as _dt
 import warnings
 from collections import Counter
@@ -78,10 +79,11 @@ class Menu:
     which they are, and ``get_days(auto_ordered=True)`` is the filter an automatic
     ordering tool wants.
 
-    Meals can be named two ways. :attr:`Meal.id` is the canteen's own number and is
-    only good within one login, because each session gets the menu numbered differently.
-    :attr:`Meal.key` is the day and slot (``"2026-11-09:O2"``), which means the same
-    thing in every session. Anything that crosses a login has to use the key.
+    Meals can be named two ways. :attr:`Meal.id` is the canteen's own number. It is only
+    good until the canteen next renumbers the menu, which it does at every login and at
+    every reset of the session, including the one that rolls back a failed order.
+    :attr:`Meal.key` is the day and slot (``"2026-11-09:O2"``), which means the same thing
+    in every session. Anything that outlives one fetch should use the key.
     """
 
     def __init__(self, client: StravaCZ) -> None:
@@ -91,11 +93,19 @@ class Menu:
         self._by_key: dict[str, Meal] = {}
         self.raw_data: dict[str, Any] = {}
         self.parse_warnings: tuple[ParseWarning, ...] = ()
+        #: The canteen renumbered the menu and the caller hasn't fetched since.
+        self._numbers_moved = False
+        #: A reset failed, so the session may still hold staged changes.
+        self._reset_owed = False
 
     # ------------------------------------------------------------------ loading
 
     def fetch(self) -> Menu:
-        """Load the menu from the API and parse it.
+        """Load this login's copy of the menu and parse it.
+
+        The canteen gives each login its own copy of the orders, taken when it logged in,
+        so this doesn't show what another session has changed since: an order placed in
+        the app meanwhile, say. Log in again to see that.
 
         Returns:
             Self, so calls can be chained: ``days = strava.menu.fetch().get_days()``.
@@ -104,6 +114,15 @@ class Menu:
             NotLoggedInError: If no one is logged in.
             StravaAPIError: If the API request fails.
         """
+        if self._reset_owed:
+            self._discard_staged_changes()
+            self._reset_owed = False
+        self._load()
+        self._numbers_moved = False
+        return self
+
+    def _load(self) -> None:
+        """Read the menu without telling the caller its numbers are good again."""
         user = self._client.user
         payload = {
             "cislo": user.canteen_number,
@@ -119,7 +138,23 @@ class Menu:
         self._by_id = {meal.id: meal for day in self._days for meal in day.meals}
         self._by_key, key_warnings = _index_by_key(self._days)
         self.parse_warnings = parse_warnings + key_warnings
-        return self
+
+    def _resync(self) -> None:
+        """Drop the session's copy of the orders and read the canteen's records.
+
+        The reset this needs also renumbers the menu, so whatever was loaded before it
+        goes first: if a step here fails there are no old numbers left that could order
+        another meal. Numbers the caller got earlier stay refused until they fetch.
+
+        Raises:
+            StravaAPIError: If either request fails. The menu is then not fetched.
+        """
+        self._reset()
+        self._numbers_moved = True
+        self._reset_owed = True
+        self._discard_staged_changes()
+        self._reset_owed = False
+        self._load()
 
     @property
     def fetched(self) -> bool:
@@ -149,6 +184,8 @@ class Menu:
         self._by_key = {}
         self.raw_data = {}
         self.parse_warnings = ()
+        self._numbers_moved = False
+        self._reset_owed = False
 
     # ---------------------------------------------------------------- filtering
 
@@ -239,9 +276,19 @@ class Menu:
         ]
 
     def get_by_id(self, meal_id: int) -> Meal | None:
-        """The meal with this id, or ``None`` if the menu holds no such meal."""
+        """The meal with this id, or ``None`` if the menu holds no such meal.
+
+        Raises:
+            MenuNotFetchedError: If the menu isn't fetched, or the canteen has renumbered
+                it since the last :meth:`fetch`, when a number could mean another meal.
+        """
         if self._days is None:
             raise MenuNotFetchedError()
+        if self._numbers_moved:
+            raise MenuNotFetchedError(
+                "The canteen renumbered the menu when the session was reset, so this number "
+                "may be another meal now. Call menu.fetch() again, or use Meal.key"
+            )
         return self._by_id.get(int(meal_id))
 
     def get_by_key(self, key: str) -> Meal | None:
@@ -420,7 +467,7 @@ class Menu:
                     failed.append((ref, exc))
 
             if not staged:
-                self._discard_staged_changes()
+                self._rollback()
                 return OrderResult(tuple(changed), tuple(unchanged), tuple(skipped), tuple(failed))
 
             self._save()
@@ -429,7 +476,7 @@ class Menu:
             raise
 
         # 5. Confirm against a fresh copy of the menu rather than trusting the write.
-        self.fetch()
+        self._load()
         for ref, meal in staged:
             refreshed = self._same_meal(meal)
             if refreshed is not None and refreshed.ordered is ordered:
@@ -454,7 +501,7 @@ class Menu:
         found = self.get_by_key(meal.key)
         if found is not None:
             return found
-        by_id = self.get_by_id(meal.id)
+        by_id = self._by_id.get(meal.id)
         return by_id if by_id is not None and by_id.key == meal.key else None
 
     def _resolve_duplicates(
@@ -485,11 +532,8 @@ class Menu:
 
     def _rollback(self) -> None:
         """Undo staged changes and reload, without masking the original error."""
-        try:
-            self._discard_staged_changes()
-            self.fetch()
-        except StravaAPIError:  # pragma: no cover - best effort only
-            pass
+        with contextlib.suppress(StravaAPIError):
+            self._resync()
 
     # -------------------------------------------------------------- API actions
 
@@ -598,7 +642,10 @@ class Menu:
     def __contains__(self, meal_id: object) -> bool:
         if self._days is None or not isinstance(meal_id, (int, str)):
             return False
-        return self._find(meal_id) is not None
+        try:
+            return self._find(meal_id) is not None
+        except MenuNotFetchedError:
+            return False
 
     def __repr__(self) -> str:
         if self._days is None:

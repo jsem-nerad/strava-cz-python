@@ -202,3 +202,139 @@ def no_keyring(monkeypatch: pytest.MonkeyPatch) -> None:
         raise KeyringUnavailableError("no backend on this machine")
 
     monkeypatch.setattr(profiles, "_keyring", fail)
+
+
+class FakeCanteen:
+    """The write path as the live canteen behaved on 2026-11-05, for failures it won't do on demand.
+
+    What it copies, all seen on a real account:
+
+    - Each login works on its **own copy** of the orders. A fetch reads that copy, so a
+      staged change shows up in the same session before anything is saved, and a change
+      saved by another session doesn't show up at all.
+    - ``pridejJidloS5`` changes the copy, and ordering a main unticks that day's other main.
+      Only ``saveOrders`` reaches the canteen's records. Logging out drops what wasn't saved.
+    - ``nactiVlastnostiPA`` reloads the copy from the records **and renumbers the menu**.
+      Stages, saves and plain fetches leave the numbers alone.
+    - A number that means nothing is answered with HTTP 555 and API error 9.
+
+    ``fail()`` queues what the next calls to an endpoint do instead of behaving normally.
+    """
+
+    #: How far each reset moves the numbers. Hands Monday's Oběd 2's number to Tuesday's Oběd 1.
+    RESET_SHIFT = -3
+
+    def __init__(self, api: Any, payload: Any) -> None:
+        self.payload = payload
+        rows = [r for t in payload.values() if isinstance(t, list) for r in t]
+        self.saved = {(r["datum"], r["druh"]): int(r["pocet"]) for r in rows}
+        self.table = dict(self.saved)
+        self.shift = 0
+        self.queued: dict[str, list[str | None]] = {}
+        #: Slots a save accepts and quietly doesn't record.
+        self.not_recorded: set[tuple[str, str]] = set()
+        self.logout = api.post(f"{BASE_URL}/api/logOut").mock(
+            return_value=httpx.Response(200, json=True)
+        )
+        self.routes = {
+            name: api.post(f"{BASE_URL}/api/{name}").mock(side_effect=handler)
+            for name, handler in (
+                ("objednavky", self._objednavky),
+                ("pridejJidloS5", self._stage),
+                ("saveOrders", self._save),
+                ("nactiVlastnostiPA", self._reset),
+            )
+        }
+
+    def fail(self, endpoint: str, *modes: str | None) -> None:
+        """Queue behaviours: timeout, lost, 502, 502-lost, refuse, overload, expired, ignored, funds.
+
+        ``timeout`` and ``502`` do nothing, ``lost`` and ``502-lost`` do the work and lose
+        the answer, ``ignored`` answers success and does nothing. None behaves normally.
+        """
+        self.queued.setdefault(endpoint, []).extend(modes)
+
+    def numbered(self) -> Any:
+        """The menu as this session sees it now."""
+        import copy
+
+        clone = copy.deepcopy(self.payload)
+        for table in clone.values():
+            if isinstance(table, list):
+                for row in table:
+                    row["pocet"] = self.table[(row["datum"], row["druh"])]
+        return renumbered(clone, self.shift) if self.shift else clone
+
+    def saved_keys(self) -> set[str]:
+        """What is really on the account, as meal keys."""
+        return {
+            f"{datum[6:]}-{datum[3:5]}-{datum[:2]}:{druh}"
+            for (datum, druh), count in self.saved.items()
+            if count
+        }
+
+    def _outcome(self, endpoint: str, request: httpx.Request, work: Any) -> httpx.Response:
+        queue = self.queued.get(endpoint)
+        mode = queue.pop(0) if queue else None
+        if mode in (None, "lost", "502-lost"):
+            answer = work()
+            if mode == "lost":
+                raise httpx.ReadTimeout("timed out", request=request)
+            if mode == "502-lost":
+                return httpx.Response(502, text="<html>Bad Gateway</html>")
+            return answer
+        if mode == "timeout":
+            raise httpx.ReadTimeout("timed out", request=request)
+        if mode == "502":
+            return httpx.Response(502, text="<html>Bad Gateway</html>")
+        if mode == "ignored":
+            return httpx.Response(200, json={"konto": "0.00"})
+        errors = {
+            "refuse": (7, "Nope"),
+            "overload": (43, "The service is currently overloaded"),
+            "expired": (20, "Session expired"),
+        }
+        if mode == "funds":
+            return httpx.Response(555, json=load("error_balance"))
+        number, message = errors[str(mode)]
+        return httpx.Response(555, json={"state": "error", "number": number, "message": message})
+
+    def _objednavky(self, request: httpx.Request) -> httpx.Response:
+        return self._outcome(
+            "objednavky", request, lambda: httpx.Response(200, json=self.numbered())
+        )
+
+    def _stage(self, request: httpx.Request) -> httpx.Response:
+        def work() -> httpx.Response:
+            body = json.loads(request.read())
+            rows = [r for t in self.numbered().values() if isinstance(t, list) for r in t]
+            row = next((r for r in rows if str(r["veta"]) == str(body["veta"])), None)
+            if row is None:
+                return httpx.Response(
+                    555,
+                    json={"state": "error", "number": 9, "message": "Unknown backend error S5"},
+                )
+            if body["pocet"] == "1" and row["druh"].startswith("O"):
+                for datum, druh in self.table:
+                    if datum == row["datum"] and druh.startswith("O"):
+                        self.table[(datum, druh)] = 0
+            self.table[(row["datum"], row["druh"])] = int(body["pocet"])
+            return httpx.Response(200, json={"produkt": [], "konto": "0.00"})
+
+        return self._outcome("pridejJidloS5", request, work)
+
+    def _save(self, request: httpx.Request) -> httpx.Response:
+        def work() -> httpx.Response:
+            kept = {slot: self.saved[slot] for slot in self.not_recorded}
+            self.saved = {**self.table, **kept}
+            return httpx.Response(200, json={"produkty": [], "konto": "0.00"})
+
+        return self._outcome("saveOrders", request, work)
+
+    def _reset(self, request: httpx.Request) -> httpx.Response:
+        def work() -> httpx.Response:
+            self.table = dict(self.saved)
+            self.shift += self.RESET_SHIFT
+            return httpx.Response(200, json={"tablesReseted": True, "konto": "0.00"})
+
+        return self._outcome("nactiVlastnostiPA", request, work)
