@@ -5,6 +5,41 @@ Všechny významné změny v tomto projektu budou dokumentovány v tomto souboru
 
 ## [unreleased]
 
+Čísla jídel neplatí napříč přihlášeními, a příkaz `strava-cz` je proto přestal brát:
+jídlo teď určuje den a místo v jídelníčku. **Mění se tím rozhraní příkazu i jeho JSON.**
+Knihovna zůstává zpětně kompatibilní.
+
+### Fixed
+- **`strava-cz order` a `cancel` mohly zasáhnout jiné jídlo, než jste vybrali.** Jídelna
+  čísluje celý jídelníček (`veta`) při každém přihlášení znovu a každé spuštění příkazu
+  je nové přihlášení. Číslo přečtené z `strava-cz menu` tak v dalším běhu mohlo být
+  polévka, takže přišlo odmítnutí s důvodem, který k vybranému jídlu nepatřil, nebo
+  objednatelné jídlo v jiný den, které se objednalo s návratovým kódem 0. Na živém účtu
+  to bylo vidět 5. 11. 2026: stejný jídelníček chodí v několika číslováních a uvnitř
+  jednoho přihlášení se číslování nemění. Starší poznámka, že se čísla mění jen se změnou
+  jídelníčku, neplatila.
+- Kontrola po zápisu hledá jídlo podle dne a místa v jídelníčku, takže odpověď nemůže
+  přijít z řádku jiného jídla. Pokud místo z jídelníčku zmizelo, zápis se hlásí jako
+  nepotvrzený.
+
+### Changed
+- **Id v příkazu `strava-cz` je den a místo v jídelníčku**, např. `2026-11-09:O2`.
+  Vypisují ho `menu`, `ordered` a `--dry-run`, je v poli `id` v JSONu (teď řetězec,
+  stejně jako v `changed`, `unchanged`, `failed` a `meal_id`) a berou ho `order` a
+  `cancel`. Holé číslo se odmítne s návratovým kódem 2 ještě před přihlášením, s `--json`
+  i jako JSON.
+- `--dry-run` s `--json` vypisuje v poli `meals` i jídla, která by se objednala, takže
+  jde zkontrolovat název.
+- Nejužší tabulka má 57 sloupců místo 48, aby se delší id vešlo vedle celé ceny. Na užším
+  terminálu se řádky zalomí.
+
+### Added
+- `Meal.key`, `Meal.kind_code` a `Menu.get_by_key()`. `order_meals()`, `cancel_meals()`
+  a `is_ordered()` berou vedle `Meal.id` i klíč a `OrderResult` hlásí jídla tak, jak je
+  zadal volající. `in` na jídelníčku bere obojí a jedno jídlo zadané dvakrát různě se
+  bere jako jedno. Klíč, který by sdílela dvě jídla, nebo jídlo bez kódu místa se berou
+  jako nenalezené a ohlásí je `Menu.parse_warnings`.
+
 ## [0.4.0] 2026-09-01
 
 Přibyl nástroj pro příkazovou řádku a profily. Knihovna sama je zpětně kompatibilní

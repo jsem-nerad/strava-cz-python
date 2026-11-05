@@ -37,7 +37,7 @@ from ..profiles import (
 )
 from .output import Output, day_to_json, meal_to_json, result_to_json, user_to_json
 
-__all__ = ["EXIT", "exit_code_for", "run", "session"]
+__all__ = ["EXIT", "MealIdError", "exit_code_for", "parse_meal_id", "run", "session"]
 
 #: Exit codes, so a shell script can tell the failures apart. Documented in --help.
 EXIT = {
@@ -51,12 +51,22 @@ EXIT = {
 }
 
 
+class MealIdError(StravaError):
+    """An argument to ``order`` or ``cancel`` is not a meal id."""
+
+    def __init__(self, message: str, value: str) -> None:
+        super().__init__(message)
+        self.meal_id = value
+
+
 def exit_code_for(exc: BaseException) -> int:
     """Map an exception onto the exit code documented in ``--help``.
 
     Checked most specific first: ``InsufficientBalanceError`` and
     ``AuthenticationError`` are both ``StravaAPIError``, so the order matters.
     """
+    if isinstance(exc, MealIdError):
+        return EXIT["usage"]
     if isinstance(exc, InsufficientBalanceError):
         return EXIT["balance"]
     if isinstance(exc, AuthenticationError):
@@ -257,17 +267,59 @@ def cmd_cancel(args: argparse.Namespace, out: Output) -> int:
     return _change(args, out, ordered=False)
 
 
+def parse_meal_id(value: str) -> str:
+    """Check a meal id from the command line: the day and the slot, ``2026-11-09:O2``.
+
+    A bare number is refused rather than looked up. The canteen numbers its menu afresh
+    at every login and each run of this command is a new login, so a number printed by
+    an earlier run can be another meal by now - quite possibly an orderable one, on
+    another day, which would be ordered without any error.
+
+    Returns:
+        The id in the form the menu uses.
+
+    Raises:
+        MealIdError: If *value* is not a meal id.
+    """
+    text = value.strip()
+    if text.isdigit():
+        raise MealIdError(
+            f"{text} is the canteen's number for a meal, which changes at every login. "
+            "Use the id 'strava-cz menu' prints, such as 2026-11-09:O2",
+            text,
+        )
+    day, _, slot = text.partition(":")
+    try:
+        date = _dt.date.fromisoformat(day)
+    except ValueError:
+        date = None
+    if date is None or not slot:
+        raise MealIdError(
+            f"not a meal id: {value!r} (use the one 'strava-cz menu' prints, "
+            "such as 2026-11-09:O2)",
+            value,
+        )
+    return f"{date.isoformat()}:{slot.upper()}"
+
+
 def _change(args: argparse.Namespace, out: Output, *, ordered: bool) -> int:
     action = "order" if ordered else "cancel"
+    meal_ids = [parse_meal_id(value) for value in args.meal_ids]  # before logging in
     with session(args) as strava:
         strava.menu.fetch()
         currency = strava.user.currency
+        for warning in strava.menu.parse_warnings:
+            out.warn(str(warning))
 
         if args.dry_run:
-            plan = _plan(strava, args.meal_ids, ordered=ordered)
+            plan = _plan(strava, meal_ids, ordered=ordered)
             out.emit(
                 action,
-                {"dry_run": True, **plan.payload},
+                {
+                    "dry_run": True,
+                    **plan.payload,
+                    "meals": [meal_to_json(meal, currency) for meal in plan.would],
+                },
                 lambda: _render_plan(out, plan, action, currency),
             )
             return EXIT["meal"] if plan.refused else EXIT["ok"]
@@ -276,7 +328,7 @@ def _change(args: argparse.Namespace, out: Output, *, ordered: bool) -> int:
         if ordered:
             kwargs["strict_duplicates"] = args.strict_duplicates
         method = strava.menu.order_meals if ordered else strava.menu.cancel_meals
-        result = method(*args.meal_ids, **kwargs)
+        result = method(*meal_ids, **kwargs)
 
         def render() -> None:
             out.render_result(result, action, currency)
@@ -300,7 +352,7 @@ class Plan:
 
     def __init__(self) -> None:
         self.would: list[Meal] = []
-        self.already: list[int] = []
+        self.already: list[str] = []
         self.refused: list[dict[str, Any]] = []
         self.duplicate: list[dict[str, Any]] = []
         self.balance_change: float = 0.0
@@ -312,7 +364,7 @@ class Plan:
     @property
     def payload(self) -> dict[str, Any]:
         return {
-            "would_change": [meal.id for meal in self.would],
+            "would_change": [meal.key for meal in self.would],
             "already": self.already,
             "refused": self.refused,
             "duplicate": self.duplicate,
@@ -320,13 +372,13 @@ class Plan:
         }
 
 
-def _plan(strava: StravaCZ, meal_ids: list[int], *, ordered: bool) -> Plan:
+def _plan(strava: StravaCZ, meal_ids: list[str], *, ordered: bool) -> Plan:
     """Resolve *meal_ids* against the fetched menu without sending anything."""
     plan = Plan()
-    claimed: dict[tuple[_dt.date, MealType], int] = {}
+    claimed: dict[tuple[_dt.date, MealType], str] = {}
 
-    for meal_id in dict.fromkeys(int(i) for i in meal_ids):
-        meal = strava.menu.get_by_id(meal_id)
+    for meal_id in dict.fromkeys(meal_ids):
+        meal = strava.menu.get_by_key(meal_id)
         if meal is None:
             plan.refused.append({"id": meal_id, "reason": "not in the fetched menu"})
             continue

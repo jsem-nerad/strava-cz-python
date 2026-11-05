@@ -43,9 +43,11 @@ with StravaCZ("vase.jmeno", "VaseHeslo123", "3753") as strava:
 `with` blok se sám postará o odhlášení a uzavření spojení. Pokud ho nepoužijete,
 zavolejte na konci `strava.logout()` sami.
 
-> **ID jídla** je unikátní číslo jídla v rámci právě publikovaného jídelníčku
-> (v API pole `veta`). **Není trvale vázané na konkrétní jídlo** a mění se s každou
-> změnou jídelníčku, takže ho vždy berte z čerstvě načteného jídelníčku.
+> **ID jídla** (`meal.id`, v API pole `veta`) **platí jen v rámci jednoho přihlášení**:
+> jídelna čísluje jídelníček při každém přihlášení znovu, takže po novém přihlášení může
+> stejné číslo znamenat jiné jídlo v jiný den. Co má přežít přihlášení, ukládejte jako
+> `meal.key`, tedy den a místo v jídelníčku (`"2026-11-09:O2"`). `order_meals()` i
+> `cancel_meals()` berou obojí.
 
 ## Práce s jídelníčkem
 
@@ -67,6 +69,7 @@ objednane = strava.menu.get_meals(ordered=True)
 # Vyhledávání
 den = strava.menu.get_by_date("2026-09-07")
 jidlo = strava.menu.get_by_id(9)
+jidlo = strava.menu.get_by_key("2026-09-07:O2")
 print(strava.menu.is_ordered(9))
 
 # Iterace, len() a indexování fungují přímo na menu
@@ -82,7 +85,9 @@ nevaří; ty se přidají pomocí `include_no_school=True`.
 
 | atribut | typ | popis |
 |---|---|---|
-| `id` | `int` | Identifikátor pro objednávání (API pole `veta`) |
+| `id` | `int` | Identifikátor pro objednávání (API pole `veta`), platí jen v rámci jednoho přihlášení |
+| `key` | `str` | Den a místo v jídelníčku, například `"2026-09-07:O2"`; platí i po novém přihlášení |
+| `kind_code` | `str` | Kód místa v jídelníčku (API pole `druh`), například `"O2"` |
 | `date` | `datetime.date` | Den, kdy se jídlo vydává |
 | `type` | `MealType` | `SOUP`, `MAIN` nebo `UNKNOWN` |
 | `variant` | `str` | Označení, které jídlu dává jídelna, například `"Oběd 1"` |
@@ -208,24 +213,27 @@ strava-cz profile add skola --username vase.jmeno --canteen 3753
 
 strava-cz menu --week                  # jídelníček na tento týden
 strava-cz menu --orderable --type main # jen hlavní jídla, která jdou objednat
-strava-cz order 5 9                    # objednat
-strava-cz order 5 9 --dry-run          # jen říct, co by se stalo
-strava-cz cancel 5                     # zrušit
+strava-cz order 2026-09-21:O1 2026-09-25:O1   # objednat
+strava-cz order 2026-09-21:O1 --dry-run # jen říct, co by se stalo
+strava-cz cancel 2026-09-21:O1         # zrušit
 strava-cz ordered                      # co mám objednáno
 strava-cz balance                      # 512.50 Kč
 ```
 
 ```
 Mon 21.09.2026
-  ·   102  Polévka    Zeleninová            this item cannot be ordered separately
-  ○    37  Oběd 1     Bramborové knedlíky s kuřecím masem a špenátem          50 Kč
-  ○    38  Oběd 2     Bramborové špalíky sypané cibulkou, kysané zelí         50 Kč
+  ·  2026-09-21:PO  Polévka    Zeleninová    this item cannot be ordered separa…
+  ○  2026-09-21:O1  Oběd 1     Bramborové knedlíky s kuřecím masem a špe…  50 Kč
+  ○  2026-09-21:O2  Oběd 2     Bramborové špalíky sypané cibulkou, kysan…  50 Kč
 
 Fri 25.09.2026  not ordered automatically
-  ○    49  Oběd 1     Kuřecí asijská pánev, kari rýže, tvaroháček             50 Kč
+  ○  2026-09-25:O1  Oběd 1     Kuřecí asijská pánev, kari rýže, tvaroháč…  50 Kč
 
-5 days · 15 meals · 10 orderable · 0 ordered · balance 0.00 Kč
+2 days · 4 meals · 3 orderable · 0 ordered · balance 0.00 Kč
 ```
+
+Id jídla je den a místo v jídelníčku a platí i v dalších spuštěních. Holé číslo příkaz
+odmítne, protože jídelna čísluje jídelníček při každém přihlášení znovu.
 
 Barvy se zapínají jen na terminálu — v rouře, v souboru nebo v cronu se nevypisují,
 stejně jako když je nastavená proměnná `NO_COLOR`. Vynutit je jde přes `--color always`.
@@ -244,8 +252,8 @@ strava-cz --json ordered | jq '.total_price'
 ```json
 { "ok": false,
   "command": "order",
-  "error": { "type": "MealNotOrderableError", "meal_id": 85, "reason": "unavailable",
-             "message": "Cannot order meal 85: this item cannot be ordered separately" } }
+  "error": { "type": "MealNotOrderableError", "meal_id": "2026-09-21:PO", "reason": "unavailable",
+             "message": "Cannot order meal 2026-09-21:PO: this item cannot be ordered separately" } }
 ```
 
 **Návratové kódy** — aby se šlo v shellu rozhodnout, co se pokazilo:

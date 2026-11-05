@@ -17,7 +17,7 @@ import pytest
 from strava_cz.cli import EXIT, build_parser, main
 from strava_cz.cli.output import Output, parse_date
 
-from .conftest import BASE_URL, load, with_ordered
+from .conftest import BASE_URL, load, renumbered, veta_of, with_ordered
 
 
 @pytest.fixture
@@ -31,6 +31,11 @@ def cli(api, login_route, store_path: Path, monkeypatch):
         return_value=httpx.Response(200, json=load("menu_live"))
     )
     return api
+
+
+#: An orderable main and a soup in the recorded menu, by the id the command takes.
+MEAL = "2026-09-04:O1"
+SOUP = "2026-09-02:PO"
 
 
 def run(*argv: str) -> int:
@@ -98,8 +103,8 @@ class TestParser:
         for argv, key in (
             (["menu"], "menu"),
             (["ordered"], "ordered"),
-            (["order", "1"], "order"),
-            (["cancel", "1"], "cancel"),
+            (["order", "2026-09-07:O1"], "order"),
+            (["cancel", "2026-09-07:O1"], "cancel"),
             (["balance"], "balance"),
             (["account"], "account"),
             (["raw"], "raw"),
@@ -240,7 +245,7 @@ class TestOrdered:
         )
         assert run("--json", "ordered") == EXIT["ok"]
         data = out_json(capsys)
-        assert sorted(m["id"] for m in data["meals"]) == [5, 7]
+        assert sorted(m["id"] for m in data["meals"]) == ["2026-09-03:O1", "2026-09-04:O1"]
         assert data["count"] == 2
         assert data["total_price"] == pytest.approx(100.0)
 
@@ -267,48 +272,48 @@ class TestDryRun:
     def test_nothing_is_sent(self, cli, capsys, api):
         stage = api.post(f"{BASE_URL}/api/pridejJidloS5")
         save = api.post(f"{BASE_URL}/api/saveOrders")
-        assert run("order", "7", "--dry-run") == EXIT["ok"]
+        assert run("order", MEAL, "--dry-run") == EXIT["ok"]
         assert not stage.called and not save.called
         assert "nothing was sent" in capsys.readouterr().out
 
     def test_it_reports_what_would_change(self, cli, capsys):
-        run("--json", "order", "7", "--dry-run")
+        run("--json", "order", MEAL, "--dry-run")
         data = out_json(capsys)
         assert data["dry_run"] is True
-        assert data["would_change"] == [7]
+        assert data["would_change"] == [MEAL]
         assert data["balance_change"] == pytest.approx(-50.0)
 
     def test_a_refusal_is_reported_and_changes_the_exit_code(self, cli, capsys):
-        soup = 85  # this canteen's soups carry obj: "I"
-        assert run("--json", "order", str(soup), "--dry-run") == EXIT["meal"]
+        # this canteen's soups carry obj: "I"
+        assert run("--json", "order", SOUP, "--dry-run") == EXIT["meal"]
         data = out_json(capsys)
-        assert data["refused"][0]["id"] == soup
+        assert data["refused"][0]["id"] == SOUP
         assert "separately" in data["refused"][0]["reason"]
 
     def test_an_unknown_id_is_refused_not_crashed_on(self, cli, capsys):
-        assert run("--json", "order", "999999", "--dry-run") == EXIT["meal"]
+        assert run("--json", "order", "2030-01-01:O1", "--dry-run") == EXIT["meal"]
         assert out_json(capsys)["refused"][0]["reason"] == "not in the fetched menu"
 
     def test_two_meals_in_one_slot_are_reported_as_duplicates(self, cli, capsys):
-        # 9 and 10 are both mains on 2026-09-07, so only one of them can be ordered.
-        run("--json", "order", "9", "10", "--dry-run")
+        # Both are mains on 2026-09-07, so only one of them can be ordered.
+        run("--json", "order", "2026-09-07:O1", "2026-09-07:O2", "--dry-run")
         data = out_json(capsys)
-        assert data["would_change"] == [9]
-        assert data["duplicate"] == [{"id": 10, "competes_with": 9}]
+        assert data["would_change"] == ["2026-09-07:O1"]
+        assert data["duplicate"] == [{"id": "2026-09-07:O2", "competes_with": "2026-09-07:O1"}]
 
     def test_already_ordered_meals_are_listed_as_such(self, cli, capsys, api):
         api.post(f"{BASE_URL}/api/objednavky").mock(
             return_value=httpx.Response(200, json=with_ordered(load("menu_live"), 7))
         )
-        run("--json", "order", "7", "--dry-run")
+        run("--json", "order", MEAL, "--dry-run")
         data = out_json(capsys)
-        assert data["already"] == [7] and data["would_change"] == []
+        assert data["already"] == [MEAL] and data["would_change"] == []
 
     def test_cancel_dry_run_shows_a_refund(self, cli, capsys, api):
         api.post(f"{BASE_URL}/api/objednavky").mock(
             return_value=httpx.Response(200, json=with_ordered(load("menu_live"), 7))
         )
-        run("--json", "cancel", "7", "--dry-run")
+        run("--json", "cancel", MEAL, "--dry-run")
         assert out_json(capsys)["balance_change"] == pytest.approx(50.0)
 
 
@@ -331,27 +336,27 @@ class TestOrdering:
         return api
 
     def test_ordering_reports_the_change_and_the_new_balance(self, writable, capsys):
-        assert run("order", "7") == EXIT["ok"]
+        assert run("order", MEAL) == EXIT["ok"]
         text = capsys.readouterr().out
-        assert "ordered 1: 7" in text
+        assert f"ordered 1: {MEAL}" in text
         assert "450.00" in text
 
     def test_ordering_json(self, writable, capsys):
-        run("--json", "order", "7")
+        run("--json", "order", MEAL)
         data = out_json(capsys)
         assert data["ok"] is True
-        assert data["changed"] == [7]
+        assert data["changed"] == [MEAL]
         assert data["account"]["balance"] == pytest.approx(450.0)
 
     def test_a_refused_meal_exits_four(self, cli, capsys):
-        assert run("order", "85") == EXIT["meal"]
+        assert run("order", SOUP) == EXIT["meal"]
         assert "error:" in capsys.readouterr().err
 
     def test_a_refused_meal_in_json_goes_to_stdout_with_a_reason(self, cli, capsys):
-        assert run("--json", "order", "85") == EXIT["meal"]
+        assert run("--json", "order", SOUP) == EXIT["meal"]
         error = out_json(capsys)["error"]
         assert error["type"] == "MealNotOrderableError"
-        assert error["meal_id"] == 85
+        assert error["meal_id"] == SOUP
         assert error["reason"] == "unavailable"
 
     def test_insufficient_balance_exits_five(self, cli, capsys, api):
@@ -361,19 +366,168 @@ class TestOrdering:
         api.post(f"{BASE_URL}/api/nactiVlastnostiPA").mock(
             return_value=httpx.Response(200, json={"konto": "0.00"})
         )
-        assert run("--json", "order", "7") == EXIT["balance"]
+        assert run("--json", "order", MEAL) == EXIT["balance"]
         assert out_json(capsys)["error"]["type"] == "InsufficientBalanceError"
 
     def test_continue_on_error_reports_instead_of_raising(self, writable, capsys):
-        assert run("--json", "order", "7", "85", "--continue-on-error") == EXIT["meal"]
+        assert run("--json", "order", MEAL, SOUP, "--continue-on-error") == EXIT["meal"]
         data = out_json(capsys)
-        assert data["changed"] == [7]
-        assert data["failed"][0]["id"] == 85
+        assert data["changed"] == [MEAL]
+        assert data["failed"][0]["id"] == SOUP
         assert data["failed"][0]["error"] == "MealNotOrderableError"
 
     def test_strict_duplicates_is_wired_up(self, cli, capsys):
-        assert run("order", "9", "10", "--strict-duplicates") == EXIT["meal"]
+        assert run("order", "2026-09-07:O1", "2026-09-07:O2", "--strict-duplicates") == EXIT["meal"]
         assert "same kind on one day" in capsys.readouterr().err
+
+
+class TestIdsAcrossLogins:
+    """Every run of the command is a new login, and each login numbers the menu afresh.
+
+    On 2026-11-05 `order 10 18` was refused with a soup's and a past day's restriction
+    seconds after a dry run had shown both correctly. That was the lucky direction: in
+    the opposite one, a number read from `menu` was an orderable meal on another day,
+    and it would have been ordered with exit 0.
+    """
+
+    MONDAY_O2 = "2026-09-07:O2"
+    SHIFTS = (0, 1, 21, 40)
+
+    def login_sees(self, api, shift, *ordered):
+        """The menu this login gets, and the id it gives Monday's Oběd 2."""
+        payload = renumbered(with_ordered(load("menu_live"), *ordered), shift)
+        api.post(f"{BASE_URL}/api/objednavky").mock(return_value=httpx.Response(200, json=payload))
+        return veta_of(payload, "07.09.2026", "O2")
+
+    @pytest.mark.parametrize("value", ["10", "31", " 7 "])
+    def test_a_bare_number_is_refused_before_logging_in(self, cli, login_route, capsys, value):
+        assert run("order", value) == EXIT["usage"]
+        assert "changes at every login" in capsys.readouterr().err
+        assert not login_route.called
+
+    def test_cancel_refuses_a_bare_number_too(self, cli, login_route, capsys):
+        assert run("cancel", "10") == EXIT["usage"]
+        assert not login_route.called
+
+    def test_a_dry_run_refuses_a_bare_number_too(self, cli, login_route, capsys):
+        assert run("order", "10", "--dry-run") == EXIT["usage"]
+        assert not login_route.called
+
+    def test_one_bare_number_stops_the_whole_batch(self, cli, login_route, capsys):
+        assert run("order", self.MONDAY_O2, "10", "--continue-on-error") == EXIT["usage"]
+        assert not login_route.called
+
+    def test_a_refused_number_comes_back_as_json_in_json_mode(self, cli, capsys):
+        """A script still holding numbers has to get something it can branch on."""
+        assert run("--json", "order", "10") == EXIT["usage"]
+        data = out_json(capsys)
+        assert data["ok"] is False
+        assert data["error"]["type"] == "MealIdError"
+        assert data["error"]["meal_id"] == "10"
+
+    @pytest.mark.parametrize("value", ["nonsense", "2026-09-07", "2026-13-40:O1", ":O1"])
+    def test_a_malformed_id_is_a_usage_error(self, cli, capsys, value):
+        assert run("order", value) == EXIT["usage"]
+        assert "not a meal id" in capsys.readouterr().err
+
+    def test_a_shared_key_says_why_when_ordering(self, cli, api, capsys):
+        payload = load("menu_live")
+        rows = [r for t in payload.values() if isinstance(t, list) for r in t]
+        other = next(r for r in rows if r["datum"] == "07.09.2026" and r["druh"] == "O2")
+        other["druh"] = "O1"
+        api.post(f"{BASE_URL}/api/objednavky").mock(return_value=httpx.Response(200, json=payload))
+        assert run("order", "2026-09-07:O1", "--dry-run") == EXIT["meal"]
+        assert "2026-09-07:O1" in capsys.readouterr().err
+
+    def test_a_json_dry_run_names_the_dish_it_would_order(self, cli, capsys):
+        """A slot can be republished with another dish, so the name has to be checkable."""
+        run("--json", "order", self.MONDAY_O2, "--dry-run")
+        meals = out_json(capsys)["meals"]
+        assert [meal["id"] for meal in meals] == [self.MONDAY_O2]
+        assert meals[0]["name"]
+
+    def test_lower_case_is_accepted(self, cli, capsys):
+        run("--json", "order", "2026-09-07:o2", "--dry-run")
+        assert out_json(capsys)["would_change"] == [self.MONDAY_O2]
+
+    def test_the_menu_prints_the_id_the_order_command_takes(self, cli, capsys):
+        run("menu", "--from", "2026-09-07", "--to", "2026-09-07")
+        assert self.MONDAY_O2 in capsys.readouterr().out
+
+    def test_the_json_id_is_the_stable_one(self, cli, capsys):
+        run("--json", "menu", "--from", "2026-09-07", "--to", "2026-09-07")
+        day = out_json(capsys)["days"][0]
+        assert self.MONDAY_O2 in [meal["id"] for meal in day["meals"]]
+
+    def test_an_id_from_one_login_means_the_same_meal_in_the_next(self, cli, api, capsys):
+        self.login_sees(api, 0)
+        run("--json", "menu", "--from", "2026-09-07", "--to", "2026-09-07")
+        meals = out_json(capsys)["days"][0]["meals"]
+        chosen = next(meal for meal in meals if meal["variant"] == "Oběd 2")
+
+        self.login_sees(api, 21)
+        run("--json", "order", chosen["id"], "--dry-run")
+        assert out_json(capsys)["would_change"] == [chosen["id"]]
+
+    @pytest.mark.parametrize("shift", SHIFTS)
+    def test_the_write_sends_the_number_this_login_uses(self, cli, api, capsys, shift):
+        veta = self.login_sees(api, shift)
+        stage = api.post(f"{BASE_URL}/api/pridejJidloS5").mock(
+            return_value=httpx.Response(200, json={"konto": "450.00"})
+        )
+        api.post(f"{BASE_URL}/api/saveOrders").mock(
+            return_value=httpx.Response(200, json={"konto": "450.00"})
+        )
+        payload = renumbered(load("menu_live"), shift)
+        api.post(f"{BASE_URL}/api/objednavky").mock(
+            side_effect=[
+                httpx.Response(200, json=payload),
+                httpx.Response(200, json=with_ordered(payload, veta)),
+            ]
+        )
+
+        assert run("--json", "order", self.MONDAY_O2) == EXIT["ok"]
+        assert out_json(capsys)["changed"] == [self.MONDAY_O2]
+        assert json.loads(stage.calls.last.request.read())["veta"] == str(veta)
+
+    @pytest.mark.parametrize("shift", SHIFTS)
+    def test_a_batch_works_in_every_numbering(self, cli, api, capsys, shift):
+        """The call that failed on 2026-11-05, on every layout."""
+        self.login_sees(api, shift)
+        assert (
+            run(
+                "--json",
+                "order",
+                self.MONDAY_O2,
+                "2026-09-09:O2",
+                "--dry-run",
+                "--continue-on-error",
+            )
+            == EXIT["ok"]
+        )
+        data = out_json(capsys)
+        assert data["would_change"] == [self.MONDAY_O2, "2026-09-09:O2"]
+        assert data["refused"] == []
+
+    @pytest.mark.parametrize("shift", SHIFTS)
+    def test_a_meal_already_ordered_is_recognised_in_every_numbering(self, cli, api, capsys, shift):
+        stage = api.post(f"{BASE_URL}/api/pridejJidloS5")
+        self.login_sees(api, shift, 10)
+        assert run("--json", "order", self.MONDAY_O2) == EXIT["ok"]
+        assert out_json(capsys)["unchanged"] == [self.MONDAY_O2]
+        assert not stage.called
+
+    def test_a_narrow_terminal_keeps_the_id_and_the_price_whole(self, cli, capsys, monkeypatch):
+        monkeypatch.setenv("COLUMNS", "48")
+        run("menu", "--from", "2026-09-07", "--to", "2026-09-07")
+        line = next(ln for ln in capsys.readouterr().out.splitlines() if self.MONDAY_O2 in ln)
+        assert "50 Kč" in line
+
+    def test_a_listing_keeps_the_id_and_the_price_whole_too(self, cli, capsys, monkeypatch):
+        monkeypatch.setenv("COLUMNS", "48")
+        run("order", self.MONDAY_O2, "--dry-run")
+        line = next(ln for ln in capsys.readouterr().out.splitlines() if self.MONDAY_O2 in ln)
+        assert "50 Kč" in line
 
 
 class TestAuth:

@@ -16,7 +16,7 @@ from strava_cz import (
     StravaAPIError,
 )
 
-from .conftest import BASE_URL, load, with_ordered
+from .conftest import BASE_URL, load, renumbered, veta_of, with_ordered
 
 
 @pytest.fixture
@@ -94,6 +94,183 @@ class TestOrdering:
         assert result.unchanged == (9,)
         assert result.changed == ()
         assert not stage.called and not save.called
+
+
+class TestKeys:
+    """A meal named by its day and slot, the name that survives logging in again."""
+
+    def test_a_key_is_the_day_and_the_slot(self, menu):
+        assert menu.menu.get_by_id(10).key == "2026-09-07:O2"
+        assert menu.menu.get_by_key("2026-09-07:O2").id == 10
+
+    def test_a_key_is_forgiving_about_case_and_whitespace(self, menu):
+        assert menu.menu.get_by_key(" 2026-09-07:o2 ").id == 10
+
+    def test_an_unknown_key_finds_nothing(self, menu):
+        assert menu.menu.get_by_key("2030-01-01:O1") is None
+
+    def test_a_key_two_meals_share_finds_neither(self, api, strava, menu_payload):
+        """A canteen could repeat a slot on one day; guessing could order the wrong one."""
+        import copy
+
+        payload = copy.deepcopy(menu_payload)
+        rows = [r for t in payload.values() if isinstance(t, list) for r in t]
+        other = next(r for r in rows if r["datum"] == "07.09.2026" and r["druh"] == "O2")
+        other["druh"] = "O1"
+        api.post(f"{BASE_URL}/api/objednavky").mock(return_value=httpx.Response(200, json=payload))
+        strava.menu.fetch()
+        assert strava.menu.get_by_key("2026-09-07:O1") is None
+
+    def test_ordering_by_key_stages_this_logins_number(self, canteen):
+        canteen.after(10)
+        result = canteen.strava.menu.order_meals("2026-09-07:O2")
+        assert result.changed == ("2026-09-07:O2",)
+        assert canteen.staged() == [(10, "1")]
+
+    def test_an_id_and_a_key_can_be_mixed(self, canteen):
+        canteen.after(9, 14)
+        result = canteen.strava.menu.order_meals(9, "2026-09-08:O2")
+        assert set(result.changed) == {9, "2026-09-08:O2"}
+
+    def test_an_unknown_key_is_reported(self, canteen):
+        with pytest.raises(MealNotFoundError, match="2030-01-01:O1"):
+            canteen.strava.menu.order_meals("2030-01-01:O1")
+        assert not canteen.stage.called
+
+    def test_a_refusal_names_the_meal_the_way_the_caller_did(self, canteen):
+        with pytest.raises(MealNotOrderableError, match="2026-09-02:PO"):
+            canteen.strava.menu.order_meals("2026-09-02:PO")
+
+    def test_is_ordered_takes_a_key_too(self, canteen):
+        assert canteen.strava.menu.is_ordered("2026-09-07:O2") is False
+
+    def test_a_number_in_a_string_is_still_an_id(self, canteen):
+        canteen.after(10)
+        assert canteen.strava.menu.order_meals("10").changed == (10,)
+        assert canteen.staged() == [(10, "1")]
+
+    def test_one_meal_named_two_ways_is_one_meal(self, canteen):
+        canteen.after(10)
+        result = canteen.strava.menu.order_meals(10, "2026-09-07:O2", "2026-09-07:o2", "10")
+        assert result.changed == (10,) and result.skipped == ()
+        assert canteen.staged() == [(10, "1")]
+
+    def test_naming_a_meal_two_ways_is_not_a_duplicate_in_strict_mode(self, canteen):
+        canteen.after(10)
+        result = canteen.strava.menu.order_meals(10, "2026-09-07:O2", strict_duplicates=True)
+        assert result.changed == (10,)
+
+    def test_cancelling_one_meal_named_two_ways_sends_one_request(self, api, strava, menu_payload):
+        route = api.post(f"{BASE_URL}/api/objednavky").mock(
+            return_value=httpx.Response(200, json=with_ordered(menu_payload, 10))
+        )
+        stage = api.post(f"{BASE_URL}/api/pridejJidloS5").mock(
+            return_value=httpx.Response(200, json={})
+        )
+        api.post(f"{BASE_URL}/api/saveOrders").mock(return_value=httpx.Response(200, json={}))
+        strava.menu.fetch()
+        route.mock(return_value=httpx.Response(200, json=menu_payload))
+        assert strava.menu.cancel_meals(10, "2026-09-07:O2").changed == (10,)
+        assert len(stage.calls) == 1
+
+    def test_in_agrees_with_ordering_on_every_way_of_naming_a_meal(self, menu):
+        for ref in (10, "10", " 10 ", "2026-09-07:O2", "2026-09-07:o2"):
+            assert ref in menu.menu
+        for ref in (999999, "999999", "2030-01-01:O1", "nonsense", 1.5, None):
+            assert ref not in menu.menu
+
+    def test_a_shared_key_is_reported_when_the_menu_loads(self, api, strava, menu_payload):
+        import copy
+
+        payload = copy.deepcopy(menu_payload)
+        rows = [r for t in payload.values() if isinstance(t, list) for r in t]
+        other = next(r for r in rows if r["datum"] == "07.09.2026" and r["druh"] == "O2")
+        other["druh"] = "O1"
+        api.post(f"{BASE_URL}/api/objednavky").mock(return_value=httpx.Response(200, json=payload))
+        strava.menu.fetch()
+        assert any("2026-09-07:O1" in str(warning) for warning in strava.menu.parse_warnings)
+
+    def test_a_meal_with_no_slot_code_is_reported_and_has_no_key_to_order_by(
+        self, api, strava, menu_payload
+    ):
+        import copy
+
+        payload = copy.deepcopy(menu_payload)
+        rows = [r for t in payload.values() if isinstance(t, list) for r in t]
+        row = next(r for r in rows if r["datum"] == "07.09.2026" and r["druh"] == "O2")
+        row["druh"] = ""
+        api.post(f"{BASE_URL}/api/objednavky").mock(return_value=httpx.Response(200, json=payload))
+        strava.menu.fetch()
+        assert strava.menu.get_by_key("2026-09-07:") is None
+        assert any("2026-09-07:" in str(warning) for warning in strava.menu.parse_warnings)
+
+
+class TestConfirmingAgainstARenumberedMenu:
+    """The check after a write must not read the answer off whichever row has that number."""
+
+    #: Moves every id, and hands Monday's Oběd 2's old number to Tuesday's Oběd 1.
+    SHIFT = -3
+
+    @staticmethod
+    def rows(payload):
+        return [r for t in payload.values() if isinstance(t, list) for r in t]
+
+    def impostor(self, payload, number):
+        """The row now holding *number*, checked to be a real meal on another day."""
+        row = next(r for r in self.rows(payload) if int(r["veta"]) == number)
+        assert (row["datum"], row["druh"]) == ("08.09.2026", "O1")
+        assert row["nazev"] and row["nazev"] != row["druh_popis"]
+        return row
+
+    def test_an_order_that_landed_is_not_reported_as_failed(self, canteen):
+        wanted = veta_of(canteen.payload, "07.09.2026", "O2")
+        shifted = renumbered(with_ordered(canteen.payload, wanted), self.SHIFT)
+        self.impostor(shifted, wanted)
+        canteen.menu_route.mock(return_value=httpx.Response(200, json=shifted))
+        assert canteen.strava.menu.order_meals(wanted).changed == (wanted,)
+
+    def test_an_order_that_did_not_land_is_not_reported_as_done(self, canteen):
+        """The meal's old number now means another meal, already ordered. It proves nothing."""
+        wanted = veta_of(canteen.payload, "07.09.2026", "O2")
+        shifted = renumbered(canteen.payload, self.SHIFT)
+        self.impostor(shifted, wanted)["pocet"] = 1
+        canteen.menu_route.mock(return_value=httpx.Response(200, json=shifted))
+        with pytest.raises(StravaAPIError, match="still not ordered"):
+            canteen.strava.menu.order_meals(wanted)
+
+    def test_a_slot_that_vanished_is_not_vouched_for_by_whatever_has_its_number(self, canteen):
+        """The slot is gone from the fresh menu and its old number is another, ordered meal."""
+        wanted = veta_of(canteen.payload, "07.09.2026", "O2")
+        shifted = renumbered(canteen.payload, self.SHIFT)
+        slot = next(
+            r for r in self.rows(shifted) if r["datum"] == "07.09.2026" and r["druh"] == "O2"
+        )
+        slot["nazev"] = ""  # the canteen unpublished it
+        self.impostor(shifted, wanted)["pocet"] = 1
+        canteen.menu_route.mock(return_value=httpx.Response(200, json=shifted))
+        with pytest.raises(StravaAPIError, match="still not ordered"):
+            canteen.strava.menu.order_meals(wanted)
+
+    def test_a_meal_whose_key_is_shared_is_still_confirmed_by_its_number(
+        self, api, strava, menu_payload
+    ):
+        """With no usable key the number is all there is, while it's still the same slot."""
+        import copy
+
+        payload = copy.deepcopy(menu_payload)
+        row = next(
+            r for r in self.rows(payload) if r["datum"] == "07.09.2026" and r["druh"] == "O2"
+        )
+        wanted = int(row["veta"])
+        row["druh"] = "O1"
+        route = api.post(f"{BASE_URL}/api/objednavky").mock(
+            return_value=httpx.Response(200, json=payload)
+        )
+        api.post(f"{BASE_URL}/api/pridejJidloS5").mock(return_value=httpx.Response(200, json={}))
+        api.post(f"{BASE_URL}/api/saveOrders").mock(return_value=httpx.Response(200, json={}))
+        strava.menu.fetch()
+        route.mock(return_value=httpx.Response(200, json=with_ordered(payload, wanted)))
+        assert strava.menu.order_meals(wanted).changed == (wanted,)
 
 
 class TestNothingToDo:

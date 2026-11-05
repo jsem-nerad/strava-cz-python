@@ -31,6 +31,14 @@ MARK_BLOCKED = "·"  # middle dot
 #: Never squeeze a meal name below this, however narrow the terminal.
 NAME_MIN = 12
 
+#: How wide a meal id usually is: ``2026-11-09:O2``.
+ID_WIDTH = 13
+
+#: The table's narrowest layout: the fixed columns (31), NAME_MIN of the name, a gap of 2,
+#: and 12 for a price or the start of a reason. A narrower terminal wraps rather than
+#: cutting a price down to ``50…``.
+MIN_WIDTH = 57
+
 
 class Palette:
     """ANSI codes, or empty strings when colour is off.
@@ -92,9 +100,13 @@ def meal_to_json(meal: Meal, currency: str = "") -> dict[str, Any]:
 
     Enums become their lower-case names rather than the canteen's raw letters, so a
     consumer reads ``"closed"`` instead of having to know that ``"C"`` means that.
+
+    ``id`` is the one name that differs: it carries :attr:`Meal.key`, not :attr:`Meal.id`.
+    Whatever reads this passes the id back to a later run, and that run is a new login,
+    where the canteen's own number can be another meal.
     """
     data: dict[str, Any] = {
-        "id": meal.id,
+        "id": meal.key,
         "date": meal.date.isoformat(),
         "type": meal.type.value,
         "variant": meal.variant,
@@ -202,7 +214,7 @@ class Output:
     def width(self) -> int:
         """Usable terminal width, clamped so a very narrow window still lines up."""
         try:
-            return max(48, min(shutil.get_terminal_size((80, 24)).columns, 160))
+            return max(MIN_WIDTH, min(shutil.get_terminal_size((80, 24)).columns, 160))
         except OSError:  # pragma: no cover - only on very odd terminals
             return 80
 
@@ -265,7 +277,7 @@ class Output:
                 self.line(self._meal_line(meal, currency))
                 if show_allergens and meal.allergens:
                     allergens = ", ".join(str(a) for a in meal.allergens)
-                    self.line(self.c.dim(f"{'':>13}{allergens}"))
+                    self.line(self.c.dim(f"{'':>{ID_WIDTH + 7}}{allergens}"))
             if not day.meals:
                 self.line(self.c.dim(f"{'':>4}(nothing published)"))
 
@@ -295,15 +307,15 @@ class Output:
             else (f"{meal.price:g} {currency}".strip() if meal.price else "")
         )
 
-        # Widths: 2 indent + mark + 2 + id(4) + 2 + variant(10) + 1 + name + trailer.
+        # Widths: 2 indent + mark + 2 + id + 2 + variant(10) + 1 + name + trailer.
         # The name keeps at least NAME_MIN characters; a long restriction is clipped
         # rather than pushing the line past the terminal.
-        fixed = 2 + 1 + 2 + 4 + 2 + 10 + 1
+        fixed = 2 + 1 + 2 + ID_WIDTH + 2 + 10 + 1
         trailer = _clip(trailer, max(0, self.width - fixed - NAME_MIN - 2))
         room = max(1, self.width - fixed - len(trailer) - 2)
         name = _clip(meal.name, room)
 
-        left = f"  {mark}  {meal.id:>4}  {_clip(meal.variant, 10):<10} {name}"
+        left = f"  {mark}  {meal.key:<{ID_WIDTH}}  {_clip(meal.variant, 10):<10} {name}"
         if not trailer:
             return left
         padding = max(1, self.width - _visible_len(left) - len(trailer))
@@ -335,7 +347,7 @@ class Output:
             return
         for meal in rows:
             price = f"{meal.price:g} {currency}".strip() if meal.price else ""
-            left = f"  {meal.id:>4}  {meal.date:%a %d.%m.}  {_clip(meal.variant, 10):<10} "
+            left = f"  {meal.key:<{ID_WIDTH}}  {meal.date:%a}  {_clip(meal.variant, 10):<10} "
             room = max(NAME_MIN, self.width - len(left) - len(price) - 2)
             left += _clip(meal.name, room)
             if not price:
