@@ -43,11 +43,11 @@ with StravaCZ("vase.jmeno", "VaseHeslo123", "3753") as strava:
 `with` blok se sám postará o odhlášení a uzavření spojení. Pokud ho nepoužijete,
 zavolejte na konci `strava.logout()` sami.
 
-> **ID jídla** (`meal.id`, v API pole `veta`) **platí jen v rámci jednoho přihlášení**:
-> jídelna čísluje jídelníček při každém přihlášení znovu, takže po novém přihlášení může
-> stejné číslo znamenat jiné jídlo v jiný den. Co má přežít přihlášení, ukládejte jako
-> `meal.key`, tedy den a místo v jídelníčku (`"2026-11-09:O2"`). `order_meals()` i
-> `cancel_meals()` berou obojí.
+> **ID jídla** (`meal.id`, v API pole `veta`) **platí jen do dalšího přečíslování**:
+> jídelna čísluje jídelníček znovu při každém přihlášení a při každém resetu session, který
+> proběhne i při vracení neúspěšné objednávky. Stejné číslo pak může znamenat jiné jídlo v
+> jiný den. Co má přežít jedno načtení, ukládejte jako `meal.key`, tedy den a místo v
+> jídelníčku (`"2026-11-09:O2"`). `order_meals()` i `cancel_meals()` berou obojí.
 
 ## Práce s jídelníčkem
 
@@ -85,7 +85,7 @@ nevaří; ty se přidají pomocí `include_no_school=True`.
 
 | atribut | typ | popis |
 |---|---|---|
-| `id` | `int` | Identifikátor pro objednávání (API pole `veta`), platí jen v rámci jednoho přihlášení |
+| `id` | `int` | Identifikátor pro objednávání (API pole `veta`), platí jen do dalšího přihlášení nebo resetu session |
 | `key` | `str` | Den a místo v jídelníčku, například `"2026-09-07:O2"`; platí i po novém přihlášení |
 | `kind_code` | `str` | Kód místa v jídelníčku (API pole `druh`), například `"O2"` |
 | `date` | `datetime.date` | Den, kdy se jídlo vydává |
@@ -180,9 +180,14 @@ strava.menu.cancel_meals(5, 9)
 ```
 
 Obě metody proběhnou jako **jedna transakce**: nejdřív se zaškrtnou všechna jídla,
-pak se změny uloží najednou a nakonec se výsledek ověří na čerstvě načteném
-jídelníčku. Když cokoliv selže, změny se zahodí a nic se neuloží. Pokud není co
-měnit, neodešle se žádný požadavek.
+pak se změny uloží najednou a nakonec se výsledek ověří na znovu načteném jídelníčku.
+Když selže zaškrtnutí, změny se zahodí a nic se neuloží. Pokud není co měnit, neodešle se
+žádný požadavek.
+
+Když selže samotné uložení, knihovna se podívá, co se stalo: když se změna uložila, je to
+úspěch, když ne, chyba říká „Nothing was saved“. **Když to zjistit nejde, přijde
+`OrderNotConfirmedError`, která neznamená, že se nic nestalo.** Nese `.changed` a
+`.unconfirmed`, a před dalším pokusem je potřeba se podívat do jídelníčku.
 
 **Parametry**
 
@@ -191,6 +196,10 @@ měnit, neodešle se žádný požadavek.
 - `strict_duplicates=True` — vyhodí `DuplicateMealError`, když se dvě zvolená jídla
   perou o stejné místo (stejný den, stejný typ). Ve výchozím stavu se objedná
   první z nich a u ostatních se jen vypíše varování.
+- `verify_saved=True` — ověří výsledek proti záznamům jídelny. Bez něj se čte kopie
+  objednávek v tomhle přihlášení, ve které je zaškrtnuté jídlo vidět už před uložením, takže
+  se nepozná uložení, které nic neudělalo. Stojí jeden požadavek a přečísluje jídelníček,
+  takže čísla přečtená předtím přestanou platit do dalšího `fetch()`; klíče platí dál.
 
 ```python
 vysledek = strava.menu.order_meals(5, 85, 999, continue_on_error=True)
@@ -268,8 +277,19 @@ strava-cz --json ordered | jq '.total_price'
 | 5 | Nedostatečný zůstatek |
 | 6 | Problém s profilem nebo klíčenkou |
 
+S `--continue-on-error` kód říká to nejhorší, co se stalo: 5, když na nějaké jídlo nebyly
+peníze, jinak 1, když u některého selhala jídelna nebo síť, jinak 4.
+
+Kód 1 u `order` a `cancel` neznamená vždycky, že se nic nestalo. Když jídelna uložení
+přijala, ale nejde ho potvrdit, hlášení to řekne a s `--json` jsou jídla v `error.unconfirmed`
+a `error.changed`. **Před dalším pokusem se podívejte přes `strava-cz ordered`.**
+
 `--dry-run` u `order` a `cancel` **neodešle vůbec nic** — jen spočítá, co by se změnilo,
 včetně jídel, která už jsou objednaná, a dvou jídel, která by soupeřila o stejné místo.
+Počítá se zadanými přepínači, takže bez `--continue-on-error` jedno odmítnuté jídlo zastaví
+celou dávku a `would_change` je prázdné. Nezná jen limit účtu: když by zůstatek klesl pod
+nulu, přijde varování a pole `balance_after`, protože jídelna může objednávku odmítnout, a
+to i na účtu placeném fakturou, ale kód zůstává 0.
 
 Úplný seznam přepínačů vypíše `strava-cz --help` a `strava-cz menu --help`.
 
@@ -359,6 +379,7 @@ Všechny výjimky knihovny dědí ze `StravaError`, takže je lze odchytit najed
 | `AuthenticationError` | Přihlášení selhalo nebo session vypršela |
 | `NotLoggedInError` | Volání, které vyžaduje přihlášení, ale uživatel přihlášený není |
 | `InsufficientBalanceError` | Na účtu není dost peněz |
+| `OrderNotConfirmedError` | Změna možná proběhla, ale nejde ji potvrdit; nese `.changed` a `.unconfirmed` |
 | `MealNotFoundError` | ID jídla není v načteném jídelníčku |
 | `MealNotOrderableError` | Jídelna objednávku či zrušení nedovolí; nese `.reason` |
 | `DuplicateMealError` | Dvě jídla soupeří o stejné místo a je zapnuté `strict_duplicates` |
