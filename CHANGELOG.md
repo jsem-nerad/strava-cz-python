@@ -28,6 +28,15 @@ Knihovna zůstává zpětně kompatibilní.
   `order_meals()` v tomtéž přihlášení je poslalo dál. Reset teď vždycky znovu načte
   jídelníček, a když se to nepovede, jídelníček se zahodí. Číslo přečtené před resetem se
   odmítne s `MenuNotFetchedError`, dokud nezavoláte `fetch()`; klíč funguje dál.
+- **Selhání při zápisu už nelže o tom, co je na účtu.** Vypršený čas u `saveOrders` nic
+  neříká o tom, jestli se uložení povedlo, a knihovna přesto hlásila jen „timed out“, i když
+  objednávka na účtu byla. Timeout při kontrole po úspěšném uložení vypadal jako neúspěšná
+  objednávka. Teď se po neúspěšném uložení přečte stav znovu: když se změna uložila, je to
+  úspěch, když ne, chyba říká „Nothing was saved“. Když to zjistit nejde, přijde nová
+  výjimka `OrderNotConfirmedError` s atributy `changed` a `unconfirmed`, a příkaz skončí
+  kódem 1 a napíše, co je nepotvrzené, s `--json` i v polích `error.unconfirmed` a
+  `error.changed`. S `--continue-on-error` se jídlo, u kterého se ztratila odpověď na
+  zaškrtnutí a které se přesto uložilo, hlásí jako změněné, ne jako selhané.
 - Když reset selže, udělá se dodatečně před dalším `fetch()`. Jinak by se zaškrtnuté a
   neuložené jídlo tvářilo jako objednané a další uložení by ho opravdu objednalo.
 

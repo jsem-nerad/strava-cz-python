@@ -17,6 +17,7 @@ __all__ = [
     "MealNotOrderableError",
     "MenuNotFetchedError",
     "NotLoggedInError",
+    "OrderNotConfirmedError",
     "ProfileError",
     "ProfileNotFoundError",
     "StravaAPIError",
@@ -74,6 +75,30 @@ class NotLoggedInError(AuthenticationError):
 
 class InsufficientBalanceError(StravaAPIError):
     """The account does not hold enough money to order this meal."""
+
+
+class OrderNotConfirmedError(StravaAPIError):
+    """A change may be on the account, or was accepted and isn't, and which one matters.
+
+    Raised when a save's answer was lost and the menu couldn't be read back, when the save
+    went through and the menu couldn't be read back, or when the canteen accepted a change
+    the menu doesn't show. Don't assume the order failed: look at the menu first.
+
+    Attributes:
+        changed: Meals confirmed as changed, named the way the caller named them.
+        unconfirmed: Meals whose state isn't known, or isn't what was asked for.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        changed: tuple[int | str, ...] = (),
+        unconfirmed: tuple[int | str, ...] = (),
+    ) -> None:
+        super().__init__(message)
+        self.changed = changed
+        self.unconfirmed = unconfirmed
 
 
 class MealNotFoundError(StravaError):
