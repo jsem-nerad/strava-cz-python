@@ -425,3 +425,41 @@ class TestADryRunPredictsTheRealCall:
     def test_an_order_on_an_empty_day_costs_the_price(self, cli_canteen, capsys):
         main(["--json", "order", A, "--dry-run"])
         assert json.loads(capsys.readouterr().out)["balance_change"] == -50
+
+
+class TestAMealAlreadyOrderedAndItsAlternative:
+    """Asked for both, the canteen could only keep one, so what's there already stays."""
+
+    BOTH = (("2026-09-07:O1", A), (A, "2026-09-07:O1"))
+
+    @pytest.fixture(autouse=True)
+    def monday_has_lunch_1(self, canteen):
+        canteen.saved[("07.09.2026", "O1")] = 1
+        canteen.table[("07.09.2026", "O1")] = 1
+
+    @pytest.mark.parametrize("meals", BOTH)
+    def test_nothing_is_swapped(self, strava, canteen, meals, recwarn):
+        result = strava.menu.order_meals(*meals)
+        assert result.changed == ()
+        assert result.unchanged == ("2026-09-07:O1",)
+        assert [ref for ref, _ in result.skipped] == [A]
+        assert not canteen.routes["pridejJidloS5"].called
+        assert canteen.saved_keys() == {"2026-09-07:O1"}
+
+    @pytest.mark.parametrize("meals", BOTH)
+    def test_strict_mode_refuses_it(self, strava, canteen, meals):
+        with pytest.raises(sc.DuplicateMealError):
+            strava.menu.order_meals(*meals, strict_duplicates=True)
+
+    @pytest.mark.parametrize("meals", BOTH)
+    def test_a_dry_run_says_the_same(self, cli_canteen, capsys, meals, recwarn):
+        assert main(["--json", "order", *meals, "--dry-run"]) == EXIT["ok"]
+        body = json.loads(capsys.readouterr().out)
+        assert body["would_change"] == []
+        assert body["already"] == ["2026-09-07:O1"]
+        assert [item["id"] for item in body["duplicate"]] == [A]
+
+    def test_cancelling_both_is_not_a_duplicate(self, strava, canteen):
+        result = strava.menu.cancel_meals(*self.BOTH[0])
+        assert result.changed == ("2026-09-07:O1",)
+        assert result.unchanged == (A,)

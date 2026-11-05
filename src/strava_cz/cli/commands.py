@@ -416,6 +416,12 @@ def _plan(
     plan = Plan()
     claimed: dict[tuple[_dt.date, MealType], str] = {}
 
+    if ordered:  # a requested meal that is already ordered holds its slot, as in the real call
+        for meal_id in meal_ids:
+            meal = strava.menu.get_by_key(meal_id)
+            if meal is not None and meal.ordered:
+                claimed[(meal.date, meal.type)] = meal_id
+
     for meal_id in dict.fromkeys(meal_ids):
         meal = strava.menu.get_by_key(meal_id)
         if meal is None:

@@ -51,6 +51,9 @@ Knihovna zůstává zpětně kompatibilní.
   v takovém případě prázdné, zadržená jídla jsou v novém poli `blocked` a návratový kód
   sedí. V JSONu bylo `ok: true` i u odmítnutého jídla s kódem 4. `balance_change` u výměny
   jídla počítá rozdíl cen, ne celou cenu nového jídla.
+- `order` s objednaným jídlem a jeho alternativou na stejný den jídlo vyměnil a přitom
+  o tom objednaném hlásil „already ordered“, což už po běhu neplatilo. Objednané jídlo teď
+  své místo drží, alternativa se přeskočí s varováním a s `--strict-duplicates` je to chyba.
 - Když reset selže, udělá se dodatečně před dalším `fetch()`. Jinak by se zaškrtnuté a
   neuložené jídlo tvářilo jako objednané a další uložení by ho opravdu objednalo.
 

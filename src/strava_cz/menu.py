@@ -449,6 +449,7 @@ class Menu:
 
         # 1. Resolve each meal and check the canteen allows the change at all.
         planned: list[tuple[int | str, Meal]] = []
+        already: list[tuple[int | str, Meal]] = []
         seen: set[int] = set()
         for ref in dict.fromkeys(_normal_ref(r) for r in refs):  # de-duplicate, keep order
             try:
@@ -458,6 +459,7 @@ class Menu:
                 seen.add(meal.id)
                 if meal.ordered is ordered:
                     unchanged.append(ref)
+                    already.append((ref, meal))
                     continue
                 allowed = meal.can_order if ordered else meal.can_cancel
                 if not allowed:
@@ -471,7 +473,7 @@ class Menu:
 
         # 2. Two meals of the same kind on the same day compete for one slot.
         if ordered:
-            planned, dupes = self._resolve_duplicates(planned, strict_duplicates)
+            planned, dupes = self._resolve_duplicates(planned, already, strict_duplicates)
             skipped.extend(dupes)
 
         # 3. Nothing to do means nothing to send.
@@ -587,12 +589,21 @@ class Menu:
         return by_id if by_id is not None and by_id.key == meal.key else None
 
     def _resolve_duplicates(
-        self, planned: list[tuple[int | str, Meal]], strict: bool
+        self,
+        planned: list[tuple[int | str, Meal]],
+        already: list[tuple[int | str, Meal]],
+        strict: bool,
     ) -> tuple[list[tuple[int | str, Meal]], list[tuple[int | str, str]]]:
-        """Keep one meal per (day, kind) slot; skip or reject the rest."""
+        """Keep one meal per (day, kind) slot; skip or reject the rest.
+
+        A requested meal that is already ordered holds its slot, wherever it comes in the
+        request: ordering the other one would replace it, and it was reported unchanged.
+        """
         kept: list[tuple[int | str, Meal]] = []
         skipped: list[tuple[int | str, str]] = []
-        claimed: dict[tuple[_dt.date, MealType], int | str] = {}
+        claimed: dict[tuple[_dt.date, MealType], int | str] = {
+            (meal.date, meal.type): ref for ref, meal in already
+        }
 
         for ref, meal in planned:
             slot = (meal.date, meal.type)
