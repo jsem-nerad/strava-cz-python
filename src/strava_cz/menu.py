@@ -344,6 +344,7 @@ class Menu:
         *meals: int | str,
         continue_on_error: bool = False,
         strict_duplicates: bool = False,
+        verify_saved: bool = False,
     ) -> OrderResult:
         """Order one or more meals and save the changes in a single transaction.
 
@@ -361,6 +362,11 @@ class Menu:
                 requested meals compete for the same slot (same day, same kind).
                 When ``False`` the first one wins and the rest are skipped with a
                 warning.
+            verify_saved: Check the result against the canteen's records. By default it
+                is checked against this login's own copy, which already shows staged
+                changes, so it can't tell a save that did nothing. This costs one more
+                request and renumbers the menu, so :attr:`Meal.id` values read earlier
+                stop working until the next :meth:`fetch`. :attr:`Meal.key` values don't.
 
         Returns:
             An :class:`~strava_cz.models.OrderResult` describing what happened.
@@ -380,12 +386,14 @@ class Menu:
             ordered=True,
             continue_on_error=continue_on_error,
             strict_duplicates=strict_duplicates,
+            verify_saved=verify_saved,
         )
 
     def cancel_meals(
         self,
         *meals: int | str,
         continue_on_error: bool = False,
+        verify_saved: bool = False,
     ) -> OrderResult:
         """Cancel one or more orders and save the changes in a single transaction.
 
@@ -397,6 +405,8 @@ class Menu:
                 fetched menu.
             continue_on_error: Cancel what can be cancelled and report the rest
                 instead of raising.
+            verify_saved: Check the result against the canteen's records rather than
+                this login's copy. See :meth:`order_meals`.
 
         Returns:
             An :class:`~strava_cz.models.OrderResult` describing what happened.
@@ -414,6 +424,7 @@ class Menu:
             ordered=False,
             continue_on_error=continue_on_error,
             strict_duplicates=False,
+            verify_saved=verify_saved,
         )
 
     def _change_orders(
@@ -423,6 +434,7 @@ class Menu:
         ordered: bool,
         continue_on_error: bool,
         strict_duplicates: bool,
+        verify_saved: bool,
     ) -> OrderResult:
         """Shared body of :meth:`order_meals` and :meth:`cancel_meals`.
 
@@ -496,7 +508,7 @@ class Menu:
 
         # 6. Read the result back, which after a failed save is the only way to learn it.
         try:
-            if save_error is not None:
+            if save_error is not None or verify_saved:
                 self._resync()
             else:
                 self._load()

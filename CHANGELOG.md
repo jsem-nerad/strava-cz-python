@@ -37,6 +37,10 @@ Knihovna zůstává zpětně kompatibilní.
   kódem 1 a napíše, co je nepotvrzené, s `--json` i v polích `error.unconfirmed` a
   `error.changed`. S `--continue-on-error` se jídlo, u kterého se ztratila odpověď na
   zaškrtnutí a které se přesto uložilo, hlásí jako změněné, ne jako selhané.
+- **Kontrola po zápisu nic nedokazovala.** Každé přihlášení pracuje s vlastní kopií
+  objednávek a zaškrtnuté jídlo je v ní vidět ještě před uložením, takže ji uložení, které
+  nic neudělalo, projde (na živém účtu 5. 11. 2026). `strava-cz order` a `cancel` teď
+  ověřují výsledek proti záznamům jídelny, stejně jako knihovna s `verify_saved=True`.
 - Když reset selže, udělá se dodatečně před dalším `fetch()`. Jinak by se zaškrtnuté a
   neuložené jídlo tvářilo jako objednané a další uložení by ho opravdu objednalo.
 
@@ -52,6 +56,10 @@ Knihovna zůstává zpětně kompatibilní.
   terminálu se řádky zalomí.
 
 ### Added
+- `order_meals()` a `cancel_meals()` berou `verify_saved=True`, které výsledek ověří proti
+  záznamům jídelny. Stojí jeden požadavek navíc a přečísluje jídelníček, takže `Meal.id`
+  přečtená předtím přestanou platit do dalšího `fetch()`, klíče platí dál. Výchozí chování
+  se proto nemění.
 - `Meal.key`, `Meal.kind_code` a `Menu.get_by_key()`. `order_meals()`, `cancel_meals()`
   a `is_ordered()` berou vedle `Meal.id` i klíč a `OrderResult` hlásí jídla tak, jak je
   zadal volající. `in` na jídelníčku bere obojí a jedno jídlo zadané dvakrát různě se

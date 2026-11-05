@@ -324,7 +324,8 @@ def _change(args: argparse.Namespace, out: Output, *, ordered: bool) -> int:
             )
             return EXIT["meal"] if plan.refused else EXIT["ok"]
 
-        kwargs: dict[str, Any] = {"continue_on_error": args.continue_on_error}
+        # Each run is one login and names meals by key, so renumbering costs it nothing.
+        kwargs: dict[str, Any] = {"continue_on_error": args.continue_on_error, "verify_saved": True}
         if ordered:
             kwargs["strict_duplicates"] = args.strict_duplicates
         method = strava.menu.order_meals if ordered else strava.menu.cancel_meals

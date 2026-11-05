@@ -12,7 +12,7 @@ import pytest
 
 import strava_cz as sc
 from strava_cz import MenuNotFetchedError, Profile, ProfileStore, SecretSource, StravaAPIError
-from strava_cz.cli import main
+from strava_cz.cli import EXIT, main
 
 from .conftest import FakeCanteen
 
@@ -214,6 +214,54 @@ class TestAStageWhoseAnswerNeverArrived:
         assert canteen.saved_keys() == set()
 
 
+class TestAWriteThatPartlyLanded:
+    def test_it_names_what_changed_and_what_did_not(self, strava, canteen):
+        canteen.not_recorded.add(("07.09.2026", "O2"))
+        with pytest.raises(sc.OrderNotConfirmedError, match="still not ordered") as exc:
+            strava.menu.order_meals(A, B, verify_saved=True)
+        assert exc.value.unconfirmed == (A,)
+        assert exc.value.changed == (B,)
+        assert B in str(exc.value)
+
+    def test_continuing_on_error_reports_it_per_meal(self, strava, canteen):
+        canteen.not_recorded.add(("07.09.2026", "O2"))
+        result = strava.menu.order_meals(A, B, continue_on_error=True, verify_saved=True)
+        assert result.changed == (B,)
+        assert [ref for ref, _ in result.failed] == [A]
+
+
+class TestVerifySaved:
+    """A fetch in the same session reads the session's own copy, staged changes included."""
+
+    def test_a_same_session_read_cannot_see_a_save_that_did_nothing(self, strava, canteen):
+        """The default, and why the option exists."""
+        canteen.fail("saveOrders", "ignored")
+        assert strava.menu.order_meals(A).changed == (A,)
+        assert canteen.saved_keys() == set()
+
+    def test_reading_the_canteens_records_can(self, strava, canteen):
+        canteen.fail("saveOrders", "ignored")
+        with pytest.raises(StravaAPIError, match="still not ordered"):
+            strava.menu.order_meals(A, verify_saved=True)
+
+    def test_cancelling_takes_it_too(self, strava, canteen):
+        strava.menu.order_meals(A)
+        canteen.fail("saveOrders", "ignored")
+        with pytest.raises(StravaAPIError, match="still ordered"):
+            strava.menu.cancel_meals(A, verify_saved=True)
+
+    def test_a_write_that_landed_passes(self, strava, canteen):
+        assert strava.menu.order_meals(A, verify_saved=True).changed == (A,)
+        assert canteen.saved_keys() == {A}
+        assert strava.menu.is_ordered(A) is True
+
+    def test_it_renumbers_so_old_numbers_are_refused(self, strava, canteen):
+        number = strava.menu.get_by_key(A).id
+        strava.menu.order_meals(number, verify_saved=True)
+        with pytest.raises(MenuNotFetchedError, match="renumber"):
+            strava.menu.order_meals(number)
+
+
 @pytest.fixture
 def cli_canteen(canteen, login_route, store_path, monkeypatch):
     ProfileStore(store_path).save(Profile("test", "test.user", "1234", secret=SecretSource.ENV))
@@ -227,8 +275,11 @@ FAILURES = [
     pytest.param("saveOrders", ["refuse"], 1, "Nothing was saved", set(), id="save-refused"),
     pytest.param("saveOrders", ["502"], 1, "Nothing was saved", set(), id="save-502"),
     pytest.param("saveOrders", ["lost"], 0, "ordered 1", {A}, id="save-landed-answer-lost"),
+    pytest.param("saveOrders", ["ignored"], 1, "still not ordered", set(), id="save-ignored"),
     pytest.param("pridejJidloS5", ["timeout"], 1, "timed out", set(), id="stage-timeout"),
     pytest.param("pridejJidloS5", ["lost"], 1, "timed out", set(), id="stage-landed-answer-lost"),
+    pytest.param("nactiVlastnostiPA", ["timeout"], 1, "accepted", {A}, id="reset-timeout"),
+    pytest.param("nactiVlastnostiPA", ["502"], 1, "accepted", {A}, id="reset-502"),
     pytest.param("objednavky", [None, "timeout"], 1, "accepted", {A}, id="read-back-timeout"),
     pytest.param("objednavky", [None, "502"], 1, "accepted", {A}, id="read-back-502"),
     pytest.param("objednavky", ["timeout"], 1, "timed out", set(), id="first-fetch-timeout"),
@@ -251,6 +302,14 @@ class TestTheCommandTellsTheTruth:
         body = json.loads(capsys.readouterr().out)
         assert body["ok"] is (code == 0)
         assert cli_canteen.saved_keys() == saved
+
+    def test_json_names_what_is_unconfirmed(self, cli_canteen, capsys):
+        cli_canteen.fail("nactiVlastnostiPA", "timeout")
+        assert main(["--json", "order", A, B]) == EXIT["error"]
+        error = json.loads(capsys.readouterr().out)["error"]
+        assert error["type"] == "OrderNotConfirmedError"
+        assert error["unconfirmed"] == [A, B]
+        assert error["changed"] == []
 
     @pytest.mark.parametrize(("endpoint", "modes", "code", "said", "saved"), FAILURES)
     def test_it_logs_out_whatever_happened(
