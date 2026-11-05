@@ -10,6 +10,7 @@ from collections.abc import Iterable, Iterator, Sequence
 from typing import TYPE_CHECKING, Any
 
 from .exceptions import (
+    AuthenticationError,
     DuplicateMealError,
     MealNotFoundError,
     MealNotOrderableError,
@@ -486,6 +487,8 @@ class Menu:
                 try:
                     self._stage(meal.id, ordered)
                     staged.append((ref, meal))
+                except AuthenticationError:
+                    raise  # the session is gone, so the other meals can't go through either
                 except StravaAPIError as exc:
                     if not continue_on_error:
                         raise

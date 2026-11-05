@@ -18,6 +18,8 @@ from .conftest import FakeCanteen
 
 A = "2026-09-07:O2"
 B = "2026-09-08:O2"
+CLOSED = "2026-09-02:O1"
+SOUP = "2026-09-02:PO"
 
 
 @pytest.fixture
@@ -332,3 +334,45 @@ class TestTheCommandTellsTheTruth:
         session = load("login")
         for secret in ("test-password", session["sid"], session["s5url"]):
             assert secret not in captured.out + captured.err
+
+
+class TestExitCodesWhileContinuing:
+    """--continue-on-error is how every weekly run calls this, so its exit code has to mean it."""
+
+    def test_no_money_exits_five(self, cli_canteen, capsys):
+        cli_canteen.fail("pridejJidloS5", "funds")
+        assert main(["order", A, "--continue-on-error"]) == EXIT["balance"]
+
+    def test_no_money_outranks_a_closed_day(self, cli_canteen, capsys):
+        cli_canteen.fail("pridejJidloS5", "funds")
+        assert main(["order", A, CLOSED, "--continue-on-error"]) == EXIT["balance"]
+
+    def test_a_network_failure_exits_one(self, cli_canteen, capsys):
+        cli_canteen.fail("pridejJidloS5", "timeout")
+        assert main(["order", A, "--continue-on-error"]) == EXIT["error"]
+
+    def test_a_network_failure_outranks_a_closed_day(self, cli_canteen, capsys):
+        cli_canteen.fail("pridejJidloS5", "timeout", None)
+        assert main(["order", A, B, CLOSED, "--continue-on-error"]) == EXIT["error"]
+        assert cli_canteen.saved_keys() == {B}
+
+    def test_a_meal_the_canteen_refused_exits_four(self, cli_canteen, capsys):
+        cli_canteen.fail("pridejJidloS5", "refuse", None)
+        assert main(["order", A, B, "--continue-on-error"]) == EXIT["meal"]
+        assert cli_canteen.saved_keys() == {B}
+
+    def test_a_closed_day_and_a_soup_exit_four(self, cli_canteen, capsys):
+        assert main(["order", A, CLOSED, SOUP, "--continue-on-error"]) == EXIT["meal"]
+        assert cli_canteen.saved_keys() == {A}
+
+    def test_a_save_that_did_not_take_exits_one(self, cli_canteen, capsys):
+        cli_canteen.not_recorded.add(("07.09.2026", "O2"))
+        assert main(["order", A, B, "--continue-on-error"]) == EXIT["error"]
+        assert cli_canteen.saved_keys() == {B}
+
+    @pytest.mark.parametrize("flag", [[], ["--continue-on-error"]])
+    def test_a_session_that_died_exits_three_with_nothing_saved(self, cli_canteen, capsys, flag):
+        cli_canteen.fail("pridejJidloS5", None, "expired")
+        assert main(["order", A, B, *flag]) == EXIT["auth"]
+        assert cli_canteen.saved_keys() == set()
+        assert cli_canteen.logout.call_count == 1

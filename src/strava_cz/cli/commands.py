@@ -23,9 +23,10 @@ from ..exceptions import (
     MealNotFoundError,
     MealNotOrderableError,
     ProfileError,
+    StravaAPIError,
     StravaError,
 )
-from ..models import Meal, MealType
+from ..models import Meal, MealType, OrderResult
 from ..profiles import (
     PASSPHRASE_ENV,
     PASSWORD_ENV,
@@ -76,6 +77,23 @@ def exit_code_for(exc: BaseException) -> int:
     if isinstance(exc, ProfileError):
         return EXIT["profile"]
     return EXIT["error"]
+
+
+def exit_code_for_result(result: OrderResult) -> int:
+    """The exit code of a run that carried on past its failures.
+
+    Not every failure is a meal that couldn't be ordered: no money is worth knowing about
+    whatever else happened, and a failure with no error number from the canteen means the
+    canteen or the network failed.
+    """
+    errors = [exc for _, exc in result.failed]
+    if not errors:
+        return EXIT["ok"]
+    if any(isinstance(exc, InsufficientBalanceError) for exc in errors):
+        return EXIT["balance"]
+    if any(isinstance(exc, StravaAPIError) and exc.code is None for exc in errors):
+        return EXIT["error"]
+    return EXIT["meal"]
 
 
 # ------------------------------------------------------------------------- session
@@ -340,7 +358,7 @@ def _change(args: argparse.Namespace, out: Output, *, ordered: bool) -> int:
             {**result_to_json(result), "account": user_to_json(strava.user)},
             render,
         )
-        return EXIT["ok"] if result.ok else EXIT["meal"]
+        return exit_code_for_result(result)
 
 
 class Plan:

@@ -41,6 +41,10 @@ Knihovna zůstává zpětně kompatibilní.
   objednávek a zaškrtnuté jídlo je v ní vidět ještě před uložením, takže ji uložení, které
   nic neudělalo, projde (na živém účtu 5. 11. 2026). `strava-cz order` a `cancel` teď
   ověřují výsledek proti záznamům jídelny, stejně jako knihovna s `verify_saved=True`.
+- **S `--continue-on-error` byl návratový kód vždycky 4**, ať se stalo cokoliv. Nedostatek
+  peněz teď končí kódem 5 a selhání sítě nebo jídelny kódem 1, obojí i vedle odmítnutého
+  dne. Odmítnuté jídlo zůstává 4. Skončená session přeruší celou dávku, nic neuloží a
+  skončí kódem 3, i s `continue_on_error=True` v knihovně.
 - Když reset selže, udělá se dodatečně před dalším `fetch()`. Jinak by se zaškrtnuté a
   neuložené jídlo tvářilo jako objednané a další uložení by ho opravdu objednalo.
 
