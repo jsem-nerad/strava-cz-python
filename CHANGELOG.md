@@ -67,6 +67,9 @@ Knihovna zůstává zpětně kompatibilní.
   neuložené jídlo tvářilo jako objednané a další uložení by ho opravdu objednalo.
 
 ### Changed
+- `examples/example.py` ve výchozím stavu jen čte. Dřív po spuštění objednal první tři dny
+  a pak zrušil všechny objednávky na účtu, včetně těch cizích, aniž by na to cokoliv
+  upozornilo. Zapisuje až s `STRAVA_OPRAVDU_ZAPISOVAT=1`.
 - **Id v příkazu `strava-cz` je den a místo v jídelníčku**, např. `2026-11-09:O2`.
   Vypisují ho `menu`, `ordered` a `--dry-run`, je v poli `id` v JSONu (teď řetězec,
   stejně jako v `changed`, `unchanged`, `failed` a `meal_id`) a berou ho `order` a
