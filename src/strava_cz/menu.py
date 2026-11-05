@@ -377,6 +377,7 @@ class Menu:
             MealNotOrderableError: If the canteen does not allow ordering a meal.
             InsufficientBalanceError: If the account cannot cover an order.
             DuplicateMealError: See ``strict_duplicates``.
+            MenuNotFetchedError: If the menu isn't fetched, or a failed read-back forgot it.
             OrderNotConfirmedError: If a change may have been saved but can't be confirmed,
                 or was accepted and didn't happen. Raised even with ``continue_on_error``
                 when the whole batch is in doubt. Check the menu before trying again.
@@ -415,6 +416,7 @@ class Menu:
         Raises:
             MealNotFoundError: If a meal is not in the fetched menu.
             MealNotOrderableError: If the canteen does not allow cancelling a meal.
+            MenuNotFetchedError: If the menu isn't fetched, or a failed read-back forgot it.
             OrderNotConfirmedError: If a change may have been saved but can't be confirmed,
                 or was accepted and didn't happen. Raised even with ``continue_on_error``
                 when the whole batch is in doubt. Check the menu before trying again.
@@ -521,7 +523,10 @@ class Menu:
             self._forget()
             if save_error is not None and save_error.code is not None:
                 raise save_error from exc  # the canteen answered no, whatever came after
-            names = ", ".join(str(ref) for ref, _ in staged)
+            # A stage with no answer from the canteen may have landed, and the save takes it.
+            doubtful = [ref for ref, _ in staged]
+            doubtful += [ref for ref, _, stage_error in unanswered if stage_error.code is None]
+            names = ", ".join(str(ref) for ref in doubtful)
             if save_error is not None:
                 message = (
                     f"{save_error}, and reading the menu back failed too, so {names} may or "
@@ -532,9 +537,7 @@ class Menu:
                     f"The canteen accepted the change for {names}, but reading the menu back "
                     f"failed, so it isn't confirmed: {exc}. Check the menu before trying again"
                 )
-            raise OrderNotConfirmedError(
-                message, unconfirmed=tuple(ref for ref, _ in staged)
-            ) from exc
+            raise OrderNotConfirmedError(message, unconfirmed=tuple(doubtful)) from exc
 
         # 7. Compare meal by meal.
         unconfirmed = [

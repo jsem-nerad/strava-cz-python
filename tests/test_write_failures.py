@@ -195,6 +195,25 @@ class TestAReadBackThatFails:
         assert strava.menu.fetch().is_ordered(A) is True
 
 
+class TestAReadBackThatFailsWithAStageInDoubt:
+    def test_a_stage_whose_answer_was_lost_is_unconfirmed_too(self, strava, canteen):
+        """If it landed, the save took it along, and now nobody can look."""
+        canteen.fail("pridejJidloS5", "lost", None)
+        canteen.fail("objednavky", "timeout")
+        with pytest.raises(sc.OrderNotConfirmedError) as exc:
+            strava.menu.order_meals(A, B, continue_on_error=True)
+        assert canteen.saved_keys() == {A, B}
+        assert set(exc.value.unconfirmed) == {A, B}
+
+    def test_a_meal_the_canteen_refused_is_not_in_doubt(self, strava, canteen):
+        canteen.fail("pridejJidloS5", "funds", None)
+        canteen.fail("objednavky", "timeout")
+        with pytest.raises(sc.OrderNotConfirmedError) as exc:
+            strava.menu.order_meals(A, B, continue_on_error=True)
+        assert canteen.saved_keys() == {B}
+        assert exc.value.unconfirmed == (B,)
+
+
 class TestAStageWhoseAnswerNeverArrived:
     def test_one_that_landed_and_got_saved_is_reported_as_changed(self, strava, canteen):
         canteen.fail("pridejJidloS5", "lost", None)
