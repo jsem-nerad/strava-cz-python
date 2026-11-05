@@ -292,7 +292,10 @@ class FakeCanteen:
         errors = {
             "refuse": (7, "Nope"),
             "overload": (43, "The service is currently overloaded"),
-            "expired": (20, "Session expired"),
+            "expired": (
+                15,
+                "Because the user has been inactive for a long time, he/she has been logged out",
+            ),
         }
         if mode == "funds":
             return httpx.Response(555, json=load("error_balance"))

@@ -200,6 +200,7 @@ class EncryptionUnavailableError(ProfileError):
 
 #: Maps the API's ``number`` field onto a specific exception class.
 ERROR_CODES: dict[int, type] = {
+    15: AuthenticationError,  # the session is over, seen live for a logged-out or unknown sid
     20: AuthenticationError,
     35: InsufficientBalanceError,
 }

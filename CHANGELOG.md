@@ -54,6 +54,12 @@ Knihovna zůstává zpětně kompatibilní.
 - `order` s objednaným jídlem a jeho alternativou na stejný den jídlo vyměnil a přitom
   o tom objednaném hlásil „already ordered“, což už po běhu neplatilo. Objednané jídlo teď
   své místo drží, alternativa se přeskočí s varováním a s `--strict-duplicates` je to chyba.
+- **Vypršená session teď opravdu je `AuthenticationError`**, jak slibuje dokumentace.
+  Jídelna na ni odpovídá číslem chyby 15, které knihovna neznala, takže šla jen obecná
+  `StravaAPIError` a příkaz končil kódem 1 místo 3 (na živém účtu 5. 11. 2026).
+- `logout()` u skončené session nezvládl odhlášení a klient pak `login()` odmítal, protože
+  se pořád tvářil přihlášeně. Po `logout()` je teď klient odhlášený vždycky, a odhlášení ze
+  session, která už skončila, není chyba.
 - Když reset selže, udělá se dodatečně před dalším `fetch()`. Jinak by se zaškrtnuté a
   neuložené jídlo tvářilo jako objednané a další uložení by ho opravdu objednalo.
 
