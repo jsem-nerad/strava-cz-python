@@ -45,6 +45,12 @@ Knihovna zůstává zpětně kompatibilní.
   peněz teď končí kódem 5 a selhání sítě nebo jídelny kódem 1, obojí i vedle odmítnutého
   dne. Odmítnuté jídlo zůstává 4. Skončená session přeruší celou dávku, nic neuloží a
   skončí kódem 3, i s `continue_on_error=True` v knihovně.
+- **`--dry-run` tvrdil něco jiného, než co pak skutečné volání udělalo.** Bez
+  `--continue-on-error` jedno odmítnuté jídlo zastaví celou dávku, ale `--dry-run` dál
+  vypisoval, co by se objednalo. Stejně tak u `--strict-duplicates`. Teď je `would_change`
+  v takovém případě prázdné, zadržená jídla jsou v novém poli `blocked` a návratový kód
+  sedí. V JSONu bylo `ok: true` i u odmítnutého jídla s kódem 4. `balance_change` u výměny
+  jídla počítá rozdíl cen, ne celou cenu nového jídla.
 - Když reset selže, udělá se dodatečně před dalším `fetch()`. Jinak by se zaškrtnuté a
   neuložené jídlo tvářilo jako objednané a další uložení by ho opravdu objednalo.
 

@@ -376,3 +376,52 @@ class TestExitCodesWhileContinuing:
         assert main(["order", A, B, *flag]) == EXIT["auth"]
         assert cli_canteen.saved_keys() == set()
         assert cli_canteen.logout.call_count == 1
+
+
+BATCHES = [
+    pytest.param([A, B], [], id="plain"),
+    pytest.param([A, B], ["--continue-on-error"], id="plain-continuing"),
+    pytest.param([A, CLOSED, B], [], id="closed-stops-it"),
+    pytest.param([A, CLOSED, SOUP, B], ["--continue-on-error"], id="closed-continuing"),
+    pytest.param([A, "2030-01-01:O1"], [], id="unknown-stops-it"),
+    pytest.param([A, "2026-09-07:O1"], [], id="duplicate"),
+    pytest.param([A, "2026-09-07:O1", B], ["--strict-duplicates"], id="duplicate-strict"),
+    pytest.param([SOUP], [], id="only-a-soup"),
+]
+
+
+class TestADryRunPredictsTheRealCall:
+    """Whatever a dry run says would change is exactly what the real call then changes."""
+
+    @pytest.mark.parametrize(("meals", "flags"), BATCHES)
+    def test_it_agrees(self, cli_canteen, capsys, meals, flags, recwarn):
+        dry_code = main(["--json", "order", *meals, *flags, "--dry-run"])
+        dry = json.loads(capsys.readouterr().out)
+        assert cli_canteen.saved_keys() == set()
+
+        real_code = main(["--json", "order", *meals, *flags])
+        assert dry_code == real_code
+        assert set(dry["would_change"]) == cli_canteen.saved_keys()
+        assert [meal["id"] for meal in dry["meals"]] == dry["would_change"]
+        assert dry["ok"] is (real_code == 0)
+
+    def test_it_says_why_a_refusal_stops_the_batch(self, cli_canteen, capsys):
+        assert main(["order", A, CLOSED, "--dry-run"]) == EXIT["meal"]
+        out = capsys.readouterr().out
+        assert "--continue-on-error" in out
+        assert "would order:" not in out
+
+    def test_json_names_what_the_refusal_held_back(self, cli_canteen, capsys):
+        main(["--json", "order", A, CLOSED, "--dry-run"])
+        body = json.loads(capsys.readouterr().out)
+        assert body["would_change"] == []
+        assert body["blocked"] == [A]
+
+    def test_a_swap_costs_the_difference_not_the_whole_price(self, cli_canteen, capsys):
+        cli_canteen.table[("07.09.2026", "O1")] = 1
+        main(["--json", "order", A, "--dry-run"])
+        assert json.loads(capsys.readouterr().out)["balance_change"] == 0
+
+    def test_an_order_on_an_empty_day_costs_the_price(self, cli_canteen, capsys):
+        main(["--json", "order", A, "--dry-run"])
+        assert json.loads(capsys.readouterr().out)["balance_change"] == -50
