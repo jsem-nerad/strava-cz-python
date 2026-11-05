@@ -49,7 +49,7 @@ vyletí jako obecná `StravaAPIError` s `.code == 43`.
 ```json
 {
     "cislo": "3753",
-    "jmeno": "vojtech.nerad",
+    "jmeno": "vase.jmeno",
     "heslo": "XXXXXXXXX",
     "zustatPrihlasen": false,
     "environment": "W",
@@ -60,7 +60,7 @@ vyletí jako obecná `StravaAPIError` s `.code == 43`.
 | key | popis | příklad | typ |
 |---|---|---|---|
 | cislo | číslo jídelny | 3753 | string |
-| jmeno | uživatelské jméno | vojtech.nerad | string |
+| jmeno | uživatelské jméno | vase.jmeno | string |
 | heslo | plaintext heslo uživatele | Heslo123 | string |
 | zustatPrihlasen | zůstat přihlášen | false | boolean |
 | environment | prostředí, web posílá `W` | W | string |
