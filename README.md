@@ -9,7 +9,7 @@ pip install strava-cz          # knihovna
 pip install "strava-cz[cli]"   # + bezpečné uložení hesla pro příkaz strava-cz
 ```
 
-Ve složce [notes](notes/) najdete všechny moje poznatky o vnitřním fungování API
+Ve složce [notes](https://github.com/jsem-nerad/strava-cz-python/tree/main/notes) najdete všechny moje poznatky o vnitřním fungování API
 Strava.cz. Kompletní **dokumentace** je na
 **[GitHub Wiki](https://github.com/jsem-nerad/strava-cz-python/wiki)**.
 
@@ -435,7 +435,7 @@ Našel jsi chybu nebo máš návrh na zlepšení? Skvělé! Vytvoř prosím
 nebo [feature request](https://github.com/jsem-nerad/strava-cz-python/issues/new?labels=enhancement).
 
 Udělal jsi sám nějaké zlepšení? Ještě lepší! Každý pull request je vítaný — postup
-najdeš v [notes/repo_rules.md](notes/repo_rules.md).
+najdeš v [notes/repo_rules.md](https://github.com/jsem-nerad/strava-cz-python/blob/main/notes/repo_rules.md).
 
 ## Použití AI
 
@@ -444,4 +444,4 @@ testy a formátování kódu. Každá taková úprava prošla mojí kontrolou.
 
 ## Licence
 
-[GPL-3.0-or-later](LICENSE)
+[GPL-3.0-or-later](https://github.com/jsem-nerad/strava-cz-python/blob/main/LICENSE)

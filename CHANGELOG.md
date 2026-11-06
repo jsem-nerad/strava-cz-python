@@ -5,6 +5,8 @@ Všechny významné změny v tomto projektu budou dokumentovány v tomto souboru
 
 ## [unreleased]
 
+## [0.5.0] 2026-11-06
+
 Čísla jídel neplatí napříč přihlášeními, a příkaz `strava-cz` je proto přestal brát:
 jídlo teď určuje den a místo v jídelníčku. **Mění se tím rozhraní příkazu i jeho JSON.**
 Knihovna zůstává zpětně kompatibilní.
@@ -65,8 +67,15 @@ Knihovna zůstává zpětně kompatibilní.
   session, která už skončila, není chyba.
 - Když reset selže, udělá se dodatečně před dalším `fetch()`. Jinak by se zaškrtnuté a
   neuložené jídlo tvářilo jako objednané a další uložení by ho opravdu objednalo.
+- Odkazy na `notes/` a licenci v README fungují i na stránce projektu na PyPI.
+- Sestavení balíčku požaduje setuptools 77.0.3 nebo novější. Se staršími kvůli zápisu
+  licence v `pyproject.toml` selhalo, i když se `pyproject.toml` hlásil k verzi 61.
+- Zdrojový balíček obsahuje `tests/conftest.py`, nahrané odpovědi a příklady, takže se
+  v něm testy dají spustit.
 
 ### Changed
+- Na PyPI se publikuje jen po pushnutí tagu. Vytvoření GitHub Release ke stejnému tagu
+  spouštělo druhé nahrání, které pak selhalo.
 - `examples/example.py` ve výchozím stavu jen čte. Dřív po spuštění objednal první tři dny
   a pak zrušil všechny objednávky na účtu, včetně těch cizích, aniž by na to cokoliv
   upozornilo. Zapisuje až s `STRAVA_OPRAVDU_ZAPISOVAT=1`.
