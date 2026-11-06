@@ -1,0 +1,5 @@
+# The source package has to be able to run its own tests: tests/test_examples.py reads
+# examples/, and everything else needs conftest.py and the recorded API answers.
+graft tests
+graft examples
+global-exclude __pycache__ *.py[cod]
