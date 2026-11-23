@@ -1,15 +1,16 @@
 # strava-cz
 
-Objednávání obědů ve školních jídelnách, které používají systém **[Strava.cz](https://app.strava.cz)**,
-bez prohlížeče. Podívá se na jídelníček, objedná a zruší jídla, ohlídá zůstatek na účtu
-a řekne, proč se konkrétní jídlo objednat nedá.
+High level Python API pro objednávání obědů ve školních jídelnách, které používají systém
+**[Strava.cz](https://app.strava.cz)**. Podívá se na jídelníček, objedná a zruší jídla, zjistí
+zůstatek na účtu a řekne, proč se konkrétní jídlo objednat nedá.
 
-Je to **knihovna pro Python**, **příkaz `strava-cz`** pro terminál a skripty a **MCP server**,
-přes který může váš účet používat AI agent. Všechny tři dělají totéž a sdílejí přihlašovací údaje.
+Není to pouze **knihovna pro Python**, ale také **příkaz `strava-cz`** pro terminál a skripty
+a **MCP server**, přes který vám může obědy spravovat AI agent. Všechny tři dělají totéž a sdílejí
+přihlašovací údaje.
 
 K čemu se to hodí:
 
-- **automatické objednávání**: cron, skript nebo agent, který vám objedná oběd na příští týden,
+- **automatické objednávání**: cron, skript nebo agent, který vám objedná obědy,
 - rychlý pohled na jídelníček a zůstatek z terminálu,
 - vlastní aplikace, upozornění nebo statistiky nad jídelníčkem.
 
@@ -18,16 +19,31 @@ K čemu se to hodí:
 Potřebujete **Python 3.10 nebo novější**, přihlašovací jméno do Strava.cz a číslo vaší jídelny
 ([jak ho najít](https://github.com/jsem-nerad/strava-cz-python/wiki/Installation-Guide#finding-your-canteen-number)).
 
-**1. Nainstalujte**
+**1. Nainstalujte** podle toho, jak to budete používat
+
+#### Knihovna pro Python
+
+```bash
+pip install strava-cz
+```
+
+#### Příkaz `strava-cz` v terminálu
 
 ```bash
 pip install "strava-cz[cli]"
 ```
 
-Extra `cli` přidává bezpečné uložení hesla. Chcete-li i MCP server pro AI agenta, použijte
-`pip install "strava-cz[cli,mcp]"`. Samotná knihovna bez extra: `pip install strava-cz`.
+#### MCP server pro AI agenta
 
-**2. Uložte přihlášení** (heslo se vás zeptá a uloží ho do klíčenky, ne do souboru jako text)
+```bash
+pip install "strava-cz[cli,mcp]"
+```
+
+Extra `cli` přidává bezpečné uložení hesla z kroku 2. Bez něj se vás na heslo zeptá pokaždé,
+nebo ho vezme z proměnné `STRAVA_CZ_PASSWORD`.
+
+**2. Uložte přihlášení** (na heslo se vás zeptá a uloží ho do lokální klíčenky systému, nikoliv
+do souboru jako text)
 
 ```bash
 strava-cz profile add skola --username vase.jmeno --canteen 3753 --verify
@@ -118,7 +134,7 @@ Všechno podrobné je na **[GitHub Wiki](https://github.com/jsem-nerad/strava-cz
 | | |
 |---|---|
 | [Instalace](https://github.com/jsem-nerad/strava-cz-python/wiki/Installation-Guide) · [Rychlý start](https://github.com/jsem-nerad/strava-cz-python/wiki/Quick-Start) | začínáme |
-| [Příkaz `strava-cz`](https://github.com/jsem-nerad/strava-cz-python/wiki/CLI) · [MCP server](https://github.com/jsem-nerad/strava-cz-python/wiki/MCP) | jak to používat |
+| [Příkaz `strava-cz`](https://github.com/jsem-nerad/strava-cz-python/wiki/CLI) · [MCP server](https://github.com/jsem-nerad/strava-cz-python/wiki/MCP) | jak používat |
 | [Profily a hesla](https://github.com/jsem-nerad/strava-cz-python/wiki/Profiles) · [Přihlášení](https://github.com/jsem-nerad/strava-cz-python/wiki/Authentication) | přihlašování |
 | [Jídelníček](https://github.com/jsem-nerad/strava-cz-python/wiki/Menu-System) · [Jídla a omezení](https://github.com/jsem-nerad/strava-cz-python/wiki/Meals-and-Restrictions) · [Objednávání](https://github.com/jsem-nerad/strava-cz-python/wiki/Ordering-Meals) · [Výjimky](https://github.com/jsem-nerad/strava-cz-python/wiki/Error-Handling) | knihovna |
 | [Vnitřnosti API](https://github.com/jsem-nerad/strava-cz-python/wiki/API-Internals) · [Přispívání](https://github.com/jsem-nerad/strava-cz-python/wiki/Contributing) · [Changelog](https://github.com/jsem-nerad/strava-cz-python/blob/main/CHANGELOG.md) | vývoj |
