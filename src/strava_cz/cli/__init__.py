@@ -266,6 +266,27 @@ def build_parser() -> argparse.ArgumentParser:
     subs.add_parser(
         "account", help="show the logged-in account", description="Show who is logged in and where."
     )
+    mcp = subs.add_parser(
+        "mcp",
+        help="run an MCP server for AI agents (needs strava-cz[mcp])",
+        description="Serve the canteen to an AI agent over MCP, on stdin and stdout. "
+        "It signs in with the profile chosen by --profile, so the password never "
+        "passes through the agent. Install the extra first: pip install 'strava-cz[mcp]'",
+    )
+    mcp.add_argument(
+        "--read-only",
+        action="store_true",
+        help="offer only the tools that read; ordering and cancelling are not registered "
+        "at all (default: they are on)",
+    )
+    # Also accepted after the command, as an MCP client's config naturally writes it.
+    mcp.add_argument(
+        "-p",
+        "--profile",
+        metavar="NAME",
+        default=argparse.SUPPRESS,
+        help="stored profile to use (same as the global --profile)",
+    )
     subs.add_parser(
         "raw",
         help="dump the raw menu response",
