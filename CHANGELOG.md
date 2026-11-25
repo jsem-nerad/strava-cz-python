@@ -5,7 +5,7 @@ Všechny významné změny v tomto projektu budou dokumentovány v tomto souboru
 
 ## [unreleased]
 
-## [0.6.0] 2026-11-23
+## [0.6.0] 2026-11-25
 
 Příkaz `strava-cz` umí teď i MCP server, takže knihovnu může používat AI agent. Knihovna
 ani stávající příkazy se nemění.
