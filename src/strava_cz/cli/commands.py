@@ -699,6 +699,26 @@ def cmd_profile_show(args: argparse.Namespace, out: Output) -> int:
     return EXIT["ok"]
 
 
+# --------------------------------------------------------------------- mcp server
+
+
+class McpUnavailableError(StravaError):
+    """``strava-cz mcp`` was run without the ``mcp`` extra installed."""
+
+
+def cmd_mcp(args: argparse.Namespace, out: Output) -> int:
+    """Serve MCP on stdio. The SDK is imported here, so the other commands never need it."""
+    try:
+        from .. import mcp_server
+    except ModuleNotFoundError as exc:
+        if (exc.name or "").partition(".")[0] != "mcp":
+            raise
+        raise McpUnavailableError(
+            "the MCP server needs the 'mcp' package: pip install 'strava-cz[mcp]'"
+        ) from None
+    return mcp_server.serve(args, read_only=args.read_only)
+
+
 # --------------------------------------------------------------------- dispatching
 
 #: Subcommand name (``"profile add"`` for the nested ones) to handler.
@@ -710,6 +730,7 @@ COMMANDS = {
     "balance": cmd_balance,
     "account": cmd_account,
     "raw": cmd_raw,
+    "mcp": cmd_mcp,
     "profile list": cmd_profile_list,
     "profile add": cmd_profile_add,
     "profile remove": cmd_profile_remove,

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "strava-cz"
-version = "0.5.0"
+version = "0.6.0"
 description = "Python klient pro objednávání jídel ve školních jídelnách přes Strava.cz"
 readme = "README.md"
 license = "GPL-3.0-or-later"
@@ -12,7 +12,7 @@ license-files = ["LICENSE"]
 authors = [
     {name = "Vojtěch Nerad", email = "ja@jsem-nerad.cz"}
 ]
-keywords = ["czech", "canteen", "food", "school", "strava", "jidelna", "api", "httpx", "cli"]
+keywords = ["czech", "canteen", "food", "school", "strava", "jidelna", "api", "httpx", "cli", "mcp", "ai-agent"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -43,6 +43,10 @@ cli = [
     "keyring>=24",
     "cryptography>=42",
 ]
+# The MCP server behind `strava-cz mcp`, for AI agents. Needs the 2.x SDK (MCPServer).
+mcp = [
+    "mcp>=2.3,<3",
+]
 dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
@@ -51,6 +55,7 @@ dev = [
     "mypy>=1.0.0",
     "keyring>=24",
     "cryptography>=42",
+    "mcp>=2.3,<3",
 ]
 
 [project.scripts]

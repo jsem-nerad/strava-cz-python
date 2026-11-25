@@ -5,6 +5,36 @@ Všechny významné změny v tomto projektu budou dokumentovány v tomto souboru
 
 ## [unreleased]
 
+## [0.6.0] 2026-11-25
+
+Příkaz `strava-cz` umí teď i MCP server, takže knihovnu může používat AI agent. Knihovna
+ani stávající příkazy se nemění.
+
+### Added
+- **`strava-cz mcp`: MCP server** přes stdio, postavený na oficiálním SDK (`MCPServer`).
+  Nainstaluje se jako `pip install "strava-cz[mcp]"` (SDK `mcp` 2.3 a novější, Python 3.10+
+  jako zbytek knihovny). Přihlašuje se přes stejné profily jako příkaz, takže heslo se bere
+  z klíčenky nebo z `$STRAVA_CZ_PASSWORD` a **nikdy není argumentem nástroje**, tedy
+  neprojde modelem. Profil vybírá `--profile`, před příkazem `mcp` i za ním.
+- **Nástroje** odpovídají příkazům: `get_menu` (se stejnými filtry jako `strava-cz menu`),
+  `get_ordered`, `get_balance`, `get_account`, `order_meals` a `cancel_meals`
+  (s `dry_run`, `continue_on_error` a u objednávání `strict_duplicates`). Výsledky mají stejný
+  tvar jako `--format json` u příkazu, jako strukturovaný výstup. Jídla se pojmenovávají
+  klíčem (`2026-11-09:O2`), holé číslo se odmítne ze stejného důvodu jako u příkazu.
+- **Objednávání je ve výchozím stavu zapnuté.** `strava-cz mcp --read-only` nástroje
+  `order_meals` a `cancel_meals` vůbec nezaregistruje, takže je klient neuvidí. Čtecí nástroje
+  mají `readOnlyHint`, zapisovací `destructiveHint`, aby se klient mohl před voláním zeptat.
+- Chyby se vrací jako chyby nástroje s typem a důvodem (například `MealNotOrderableError
+  (reason=closed)` nebo `InsufficientBalanceError`), ne jako holé „Error executing tool“.
+- Každé volání nástroje je jedno přihlášení a odhlášení, stejně jako jedno spuštění
+  příkazu, a volání jdou jedno po druhém.
+
+### Changed
+- README je výrazně kratší: říká, co knihovna dělá, jak se instaluje a jak začít, a ukazuje
+  po jednom příkladu pro Python, příkaz a MCP. Podrobnosti jsou ve wiki, kam se přesunulo
+  všechno, co v ní dosud nebylo.
+- Extra `dev` přibral `mcp`, aby testy serveru běžely.
+
 ## [0.5.0] 2026-11-06
 
 Čísla jídel neplatí napříč přihlášeními, a příkaz `strava-cz` je proto přestal brát:
